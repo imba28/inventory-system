@@ -6,9 +6,5 @@ class Product extends \App\Model {
     protected $type;
     protected $condition;
     protected $note;
-
-    public function __construct($id) {
-        $this->id = $id;
-    }
 }
 ?>
