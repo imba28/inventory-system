@@ -4,7 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 function __autoload($class) {
-    $class = preg_replace('/^App\\\/i', '', $class);
+    $class = preg_replace('/^(app)\\\/i', '', $class);
     $class = str_replace('\\', '/', strtolower($class));
 
     if(file_exists(ABS_PATH . "/src/{$class}.php")) {
@@ -14,6 +14,7 @@ function __autoload($class) {
         require_once(ABS_PATH . "/src/classes/{$class}.php");
     }
     else {
+        vd("Klasse {$class}:");
         vd(generateCallTrace());
         vd(ABS_PATH . "/src/classes/{$class}.php");
         vd(ABS_PATH . "/src/{$class}.php");
