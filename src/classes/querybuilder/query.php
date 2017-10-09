@@ -1,5 +1,6 @@
 <?php
 namespace App\QueryBuilder;
+use \PDO;
 
 class Query {
     protected $sql = null;
@@ -26,12 +27,12 @@ class Query {
 
            $sth->execute(array_values($columns));
 
-           $this->result = $sth->fetchAll(PDO::FETCH_ASSOC);
+           $this->result = $sth->fetchAll(\PDO::FETCH_ASSOC);
            $this->lastInsertId = $dbh->lastInsertId();
         }
         catch(Exception $e){
             if($this->logging) $this->log($e->getMessage(), $this->sql, array_values($columns));
-            throw new QueryException($e->getMessage(), $e->getCode());
+            throw new \App\QueryBuilder\QueryBuilderException($e->getMessage(), $e->getCode());
         }
         return true;
     }
