@@ -11,20 +11,7 @@ class Action extends \App\Model {
     public function __construct(\App\Models\Product $product, \App\Models\Customer $customer, $date = null) {
         $this->product = $product;
         $this->customer = $customer;
-        $this->rentDate = is_null($date) ? time() : $date;
-    }
-
-    public function getProduct() {
-        return $this->product;
-    }
-    public function getCustomer() {
-        return $this->customer;
-    }
-    public function getRentDate() {
-        return $this->rentDate;
-    }
-    public function getReturnDate() {
-        return $this->returnDate;
+        $this->rentDate = is_null($date) ? 'NOW()' : $date;
     }
 
     public function isProductReturned() {
@@ -32,8 +19,7 @@ class Action extends \App\Model {
     }
 
     public function returnProduct() {
-        $this->returnDate = time();
-        
+        $this->returnDate = 'NOW()';
         $this->save();
     }
 }
