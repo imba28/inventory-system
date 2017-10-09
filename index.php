@@ -3,16 +3,29 @@ require_once('vars.php');
 require_once('src/init.php');
 
 try {
-    $customer = App\Models\Customer::get(1);
-    $product = App\Models\Product::get(1);
+    /*$product = App\Models\Product::new();
+    $product->set('name','Playstation 3');
+    $product->set('type', 'Konsole');
+    $product->save();
 
-    vd($customer);
-    vd($product);
+    $products = App\Models\Product::grabAll(1, 'user_id');
+
+    vd($products);
+
+    die();
 
     $action = new App\Rental\Action($product, $customer);
-    var_dump($action->isProductReturned());
-    $action->returnProduct();
-    var_dump($action->isProductReturned());
+    $action->save();*/
+
+    $router = App\Router::getInstance();
+    $router->addRoute('get', 'p:(/$|/home$)', function() {
+        return 'Hello there.';
+    });
+
+    $router->addRoute('get', '/customers', array('Controller', 'PageController', 'home'));
+
+
+    vd($router->route());
 }
 catch(Exception $e) {
     echo $e->getMessage();
