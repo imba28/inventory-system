@@ -1,9 +1,6 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 function __autoload($class) {
+    $temp = $class;
     $class = preg_replace('/^(app)\\\/i', '', $class);
     $class = str_replace('\\', '/', strtolower($class));
 
@@ -14,12 +11,18 @@ function __autoload($class) {
         require_once(ABS_PATH . "/src/classes/{$class}.php");
     }
     else {
+        //trigger_error("Class {$temp} not found!", E_USER_WARNING);
+        \App\ClassManager::markNotExisting("\\{$temp}");
+
+        /*
         vd("Klasse {$class}:");
         vd(generateCallTrace());
         vd(ABS_PATH . "/src/classes/{$class}.php");
         vd(ABS_PATH . "/src/{$class}.php");
+        */
 
-        throw new Exception("Die Klasse `$class` wurde nicht gefunden!");
+        return false;
+        #throw new Exception("Die Klasse `$class` wurde nicht gefunden!");
     }
 }
 
