@@ -5,6 +5,7 @@ class Router {
     use \App\Traits\Singleton;
 
     protected $routes = array(
+        'ALL' => array(),
         'GET' => array(),
         'POST' => array(),
         'PUT' => array(),
@@ -24,7 +25,6 @@ class Router {
             return $handle();
         }
         else if(is_array($handle) && $handle[0] == 'Controller' && count($handle) == 3) {
-            vd($handle);
             $controller_name = "\App\Controller\\".$handle[1];
             $controller_action = $handle[2];
 
@@ -37,7 +37,7 @@ class Router {
     public function route() {
         $request_uri = $_SERVER['REQUEST_URI'];
         $request_method = $_SERVER['REQUEST_METHOD'];
-        $uri = parse_url($request_uri, PHP_URL_PATH);
+        $uri = ltrim(parse_url($request_uri, PHP_URL_PATH), '/');
         $params = parse_url($request_uri, PHP_URL_QUERY);
 
         /*if(preg_match('/^\/api\/(v[0-9]+)\//', $uri, $match)) {
@@ -50,8 +50,12 @@ class Router {
                 $handler = $this->routes[$request_method][$uri];
                 return $this->handle($handler);
             }
+            elseif(isset($this->routes['ALL'][$uri])) {
+                $handler = $this->routes['ALL'][$uri];
+                return $this->handle($handler);
+            }
             else {
-                foreach($this->routes[$request_method] as $path => $value) {
+                foreach(array_merge($this->routes['ALL'], $this->routes[$request_method]) as $path => $value) {
                     if(preg_match('/^p\:\((.+)\)$/i', $path, $m)) {
                         $pattern = '/('.str_replace('/', '\/', $m[1]).')/';
                         if(preg_match($pattern, $request_uri)) {
@@ -59,7 +63,7 @@ class Router {
                         }
                     }
                 }
-                throw new \ErrorException('Route not defined!');
+                throw new \ErrorException("Route `{$uri}`not defined!");
             }
             // $exp = explode('/', $uri);
             //

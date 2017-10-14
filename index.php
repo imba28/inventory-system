@@ -17,15 +17,7 @@ try {
     $action = new App\Rental\Action($product, $customer);
     $action->save();*/
 
-    $router = App\Router::getInstance();
-    $router->addRoute('get', 'p:(/$|/home$)', function() {
-        return 'Hello there.';
-    });
-
-    $router->addRoute('get', '/customers', array('Controller', 'PageController', 'home'));
-
-
-    vd($router->route());
+    $router->route();
 }
 catch(Exception $e) {
     echo $e->getMessage();
