@@ -4,7 +4,6 @@ namespace App;
 class Registry {
     use Traits\Singleton;
 
-    protected static $instance = null;
     protected $data = array();
 
     const KEY_CONFIG = "config";
