@@ -14,6 +14,8 @@ class Database {
         $this->dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->dbh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+        $this->dbh->exec('SET NAMES UTF8');
     }
 }
 ?>
