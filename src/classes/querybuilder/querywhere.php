@@ -20,11 +20,11 @@ class QueryWhere {
     }
 
     protected static function validateClause($where){
-        if(count($where) != 3) throw new InvalidArgumentException("Bedingungen für Where-Clause sind ungültig!");
+        if(count($where) != 3) throw new \InvalidArgumentException("Bedingungen für Where-Clause sind ungültig!");
 
-        if((is_array($where[0]) && count($where[0]) < 0) || ($where[0] != "0" && empty($where[0]))) throw new InvalidArgumentException("Argument 1 `$where[0]` für Where-Clause ist ungültig!");
-        if((is_array($where[2]) && count($where[2]) < 0) /*|| ($where[2] != "0" && empty($where[2]))*/) throw new InvalidArgumentException("Argument 2 `$where[2]` für Where-Clause ist ungültig!");
-        if(!in_array(strtoupper($where[1]), QueryWhere::$valid_operators)) throw new InvalidArgumentException("Operator `$where[1]` für Where-Clause ist ungültig!");
+        if((is_array($where[0]) && count($where[0]) < 0) || ($where[0] != "0" && empty($where[0]))) throw new \InvalidArgumentException("Argument 1 `$where[0]` für Where-Clause ist ungültig!");
+        if((is_array($where[2]) && count($where[2]) < 0) /*|| ($where[2] != "0" && empty($where[2]))*/) throw new \InvalidArgumentException("Argument 2 `$where[2]` für Where-Clause ist ungültig!");
+        if(!in_array(strtoupper($where[1]), QueryWhere::$valid_operators)) throw new \InvalidArgumentException("Operator `$where[1]` für Where-Clause ist ungültig!");
     }
 
     public function getCondition($table){

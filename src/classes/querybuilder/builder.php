@@ -214,7 +214,7 @@ class Builder {
 
             return $this->result;
         }
-        catch(Exception $e){
+        catch(\Exception $e){
             $this->result = null;
             $this->last_exception = $e;
         }

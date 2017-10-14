@@ -16,13 +16,13 @@ class Query {
 
     public function execute(array $columns){
         $dbh = \App\Registry::getDatabase()->dbh;
-        var_dump($dbh);
+
         try {
            $sth = $dbh->prepare($this->sql);
 
            if(!$sth){
                if($this->logging) $this->log("Prepare() fehlgeschlagen!", $this->sql, array_values($columns));
-               throw new Exception("prepare() fehlgeschlagen!");
+               throw new \Exception("prepare() fehlgeschlagen!");
            }
 
            $sth->execute(array_values($columns));
@@ -30,7 +30,7 @@ class Query {
            $this->result = $sth->fetchAll(\PDO::FETCH_ASSOC);
            $this->lastInsertId = $dbh->lastInsertId();
         }
-        catch(Exception $e){
+        catch(\Exception $e){
             if($this->logging) $this->log($e->getMessage(), $this->sql, array_values($columns));
             throw new \App\QueryBuilder\QueryBuilderException($e->getMessage(), $e->getCode());
         }
@@ -43,7 +43,7 @@ class Query {
 
     public function getResult(){
         if(!is_null($this->result)) return $this->result;
-        throw new Exception("Query must be executed first!");
+        throw new \Exception("Query must be executed first!");
     }
 
     protected final function log($error, $sql, array $values = null){
@@ -52,7 +52,7 @@ class Query {
         $error_message .= "\nSql: $sql";
         if(!is_null($values)) $error_message .= "\nValues: ". join(", ", $values);
 
-        Debugger::log($error_message, 'Fehler');
+        \App\Debugger::log($error_message, 'Fehler');
     }
 }
 ?>
