@@ -33,6 +33,9 @@ class PageController implements \App\Interfaces\Controller {
                             $product->save();
                             \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde aktualisiert!');
                         }
+                        catch(\App\QueryBuilder\NothingChangedException $e) {
+                            \App\System::getInstance()->addMessage('info', 'Es wurde nichts geändert.');
+                        }
                         catch(\Exception $e) {
                             \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
                         }
@@ -78,12 +81,48 @@ class PageController implements \App\Interfaces\Controller {
                         else {
                             \App\System::getInstance()->addMessage('error', 'Produkt konnte nicht verliehen werden!');
                         }
-
                     }
+
                     $this->view->setTemplate('product-rent');
                 }
                 elseif($this->request->getParam('sub') == 'return') {
+                    try {
+                        $action = \App\Models\Action::grabByFilter(array(
+                            array('returnDate' , 'IS', 'NULL'),
+                            array('product_id', '=', $product->getId())
+                        ));
 
+                        if(count($action) == 1) {
+                            $action = current($action);
+                        }
+                        elseif(count($action) == 0) {
+                            \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
+                        }
+                        else {
+                            \App\Debugger::log("Es gibt mehrere aktive Aktionen für das Produkt {$product->getId()}! DAS SOLLTE NICHT PASSIEREN!", 'fatal');
+                            \App\System::getInstance()->addMessage('error', 'Fehler beim Zurückgeben!');
+                        }
+
+                        if($this->request->issetParam('submit')) {
+                            if($this->request->issetParam('returnDate')) {
+                                $date = \DateTime::createFromFormat('d.m.Y', $this->request->getParam('returnDate'));
+                                if($date !== false) {
+                                    $action->returnProduct($date->format('Y-m-d H:i:s'));
+                                }
+                                else {
+                                    $action->returnProduct();
+                                }
+                            }
+                            else $action->returnProduct();
+
+                            \App\System::getInstance()->addMessage('success', "{$product->get('name')} wurde erfolgreich zurückgegeben!");
+                        }
+                    }
+                    catch(\Exception $e) {
+                        \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
+                    }
+
+                    $this->view->setTemplate('product-return');
                 }
                 elseif($this->request->getParam('sub') == 'claim') {
 
@@ -99,6 +138,33 @@ class PageController implements \App\Interfaces\Controller {
 
                 $this->view->setTemplate('product');
             }
+        }
+        elseif($this->request->getParam('sub') == 'add') {
+            //\App\Debugger::log('hello there');
+            if($this->request->issetParam('submit')) {
+                $product = \App\Models\Product::new();
+
+                $params = $this->request->getParams();
+
+                if(empty($this->request->getParam('name')) || empty($this->request->getParam('invNr'))) {
+                    \App\System::getInstance()->addMessage('error', 'Name/Inventarnummer muss angegeben werden!');
+                }
+                else {
+                    foreach($params as $key) {
+                        $product->set($key, $this->request->getParam($key));
+                    }
+
+                    try {
+                        $product->save();
+                        \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde erstellt! <a href="/products/'. $product->getId() .'">zum Produkt</a>');
+                    }
+                    catch(\Exception $e) {
+                        \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
+                    }
+                }
+            }
+
+            $this->view->setTemplate('product-add');
         }
         else {
             $this->view->assign('products', \App\Models\Product::grabAll());
