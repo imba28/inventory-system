@@ -32,7 +32,7 @@ class Query {
         }
         catch(\Exception $e){
             if($this->logging) $this->log($e->getMessage(), $this->sql, array_values($columns));
-            throw new \App\QueryBuilder\QueryBuilderException($e->getMessage(), $e->getCode());
+            throw new \App\QueryBuilder\QueryBuilderException($e->getMessage());
         }
         return true;
     }

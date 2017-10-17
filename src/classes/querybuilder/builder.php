@@ -7,6 +7,7 @@ class Builder {
     const SANITIZER = "`";
 
     protected $debug;
+    protected $logging = true;
 
     protected $joins = array();
     protected $where = array();
@@ -25,6 +26,10 @@ class Builder {
         $this->debug = $debug;
 
         $this->selection = array("*");
+    }
+
+    public function setLogging($bool) {
+        $this->logging = $bool;
     }
 
     public function where($arg1, $operator, $arg2){
@@ -205,7 +210,8 @@ class Builder {
 
     protected function query($sql, $bindings = array()){
         try {
-            $query = new Query($sql);
+            vd($this);
+            $query = new Query($sql, $this->logging);
             $query->execute($bindings);
             $this->result = $query->getResult();
             $this->lastInsertID = $query->lastInsertId();
@@ -352,7 +358,10 @@ class Builder {
         $statement = "";
 
         foreach($data as $key => $value){
-            if($value == "NOW()") $statement.= $this->sanitizeColumnName($key) . " = NOW(), ";
+            if(is_null($value) || (empty($value) && $value !== 0)) {
+                $statement.= $this->sanitizeColumnName($key) . " = NULL, ";
+            }
+            elseif(in_array($value, self::$sql_keywords)) $statement.= $this->sanitizeColumnName($key) . " = $value, ";
             else {
                 $statement .= $this->sanitizeColumnName($key) . " = ?, ";
                 $values[] = $value;
