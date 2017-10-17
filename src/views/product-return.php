@@ -18,13 +18,14 @@
             <a href="/products/<?= $product->get('id') ?>">Zurück</a>
             <hr>
             <!-- /.col-lg-3 -->
-            <div class="row pl-3 pr-3">
-                <p>
-                    Das Produkt `<?= $product->get('name') ?>`(<?= $product->get('invNr') ?>) ist bereits verliehen.
-                    <?php if(!is_null($action->get('expectedReturnDate'))): ?>
-                    <small class="d-block mt-3">Es wird voraussichtlich am <?= date('d.m.Y', strtotime($action->get('expectedReturnDate'))) ?> wieder verfügbar sein.</small>
-                    <?php endif; ?>
-                </p>
+            <div class="row">
+                <form class="ml-4" method='post'>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Rückgabedatum</label>
+                        <input type="text" class="form-control datepicker" name='returnDate' placeholder="Rückgabedatum eingeben (leer = jetzt)" value="<?= $request->getParam('expectedReturnDate')  ?>">
+                    </div>
+                    <button type="submit" name="submit" class="btn btn-primary">Zurückgeben</button>
+                </form>
             </div>
         </div>
     </div>

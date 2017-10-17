@@ -1,3 +1,6 @@
+<?php
+$available = $product->isAvailable();
+?>
 <div class="container-fluid">
     <div class="row">
         <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
@@ -21,7 +24,7 @@
             <div class="row">
                 <div class="col col-6">
                     <div class="card">
-                        <?php if($product->isAvailable()): ?>
+                        <?php if($available): ?>
                             <span class="badge badge-success">Verfügbar</span>
                         <?php else: ?>
                             <span class="badge badge-danger">Verliehen</span>
@@ -60,9 +63,12 @@
                             <?php endif; ?>
                         </div>
                         <div class="btn-group" role="group" aria-label="Basic example">
-                            <a href="/product/rent/<?= $product->get('id')?>" class="btn btn-success">Ausleihen</a>
+                            <?php if($available): ?>
+                                <a href="/product/rent/<?= $product->get('id')?>" class="btn btn-success">Ausleihen</a>
+                            <?php else: ?>
+                                <a href="/product/return/<?= $product->get('id')?>" class="btn btn-success">Zurückgeben</a>
+                            <?php endif; ?>
                             <a href="/product/claim/<?= $product->get('id')?>" class="btn btn-default">Reservieren</a>
-                            <a href="/product/return/<?= $product->get('id')?>" class="btn btn-default">Zurückgeben</a>
                             <a href="/product/edit/<?= $product->get('id')?>" class="btn btn-primary">Bearbeiten</a>
                         </div>
                     </div>
