@@ -46,7 +46,7 @@ abstract class Model {
                     unset($properties_update[$name]);
                 }
                 elseif(is_null($value) || (empty($value) && $value != 0)) {
-                    $properties_update[$name] = "a";
+                    $properties_update[$name] = null;
                 }
                 elseif($value instanceof \App\Model) {
                     if(!$value->isCreated()) {
@@ -108,7 +108,7 @@ abstract class Model {
         list($table_name, $self_class) = self::getTableName();
 
         $query = new \App\QueryBuilder\Builder($table_name);
-        $query->where('deleted', '=', '0')->orderBy('id', 'ASC');
+        $query->where('deleted', '=', '0')->orderBy('id', 'DESC');
 
         if(!$all) $query->limit(1);
 
