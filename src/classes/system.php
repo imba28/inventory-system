@@ -8,7 +8,7 @@ final class System {
         'error' => array(),
         'success' => array(),
         'warning' => array(),
-        'note' => array()
+        'info' => array()
     );
 
     public function addMessage($type, $msg) {
@@ -24,13 +24,13 @@ final class System {
 
     private function getTitle($type) {
         switch($type) {
-            case 'error':
+            case 'danger':
                 return 'Fehler';
             case 'success':
                 return 'Erfolg';
             case 'warning':
                 return 'Warnung';
-            case 'note':
+            case 'info':
                 return 'Info';
             default:
                 return null;
@@ -39,6 +39,8 @@ final class System {
 
     private function renderMessages($type, array $data) {
         $html = '';
+
+        if($type == 'error') $type = 'danger';
 
         for($i = 0; $i < count($data); $i++) {
             $msg = $data[$i];
