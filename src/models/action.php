@@ -13,8 +13,8 @@ class Action extends \App\Model {
         return !is_null($this->returnDate);
     }
 
-    public function returnProduct() {
-        $this->returnDate = 'NOW()';
+    public function returnProduct($date = 'NOW()') {
+        $this->set('returnDate', $date);
         $this->save();
     }
 }
