@@ -1,4 +1,5 @@
 <?php
+/*
 namespace App\Rental;
 
 class Action extends \App\Model {
@@ -23,4 +24,5 @@ class Action extends \App\Model {
         $this->save();
     }
 }
+*/
 ?>
