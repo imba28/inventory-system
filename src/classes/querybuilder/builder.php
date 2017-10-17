@@ -210,7 +210,6 @@ class Builder {
 
     protected function query($sql, $bindings = array()){
         try {
-            vd($this);
             $query = new Query($sql, $this->logging);
             $query->execute($bindings);
             $this->result = $query->getResult();
