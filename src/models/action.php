@@ -5,7 +5,7 @@ class Action extends \App\Model {
     protected $id;
     protected $product;
     protected $customer;
-    protected $rentDate = 'NOW()';
+    protected $rentDate;
     protected $returnDate = null;
     protected $expectedReturnDate = null;
 
