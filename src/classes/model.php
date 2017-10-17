@@ -2,7 +2,8 @@
 namespace App;
 
 abstract class Model {
-    use Traits\GetSet;
+    use Traits\GetSetData;
+    use Traits\Events;
 
     protected $id;
     protected $deleted;
@@ -20,6 +21,7 @@ abstract class Model {
             }
             if(property_exists($this, $key)) {
                 $this->$key = $value;
+                $this->data[$key] = $value;
             }
         }
     }
@@ -28,23 +30,38 @@ abstract class Model {
         return isset($this->id) && !is_null($this->id);
     }
 
+    public function getId() {
+        return $this->id;
+    }
+
     public function save() {
-        $properties = get_object_vars($this);
+        $this->trigger('save');
 
-        foreach($properties as $name => $value) {
-            if(is_null($value)) $properties[$name] = null;
+        //$properties = get_object_vars($this);
+        $properties_update = $this->data;
 
-            if($value instanceof \App\Model) {
-                if(!$value->isCreated()) {
-                    $value->save();
+        foreach($properties_update as $name => $value) {
+            if($this->$name != $value) { // has changed
+                if($name == 'id') {
+                    unset($properties_update[$name]);
                 }
-                $properties["{$name}_id"] = $value->get('id');
-                unset($properties[$name]);
+                elseif(is_null($value) || (empty($value) && $value != 0)) {
+                    $properties_update[$name] = "a";
+                }
+                elseif($value instanceof \App\Model) {
+                    if(!$value->isCreated()) {
+                        $value->save();
+                    }
+                    $properties_update["{$name}_id"] = $value->get('id');
+                    unset($properties_update[$name]);
+                }
             }
-            elseif($name == 'id') {
-                unset($properties[$name]);
+            else {
+                unset($properties_update[$name]);
             }
         }
+
+        if(count($properties_update) == 0) throw new \App\QueryBuilder\NothingChangedException("nothing changed!");
 
         list($table_name, $self_class) = self::getTableName();
 
@@ -52,21 +69,26 @@ abstract class Model {
 
         if($this->isCreated()) {
             //$properties['stamp'] = 'NOW()'; // set last update date
-            $query->where('id', '=', $this->id)->update($properties);
+            $res = $query->where('id', '=', $this->id)->update($properties_update);
+            if($res === false) {
+                throw new \App\QueryBuilder\QueryBuilderException("could not update data: {$query->getError()}");
+            }
         }
         else {
-            $properties['user_id'] = 1;
-            $properties['createDate'] = 'NOW()';
-            $properties['deleted'] = '0';
+            $this->trigger('create');
 
-            $res = $query->insert($properties);
+            $properties_update['user_id'] = 1;
+            $properties_update['createDate'] = 'NOW()';
+            $properties_update['deleted'] = '0';
 
-            if(!$res) {
+            $res = $query->insert($properties_update);
+
+            if($res === false) {
                 throw new \App\QueryBuilder\QueryBuilderException("could not insert data: {$query->getError()}");
             }
 
-
             $this->id = $query->lastInsertId();
+            $this->data['id'] = $this->id;
         }
 
         return true;
@@ -145,12 +167,14 @@ abstract class Model {
     }
 
     public static function delete(integer $id) {
+        $this->trigger('delete');
+
         $obj = self::grab($id);
         $obj->set('deleted', 1);
         $obj->save();
     }
 
-    private static function getTableName() {
+    protected static function getTableName() {
         $self_class = get_called_class();
         if($self_class === false) throw new \UnexpectedValueException('Oh shit.');
 
