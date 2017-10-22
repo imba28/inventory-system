@@ -19,7 +19,7 @@
             <hr>
             <!-- /.col-lg-3 -->
             <div class="row">
-                <form class="ml-4" method="post">
+                <form class="ml-4 col-md-6" method="post">
                     <div class="form-group">
                         <label for="exampleInputEmail1">Name</label>
                         <input type="text" class="form-control" placeholder="Produktname eingeben" name="name" value="<?= $request->getParam('name') ?>">

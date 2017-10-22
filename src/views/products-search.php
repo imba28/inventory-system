@@ -14,7 +14,7 @@
           </ul>
         </nav>
         <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-          <h1>Produkte (<?= $totals ?>)</h1>
+          <h1>Produkte &#187; "<?= $search_string ?>" (<?= $totals ?>)</h1>
           <hr />
           <section class="row text-center placeholders pl-3 pr-3">
             <?php foreach($products as $product): ?>
@@ -37,7 +37,7 @@
           </section>
           <section>
               <?php
-                if(isset($paginator)) echo $paginator->render('/products');
+                if(isset($paginator)) echo $paginator->render('/products/search');
               ?>
           </section>
         </main>

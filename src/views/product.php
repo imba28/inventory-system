@@ -31,15 +31,15 @@ $available = $product->isAvailable();
                         <?php endif; ?>
                         <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
                             <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <img class="d-block w-100" src="http://via.placeholder.com/900x400" alt="First slide">
+                                <?php foreach($product->getImages() as $key => $image): ?>
+                                <div class="carousel-item<?php if($key == 0) echo ' active' ?>">
+                                    <img class="d-block w-100" src="<?= $image->get('src') ?>" alt="<?php $image->get('title') ?>">
                                 </div>
-                                <div class="carousel-item">
-                                    <img class="d-block w-100" src="http://via.placeholder.com/900x400" alt="Second slide">
-                                </div>
-                                <div class="carousel-item">
-                                    <img class="d-block w-100" src="http://via.placeholder.com/900x400" alt="Third slide">
-                                </div>
+                                <?php endforeach;
+                                    if(empty($product->getImages())) {
+                                        echo '<div class="carousel-item active"><img class="d-block w-100" src="http://via.placeholder.com/900x400"></div>';
+                                    }
+                                ?>
                             </div>
                             <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>

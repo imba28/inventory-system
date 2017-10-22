@@ -10,11 +10,11 @@
 
     <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
       <h1>Übersicht</h1>
-
-      <section class="row text-center placeholders">
+      <hr />
+      <section class="row text-center placeholders pl-3 pr-3">
           <div class="list-group ">
             <?php foreach($actions as $action): ?>
-                <a href="/product/return/<?= $action->get('id') ?>" class="list-group-item">
+                <a href="/product/return/<?= $action->get('product')->getId() ?>" class="list-group-item">
                     <?= $action->get('product')->get('name') ?> von <?= $action->get('customer')->get('name') ?> <small>seit <?= date('d.m.Y', strtotime($action->get('rentDate'))) ?></small>
                 </a>
             <?php endforeach; ?>

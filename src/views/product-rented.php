@@ -14,7 +14,7 @@
             </ul>
         </nav>
         <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-            <h1>Produkte &#187; <?= $product->get('name') ?> &#187; Verleihen</h1>
+            <h1>Produkt &#187; <?= $product->get('name') ?> &#187; Verleihen</h1>
             <a href="/products/<?= $product->get('id') ?>">Zurück</a>
             <hr>
             <!-- /.col-lg-3 -->
