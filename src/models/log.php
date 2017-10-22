@@ -5,7 +5,7 @@ class Log extends \App\Model {
     protected $message;
     protected $type;
 
-    public function save() {
+    public function save($head_column = null, $head_id = null) {
         $properties = $this->data;
 
         list($table_name, $self_class) = self::getTableName();
