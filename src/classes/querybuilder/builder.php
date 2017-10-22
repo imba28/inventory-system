@@ -58,7 +58,7 @@ class Builder {
     }
 
     public function count(){
-        $this->selection[] = self::alias('COUNT(*)', 'count');
+        $this->selection = array(self::alias('COUNT(*)', 'count'));
         $result = $this->get();
 
         return $result[0]["count"];
@@ -115,18 +115,37 @@ class Builder {
         $tmp = $this->selection;
         $sql_keywords = self::$sql_keywords;
 
-        array_walk($tmp, function(&$select) use(&$sql_keywords) {
-            if($select instanceof QueryAlias) $column = $select->get('name');
+        foreach($tmp as $idx => $select) {
+            if($select instanceof \App\QueryBuilder\QueryAlias) {
+                $column = $select->get('name');
+            }
+            else {
+                $column = $select;
+            }
+
+            if(!in_array($column, $sql_keywords)) {
+                $column = $this->sanitizeColumnName($column);
+            }
+
+            if($select instanceof \App\QueryBuilder\QueryAlias) $column .= ' as '. $select->get("alias");
+
+            $tmp[$idx] = $column;
+        }
+
+        /*array_walk($tmp, function(&$select) use(&$sql_keywords) {
+            if($select instanceof \App\QueryBuilder\QueryAlias) $column = $select->get('name');
             else $column = $select;
 
             if(!in_array($column, $sql_keywords)) {
                 $column = $this->sanitizeColumnName($column);
             }
 
-            if($select instanceof QueryAlias) $column .= ' as '. $select->get("alias");
+            vd($select);
+
+            if($select instanceof \App\QueryBuilder\QueryAlias) $column .= ' as '. $select->get("alias");
 
             $select = $column;
-        });
+        }); */
 
         return join(", ", $tmp);
     }
@@ -199,13 +218,20 @@ class Builder {
         return $this;
     }
 
-    public function reset(){
-         $this->selection = array("*");
-         $this->where = array();
-         $this->order = array();
-         $this->joins = array();
+    public function reset($prop = null){
+        if(is_null($prop)) {
+            $this->selection = array("*");
+            $this->where = array();
+            $this->order = array();
+            $this->joins = array();
+        }
+        else {
+            if(in_array($prop, array('limit', 'selection', 'where', 'order', 'joins'))) {
+                $this->$prop = array();
+            }
+        }
 
-         return $this;
+        return $this;
     }
 
     protected function query($sql, $bindings = array()){
