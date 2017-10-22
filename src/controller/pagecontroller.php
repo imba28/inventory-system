@@ -55,15 +55,13 @@ class PageController implements \App\Interfaces\Controller {
                             return;
                         }
                     }
-                    catch(\InvalidArgumentException $e) {
-
-                    }
+                    catch(\App\Exceptions\NothingFoundException $e) {}
 
                     if($this->request->issetParam('submit')) {
                         try {
                             $customer = \App\Models\Customer::grab($this->request->getParam('internal_id'), 'internal_id');
                         }
-                        catch(\InvalidArgumentException $e) {
+                        catch(\App\Exceptions\NothingFoundException $e) {
                             $customer = \App\Models\Customer::new();
                             $customer->set('internal_id', $this->request->getParam('internal_id'));
                         }
@@ -73,6 +71,7 @@ class PageController implements \App\Interfaces\Controller {
                         $action = \App\Models\Action::new();
                         $action->set('product', $product);
                         $action->set('customer', $customer);
+                        $action->set('rentDate', 'NOW()');
                         $action->set('expectedReturnDate', $expectedReturnDate);
 
                         if($action->save()) {
@@ -132,7 +131,7 @@ class PageController implements \App\Interfaces\Controller {
                 try {
                     $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array(array('product_id', '=', $this->request->getParam('id')))));
                 }
-                catch(\Exception $e) {
+                catch(\App\Exceptions\NothingFoundException $e) {
                     $this->view->assign('rentHistory', array());
                 }
 
@@ -166,9 +165,61 @@ class PageController implements \App\Interfaces\Controller {
 
             $this->view->setTemplate('product-add');
         }
+        elseif($this->request->getParam('sub') == 'search') {
+            if($this->request->issetParam('search_string')) {
+                $_SESSION['search_string'] = $this->request->getParam('search_string');
+            }
+
+            $search_string = $_SESSION['search_string'];
+            $currentPage = $this->request->issetParam('paginatorPage') ? intval($this->request->getParam('paginatorPage')) : 1;
+            $itemsPerPage = 2;
+            try {
+                $filter = array(
+                    array(
+                        array('name', 'LIKE', "%{$search_string}%"),
+                        'OR',
+                        array('type', 'LIKE', "%{$search_string}%")
+                    )
+                );
+
+                $products = \App\Models\Product::grabByFilter($filter, (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
+
+                $query = \App\Models\Product::getQuery($filter);
+                $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage);
+                $this->view->assign('paginator', $paginator);
+                $this->view->assign('totals', $paginator->getTotals());
+            }
+            catch(\App\Exceptions\NothingFoundException $e) {
+                $products = array();
+                \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
+            }
+
+            $this->view->assign('products', $products);
+            $this->view->assign('search_string', $search_string);
+
+            $this->view->setTemplate('products-search');
+        }
         else {
-            $this->view->assign('products', \App\Models\Product::grabAll());
+            $currentPage = $this->request->issetParam('paginatorPage') ? intval($this->request->getParam('paginatorPage')) : 1;
+            $itemsPerPage = 8;
+
+            try {
+                $products = \App\Models\Product::grabByFilter(array(), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
+
+                $query = \App\Models\Product::getQuery(array());
+                $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage);
+                $this->view->assign('paginator', $paginator);
+                $this->view->assign('totals', $paginator->getTotals());
+            }
+            catch(\App\Exceptions\NothingFoundException $e) {
+                $products = array();
+                \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
+            }
+
+            $this->view->assign('products', $products);
             $this->view->setTemplate('products');
+            /*$this->view->assign('products', \App\Models\Product::grabAll());
+            $this->view->setTemplate('products');*/
         }
 
         $this->renderContent();
