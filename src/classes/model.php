@@ -8,6 +8,8 @@ abstract class Model {
     protected $id;
     protected $deleted;
 
+    static private $instances = array();
+
     public function __construct($options = array()) {
         foreach($options as $key => $value) {
             if(preg_match('/([\w]+)_id$/', $key, $m)) {
@@ -24,6 +26,11 @@ abstract class Model {
                 $this->data[$key] = $value;
             }
         }
+
+        if($this->isCreated()) {
+            if(!isset(self::$instances[get_called_class()])) self::$instances[get_called_class()] = array();
+            self::$instances[get_called_class()][$this->getId()] = $this;
+        }
     }
 
     public function isCreated() {
@@ -34,11 +41,14 @@ abstract class Model {
         return $this->id;
     }
 
-    public function save() {
+    public function save($head_column = null, $head_id = null) {
         $this->trigger('save');
 
         //$properties = get_object_vars($this);
         $properties_update = $this->data;
+        if(!is_null($head_column) && !is_null($head_id)) {
+            $properties_update[$head_column] = $head_id;
+        }
 
         foreach($properties_update as $name => $value) {
             if($this->$name != $value) { // has changed
@@ -57,7 +67,7 @@ abstract class Model {
                 }
             }
             else {
-                unset($properties_update[$name]);
+                if($this->isCreated()) unset($properties_update[$name]);
             }
         }
 
@@ -104,13 +114,36 @@ abstract class Model {
     }*/
 
     // Static methods.
-    public static function getOptions($filters = array(), $all = false) {
+    public static function getQuery(array $filters, $limit = false) {
         list($table_name, $self_class) = self::getTableName();
 
         $query = new \App\QueryBuilder\Builder($table_name);
         $query->where('deleted', '=', '0')->orderBy('id', 'DESC');
 
-        if(!$all) $query->limit(1);
+        if($limit !== false) $query->limit($limit);
+
+        if(is_array($filters)) {
+            foreach($filters as $filter) {
+                if(count($filter) != 3) continue;
+                $query->where($filter[0], $filter[1], $filter[2]);
+            }
+        }
+
+        return $query;
+    }
+
+    public static function getOptions($filters = array(), $all = false, $limit = false) {
+        list($table_name, $self_class) = self::getTableName();
+
+        $query = new \App\QueryBuilder\Builder($table_name);
+        $query->where('deleted', '=', '0')->orderBy('id', 'DESC');
+
+        if($limit == false) {
+            if(!$all) $query->limit(1);
+        }
+        else {
+            $query->limit($limit);
+        }
 
         if(is_array($filters)) {
             foreach($filters as $filter) {
@@ -125,23 +158,28 @@ abstract class Model {
             $options = $all ? $res : current($res);
             return array($options, $self_class);
         }
-        throw new \InvalidArgumentException("No entries found for {$self_class}!");
+        throw new \App\Exceptions\NothingFoundException("No entries found for {$self_class}!");
     }
 
     public static function grab($value, $column = 'id') {
+        if($column == 'id' && isset(self::$instances[get_called_class()][$value])) {
+            return self::$instances[get_called_class()][$value];
+        }
+
         list($options, $self_class) = self::getOptions(array(
             array($column, '=', $value)
         ));
         return new $self_class($options);
     }
 
-    public static function grabByFilter(array $filters) {
-        list($options, $self_class) = self::getOptions($filters, true);
+    public static function grabByFilter(array $filters, $limit = false) {
+        list($options, $self_class) = self::getOptions($filters, true, $limit);
 
         $objs = array();
         foreach($options as $o) {
             $objs[] = new $self_class($o);
         }
+
         return $objs;
     }
 
