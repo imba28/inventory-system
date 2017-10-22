@@ -27,8 +27,8 @@
               <ul class="navbar-nav mr-auto">
                   <?= \App\Menu::getItems() ?>
               </ul>
-              <form class="form-inline mt-2 mt-md-0">
-                  <input class="form-control mr-sm-2" type="text" placeholder="Produkte suchen" aria-label="Suchen">
+              <form class="form-inline mt-2 mt-md-0" method="post" action="/products/search">
+                  <input class="form-control mr-sm-2" type="text" placeholder="Produkte suchen" aria-label="Suchen" name="search_string">
                   <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Suchen</button>
               </form>
           </div>
