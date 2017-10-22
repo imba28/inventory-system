@@ -19,7 +19,7 @@ try {
 
     $router->route();
 }
-catch(Exception $e) {
+catch(\Exception $e) {
     echo $e->getMessage();
 }
 ?>
