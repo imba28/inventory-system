@@ -80,6 +80,10 @@ $available = $product->isAvailable();
                             Historie
                         </div>
                         <div class="card-body">
+                            <?php
+                            if(empty($rentHistory)): echo "<small class=\"text-muted font-weight-bold\">{$product->get('name')} wurde noch nicht verliehen.</small>";
+                            else:
+                            ?>
                             <?php foreach($rentHistory as $rentAction):
                                 if(!$rentAction->isProductReturned()) :
                             ?>
@@ -92,7 +96,9 @@ $available = $product->isAvailable();
                                 </small>
                             <?php endif; ?>
                             <hr>
-                            <?php endforeach; ?>
+                            <?php endforeach;
+                            endif;
+                            ?>
                         </div>
                     </div>
                 </div>
