@@ -51,7 +51,7 @@ abstract class Model {
         }
 
         foreach($properties_update as $name => $value) {
-            if($this->$name != $value) { // has changed
+            if(@$this->$name != $value) { // has changed
                 if($name == 'id') {
                     unset($properties_update[$name]);
                 }
@@ -132,11 +132,15 @@ abstract class Model {
         return $query;
     }
 
-    public static function getOptions($filters = array(), $all = false, $limit = false) {
+    public static function getOptions($filters = array(), $all = false, $limit = false, $order = array('id' => 'DESC')) {
         list($table_name, $self_class) = self::getTableName();
 
         $query = new \App\QueryBuilder\Builder($table_name);
-        $query->where('deleted', '=', '0')->orderBy('id', 'DESC');
+        $query->where('deleted', '=', '0');
+
+        foreach($order as $column => $order) {
+            $query->orderBy($column, $order);
+        }
 
         if($limit == false) {
             if(!$all) $query->limit(1);
@@ -172,8 +176,8 @@ abstract class Model {
         return new $self_class($options);
     }
 
-    public static function grabByFilter(array $filters, $limit = false) {
-        list($options, $self_class) = self::getOptions($filters, true, $limit);
+    public static function grabByFilter(array $filters, $limit = false, $order = array('id' => 'DESC')) {
+        list($options, $self_class) = self::getOptions($filters, true, $limit, $order);
 
         $objs = array();
         foreach($options as $o) {
