@@ -34,12 +34,48 @@ class PageController implements \App\Interfaces\Controller {
                             \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde aktualisiert!');
                         }
                         catch(\App\QueryBuilder\NothingChangedException $e) {
-                            \App\System::getInstance()->addMessage('info', 'Es wurde nichts geändert.');
+                            //\App\System::getInstance()->addMessage('info', 'Es wurde nichts geändert.');
                         }
                         catch(\Exception $e) {
                             \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
                         }
                     }
+
+                    if($this->request->issetFile("add-productImage")) {
+                        $files = $this->request->getFiles("add-productImage");
+                        $error = false;
+
+                        foreach($files as $file) {
+                            $image = new \App\File\Image($file);
+
+                            if($image->isValid()) {
+                                if($image->save("/images")) {
+                                    $product_image = \App\Models\ProductImage::new();
+                                    $product_image->set('src', "/public/files/images/{$image->getDestination()}");
+                                    $product_image->set('product', $product);
+                                    $product_image->set('title', $image->getInfo('name'));
+                                    if($product_image->save()) {
+                                        $product->addImage($product_image);
+                                    }
+                                }
+                                else {
+                                    $error = true;
+                                    \App\System::getInstance()->addMessage('error', "Fehler beim Speichern von {$image->getInfo('name')}");
+                                }
+                            }
+                            else {
+                                $error = true;
+                                if(get_class($image->getError()) !== 'App\File\NoFileSentException') {
+                                    \App\System::getInstance()->addMessage('error', $image->getError()->getMessage());
+                                }
+                            }
+                        }
+
+                        if(!$error) {
+                            \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
+                        }
+                    }
+
                     $this->view->setTemplate('product-update');
                 }
                 elseif($this->request->getParam('sub') == 'rent') {
@@ -129,7 +165,9 @@ class PageController implements \App\Interfaces\Controller {
             }
             else {
                 try {
-                    $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array(array('product_id', '=', $this->request->getParam('id')))));
+                    $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array(
+                        array('product_id', '=', $this->request->getParam('id'))
+                    ), 10));
                 }
                 catch(\App\Exceptions\NothingFoundException $e) {
                     $this->view->assign('rentHistory', array());
