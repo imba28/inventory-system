@@ -42,7 +42,6 @@
                     </div>
                     <div class="form-group">
                         <ul class="productimages row">
-                            <?php vd($product) ?>
                             <?php foreach($product->getImages() as $image): ?>
                                 <li class="col col-md-3">
                                     <button type="button" class="btn btn-danger btn-sm">x</button>
