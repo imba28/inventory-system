@@ -15,6 +15,7 @@
     <script src="/src/js/bootstrap.min.js"></script>
     <script src="/src/js/bootstrap.datepicker.min.js"></script>
     <script src="/src/js/main.js"></script>
+    <script src="/src/js/tinymce.min.js"></script>
   </head>
   <body>
       <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
