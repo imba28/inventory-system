@@ -16,7 +16,7 @@ class Product extends \App\Model {
             try {
                 $this->images = ProductImage::grabByFilter(array(
                     array('product_id', '=', $this->id)
-                ));
+                ), false, array('id' => 'ASC'));
             }
             catch( \App\Exceptions\NothingFoundException $e) {
                 $this->images = array();
@@ -24,6 +24,18 @@ class Product extends \App\Model {
         }
     }
 
+    public function getFrontImage() {
+        foreach($this->images as $image) {
+            if($image->get('title') == 'frontimage') return $image;
+        }
+
+        if(!empty($this->images)) return $this->images[0];
+
+        return new ProductImage(array(
+            'src' => 'http://via.placeholder.com/200x200',
+            'title' => 'frontimage'
+        ));
+    }
     public function addImage(ProductImage $image) {
         $this->images[] = $image;
     }
@@ -44,6 +56,8 @@ class Product extends \App\Model {
             foreach($images as $image) {
                 $image->save('product_id', $this->getId());
             }
+
+            $this->images = $images;
         }
         else parent::save();
     }
