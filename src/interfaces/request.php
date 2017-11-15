@@ -6,5 +6,8 @@ interface Request {
     public function getParam($param);
     public function getParams();
     public function getHeader($name);
+
+    public function issetFile($name);
+    public function getFile($name);
 }
 ?>
