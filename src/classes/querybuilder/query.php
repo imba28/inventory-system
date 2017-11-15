@@ -52,7 +52,7 @@ class Query {
         $error_message .= "\nSql: $sql";
         if(!is_null($values)) $error_message .= "\nValues: ". join(", ", $values);
 
-        \App\Debugger::log($error_message, 'Fehler');
+        \App\Debugger::log($error_message, 'error');
     }
 }
 ?>
