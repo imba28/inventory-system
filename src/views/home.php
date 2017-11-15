@@ -15,7 +15,7 @@
           <div class="list-group ">
             <?php foreach($actions as $action): ?>
                 <a href="/product/return/<?= $action->get('product')->getId() ?>" class="list-group-item">
-                    <?= $action->get('product')->get('name') ?> von <?= $action->get('customer')->get('name') ?> <small>seit <?= date('d.m.Y', strtotime($action->get('rentDate'))) ?></small>
+                    <?= $action->get('product')->get('name') ?> von <?= $action->get('customer')->get('name') ?> <small>seit <?= ago(strtotime($action->get('rentDate'))) ?></small>
                 </a>
             <?php endforeach; ?>
         </div>
