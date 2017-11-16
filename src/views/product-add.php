@@ -19,7 +19,7 @@
             <hr>
             <!-- /.col-lg-3 -->
             <div class="row">
-                <form class="ml-4 col-md-6" method="post">
+                <form class="ml-4 col-md-6" method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="exampleInputEmail1">Name</label>
                         <input type="text" class="form-control" placeholder="Produktname eingeben" name="name" value="<?= $request->getParam('name') ?>">
@@ -39,6 +39,25 @@
                     <div class="form-group">
                         <label for="exampleInputPassword1">Anmerkung</label>
                         <textarea class="form-control" name="note" placeholder="Anmerkung eingeben"><?= $request->getParam('note') ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <ul class="productimages row">
+                            <?php
+                            if(isset($product)):
+                                foreach($product->getImages() as $image): ?>
+                                <li class="col col-md-3">
+                                    <button type="button" class="btn btn-danger btn-sm">x</button>
+                                    <img src="<?= $image->get('src') ?>" alt="<?= $image->get('title') ?>" class="d-block w-100">
+                                    <p>
+                                        <?= $image->get('title') ?>
+                                    </p>
+                                </li>
+                            <?php
+                                endforeach;
+                            endif;
+                            ?>
+                        </ul>
+                        <input type="file" name="add-productImage[]" multiple>
                     </div>
                     <button type="submit" name="submit" class="btn btn-primary">Erstellen</button>
                 </form>
