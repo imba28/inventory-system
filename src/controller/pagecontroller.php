@@ -183,8 +183,8 @@ class PageController implements \App\Interfaces\Controller {
 
                 $params = $this->request->getParams();
 
-                if(empty($this->request->getParam('name')) || empty($this->request->getParam('invNr'))) {
-                    \App\System::getInstance()->addMessage('error', 'Name/Inventarnummer muss angegeben werden!');
+            if(empty($this->request->getParam('name')) /*|| empty($this->request->getParam('invNr'))*/) {
+                    \App\System::getInstance()->addMessage('error', 'Name muss angegeben werden!');
                 }
                 else {
                     foreach($params as $key) {
@@ -193,6 +193,42 @@ class PageController implements \App\Interfaces\Controller {
 
                     try {
                         $product->save();
+
+                        if($this->request->issetFile("add-productImage")) {
+                            $files = $this->request->getFiles("add-productImage");
+                            $error = false;
+
+                            foreach($files as $file) {
+                                $image = new \App\File\Image($file);
+
+                                if($image->isValid()) {
+                                    if($image->save("/images")) {
+                                        $product_image = \App\Models\ProductImage::new();
+                                        $product_image->set('src', "/public/files/images/{$image->getDestination()}");
+                                        $product_image->set('product', $product);
+                                        $product_image->set('title', $image->getInfo('name'));
+                                        if($product_image->save()) {
+                                            $product->addImage($product_image);
+                                        }
+                                    }
+                                    else {
+                                        $error = true;
+                                        \App\System::getInstance()->addMessage('error', "Fehler beim Speichern von {$image->getInfo('name')}");
+                                    }
+                                }
+                                else {
+                                    $error = true;
+                                    if(get_class($image->getError()) !== 'App\File\NoFileSentException') {
+                                        \App\System::getInstance()->addMessage('error', $image->getError()->getMessage());
+                                    }
+                                }
+                            }
+
+                            if(!$error) {
+                                \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
+                            }
+                        }
+
                         \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde erstellt! <a href="/products/'. $product->getId() .'">zum Produkt</a>');
                     }
                     catch(\Exception $e) {
@@ -210,25 +246,31 @@ class PageController implements \App\Interfaces\Controller {
 
             $search_string = $_SESSION['search_string'];
             $currentPage = $this->request->issetParam('paginatorPage') ? intval($this->request->getParam('paginatorPage')) : 1;
-            $itemsPerPage = 2;
+            $itemsPerPage = 10;
+
             try {
                 $filter = array(
                     array(
                         array('name', 'LIKE', "%{$search_string}%"),
                         'OR',
                         array('type', 'LIKE', "%{$search_string}%")
-                    )
+                    ),
+                    'OR',
+                    array('invNr', 'LIKE', "%{$search_string}%")
                 );
 
                 $products = \App\Models\Product::grabByFilter($filter, (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
                 $query = \App\Models\Product::getQuery($filter);
+
                 $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage);
+
                 $this->view->assign('paginator', $paginator);
                 $this->view->assign('totals', $paginator->getTotals());
             }
             catch(\App\Exceptions\NothingFoundException $e) {
                 $products = array();
+                $this->view->assign('totals', 0);
                 \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
             }
 
@@ -251,6 +293,7 @@ class PageController implements \App\Interfaces\Controller {
             }
             catch(\App\Exceptions\NothingFoundException $e) {
                 $products = array();
+                $this->view->assign('totals', 0);
                 \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
             }
 
@@ -264,13 +307,16 @@ class PageController implements \App\Interfaces\Controller {
     }
 
     public function home() {
-        $filters = array(
-            array('returnDate', 'IS', 'NULL')
-        );
+        try {
+            $this->view->assign('actions', \App\Models\Action::grabByFilter(array(
+                array('returnDate', 'IS', 'NULL')
+            )));
+        }
+        catch(\App\Exceptions\NothingFoundException $e) {
+            $this->view->assign('actions', array());
+        }
 
-        $this->view->assign('actions', \App\Models\Action::grabByFilter($filters));
         $this->view->setTemplate('home');
-
         $this->renderContent();
     }
 
