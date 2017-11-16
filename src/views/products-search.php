@@ -19,7 +19,7 @@
           <section class="row text-center placeholders pl-3 pr-3">
             <?php foreach($products as $product): ?>
             <div class="card" style="width: 20%">
-                <img class="card-img-top" src="http://via.placeholder.com/100x100" alt="Card image cap">
+                <img class="card-img-top" src="<?= $product->getFrontImage()->get('src') ?>" alt="Card image cap">
                 <div class="card-body">
                     <?php if($product->isAvailable()): ?>
                         <span class="badge badge-success">Verfügbar</span>
