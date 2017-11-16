@@ -345,14 +345,14 @@ class Builder {
         if(count($this->where) > 0){
             $criteria = " WHERE ";
             foreach($this->where as $clause){
-                $criteria .= $clause->getCondition($table_name) . " AND";
+                $criteria .= $clause->getCondition($table_name) . " AND ";
                 $val = $clause->getValue();
                 if($val !== false){
                     if(is_array($val)) foreach($val as $v) if(!is_null($v)) $bindings[] = $v;
                     else $bindings[] = $val;
                 }
             }
-            $criteria = rtrim($criteria, " AND");
+            $criteria = rtrim($criteria, " AND ");
         }
 
         return array($criteria, $bindings);
@@ -363,8 +363,11 @@ class Builder {
         $values = array();
         $bindings = array();
 
-        foreach($data as $key => $value){
+        foreach($data as $key => $value) {
             if(in_array($value, self::$sql_keywords)) $values[] = $value;
+            elseif(is_null($value) || strlen($value) == 0) {
+                $values[] = "NULL";
+            }
             else {
                 $bindings[] = $value;
                 $values[] = "?";
