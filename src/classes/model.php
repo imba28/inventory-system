@@ -123,9 +123,14 @@ abstract class Model {
         if($limit !== false) $query->limit($limit);
 
         if(is_array($filters)) {
-            foreach($filters as $filter) {
-                if(count($filter) != 3) continue;
-                $query->where($filter[0], $filter[1], $filter[2]);
+            if(count($filters) == 3) {
+                $query->where($filters[0], $filters[1], $filters[2]);
+            }
+            else {
+                foreach($filters as $filter) {
+                    if(count($filter) != 3) continue;
+                    $query->where($filter[0], $filter[1], $filter[2]);
+                }
             }
         }
 
@@ -150,9 +155,14 @@ abstract class Model {
         }
 
         if(is_array($filters)) {
-            foreach($filters as $filter) {
-                if(count($filter) != 3) continue;
-                $query->where($filter[0], $filter[1], $filter[2]);
+            if(count($filters) == 3) {
+                $query->where($filters[0], $filters[1], $filters[2]);
+            }
+            else {
+                foreach($filters as $filter) {
+                    if(count($filter) != 3) continue;
+                    $query->where($filter[0], $filter[1], $filter[2]);
+                }
             }
         }
 
