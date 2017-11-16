@@ -13,11 +13,20 @@
       <hr />
       <section class="row text-center placeholders pl-3 pr-3">
           <div class="list-group ">
-            <?php foreach($actions as $action): ?>
+            <?php
+            if(empty($actions)) :
+            ?>
+            <em>Zur Zeit sind keine Produkte verliehen!</em>
+            <?php
+            else:
+                foreach($actions as $action): ?>
                 <a href="/product/return/<?= $action->get('product')->getId() ?>" class="list-group-item">
                     <?= $action->get('product')->get('name') ?> von <?= $action->get('customer')->get('name') ?> <small>seit <?= ago(strtotime($action->get('rentDate'))) ?></small>
                 </a>
-            <?php endforeach; ?>
+            <?php
+                endforeach;
+            endif;
+            ?>
         </div>
       </section>
     </main>

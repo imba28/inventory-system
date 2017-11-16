@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="row">
-        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
+        <nav class="col-sm-3 col-md-2 bg-light sidebar pt-3">
           <ul class="nav nav-pills flex-column">
               <li class="nav-item">
                 <a class="nav-link" href="/products/add">Produkt einpflegen</a>
@@ -18,7 +18,7 @@
           <hr />
           <section class="row text-center placeholders pl-3 pr-3">
             <?php foreach($products as $product): ?>
-            <div class="card" style="width: 20%">
+            <div class="card col-lg-3 col-md-4 col-sm-6">
                 <img class="card-img-top" src="<?= $product->getFrontImage()->get('src') ?>" alt="Card image cap">
                 <div class="card-body">
                     <?php if($product->isAvailable()): ?>

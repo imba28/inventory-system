@@ -1,3 +1,13 @@
 .system-status .alert {
     margin-bottom: 0;
 }
+
+.card {
+    justify-content: space-between;
+}
+.card img, .card .img {
+    flex: 1 1;
+}
+.card .card-body {
+    flex: 0;
+}
