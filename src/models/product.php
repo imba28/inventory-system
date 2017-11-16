@@ -5,9 +5,9 @@ class Product extends \App\Model {
     protected $name;
     protected $invNr;
     protected $type;
-    protected $description;
-    protected $condition;
-    protected $note;
+    protected $description = null;
+    protected $condition = null;
+    protected $note = null;
 
     public function __construct($options = array()) {
         parent::__construct($options);
