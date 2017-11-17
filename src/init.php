@@ -5,15 +5,9 @@ error_reporting(E_ALL);
 session_start();
 
 require_once('lib/functions.php');
+require_once(ABS_PATH . '/config.php');
 
 use App;
-
-\App\Configuration::set('DB_HOST', '127.0.0.1');
-\App\Configuration::set('DB_DB', 'av');
-\App\Configuration::set('DB_PORT', '3306');
-\App\Configuration::set('DB_USER', 'root');
-\App\Configuration::set('DB_PWD', 'keins');
-\App\Configuration::set('DB_PREFIX', 'av');
 
 $router = App\Router::getInstance();
 $router->addRoute('all', 'p:(/$|/home$)', array('Controller', 'PageController', 'home'));
