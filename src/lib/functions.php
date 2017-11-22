@@ -53,6 +53,12 @@ function generateCallTrace() { // author: http://php.net/manual/de/function.debu
     return "\t" . implode("\n\t", $result);
 }
 
+function array_find(array &$xs, callable $f) {
+    foreach ($xs as $key => $x) {
+        if (call_user_func($f, $x) === true) return $xs[$key];
+    }
+    return null;
+}
 
 function ago($time){
     if($time instanceof DateTime){

@@ -114,7 +114,7 @@ abstract class Model {
     }*/
 
     // Static methods.
-    public static function getQuery(array $filters, $limit = false) {
+    public static function getQuery(array $filters, $limit = false): \App\QueryBuilder\Builder {
         list($table_name, $self_class) = self::getTableName();
 
         $query = new \App\QueryBuilder\Builder($table_name);
@@ -156,6 +156,13 @@ abstract class Model {
 
         if(is_array($filters)) {
             if(count($filters) == 3) {
+                if($filters[2] instanceof \App\Model) {
+                    $filters[2] = $filters[2]->getId();
+                    if(substr($filters[0], -3 != '_id')) {
+                        $filters[0] += '_id';
+                    }
+                }
+
                 $query->where($filters[0], $filters[1], $filters[2]);
             }
             else {
@@ -167,7 +174,7 @@ abstract class Model {
         }
 
         $res = $query->get();
-
+        
         if(!empty($res)) {
             $options = $all ? $res : current($res);
             return array($options, $self_class);
@@ -175,7 +182,7 @@ abstract class Model {
         throw new \App\Exceptions\NothingFoundException("No entries found for {$self_class}!");
     }
 
-    public static function grab($value, $column = 'id') {
+    public static function grab($value, $column = 'id'): \App\Model {
         if($column == 'id' && isset(self::$instances[get_called_class()][$value])) {
             return self::$instances[get_called_class()][$value];
         }
@@ -186,32 +193,43 @@ abstract class Model {
         return new $self_class($options);
     }
 
-    public static function grabByFilter(array $filters, $limit = false, $order = array('id' => 'DESC')) {
+    public static function grabByFilter(array $filters, $limit = false, $order = array('id' => 'DESC')): array {
         list($options, $self_class) = self::getOptions($filters, true, $limit, $order);
 
         $objs = array();
         foreach($options as $o) {
-            $objs[] = new $self_class($o);
+            if(isset($instances) && in_array($o['id'], array_keys($instances))) {
+                $obs[] = array_find($instances, function($item) use($o) {
+                    return $item->getId() == $o['id'];
+                });
+            }
+            else $objs[] = new $self_class($o);
         }
 
         return $objs;
     }
 
-    public static function grabAll() {
+    public static function grabAll(): array {
         list($options, $self_class) = self::getOptions(array(), true);
 
         $objs = array();
+        $instances = isset(self::$instances[get_called_class()]) ? self::$instances[get_called_class()] : array();
+
         foreach($options as $o) {
-            $objs[] = new $self_class($o);
+            if(isset($instances) && in_array($o['id'], array_keys($instances))) {
+                $obs[] = array_find($instances, function($item) use($o) {
+                    return $item->getId() == $o['id'];
+                });
+            }
+            else {
+                $objs[] = new $self_class($o);
+            }
         }
+
         return $objs;
     }
 
-    public static function all() {
-
-    }
-
-    public static function new() {
+    public static function new(): \App\Model {
         $self_class = get_called_class();
         if($self_class == false) throw new \RuntimeException('Oh shit.');
 
@@ -223,7 +241,7 @@ abstract class Model {
 
         $obj = self::grab($id);
         $obj->set('deleted', 1);
-        $obj->save();
+        return $obj->save();
     }
 
     protected static function getTableName() {
@@ -233,6 +251,5 @@ abstract class Model {
         $self_class = strtolower($self_class);
         return array(preg_replace('/(.+)\\\/', '', $self_class).'s', $self_class);
     }
-
 }
 ?>
