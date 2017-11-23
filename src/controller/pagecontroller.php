@@ -317,7 +317,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
     }
 
     public function error($status) {
-        $this->response->setSatus($status);
+        $this->response->setStatus($status);
         $this->view->setTemplate('error');
 
         $this->renderContent();
