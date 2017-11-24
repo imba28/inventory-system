@@ -22,7 +22,7 @@ $available = $product->isAvailable();
             <hr>
             <!-- /.col-lg-3 -->
             <div class="row">
-                <div class="col col-6">
+                <div class="col col-sm-6 col-lg-4">
                     <div class="card">
                         <?php if($available): ?>
                             <span class="badge badge-success">Verfügbar</span>
@@ -53,9 +53,9 @@ $available = $product->isAvailable();
                         <div class="card-body">
                             <h3 class="card-title"><?= $product->get('name') ?></h3>
                             <h5 class="card-type font-italic"><?= $product->get('type') ?></h5>
-                            <p class="card-text">
+                            <div class="card-text">
                                 <?= $product->get('description') ?>
-                            </p>
+                            </div>
                             <?php if(!is_null($product->get('note'))): ?>
                             <div class="alert alert-info" role="alert">
                                 <strong>Anmerkung:</strong> <?= $product->get('note') ?>
@@ -73,7 +73,7 @@ $available = $product->isAvailable();
                         </div>
                     </div>
                 </div>
-                <div class="col col-6">
+                <div class="col col-sm-6 col-lg-8">
                     <!-- /.card -->
                     <div class="card card-outline-secondary">
                         <div class="card-header">
