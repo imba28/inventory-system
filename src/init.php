@@ -13,6 +13,8 @@ $router = App\Router::getInstance();
 $router->addRoute('all', 'p:(/$|/home$)', array('Controller', 'PageController', 'home'));
 $router->addRoute('all', 'p:(/product)', array('Controller', 'PageController', 'products'));
 $router->addRoute('all', 'customers', array('Controller', 'PageController', 'customers'));
+$router->addRoute('post', 'inventur', array('Controller', 'InventurController', 'actionInventur'));
+$router->addRoute('all', 'p:(/inventur)', array('Controller', 'InventurController', 'main'));
 
 \App\Menu::getInstance()->set('items', array(
     'Produkte' => 'products',
