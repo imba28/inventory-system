@@ -10,7 +10,7 @@ require_once(ABS_PATH . '/config.php');
 use App;
 
 $router = App\Router::getInstance();
-$router->addRoute('all', 'p:(/$|/home$)', array('Controller', 'PageController', 'home'));
+$router->addRoute('all', 'p:(/$|/home$|/products/return$)', array('Controller', 'PageController', 'home'));
 $router->addRoute('all', 'p:(/product)', array('Controller', 'PageController', 'products'));
 $router->addRoute('all', 'customers', array('Controller', 'PageController', 'customers'));
 $router->addRoute('post', 'inventur', array('Controller', 'InventurController', 'actionInventur'));
