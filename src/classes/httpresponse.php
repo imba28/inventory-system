@@ -20,7 +20,7 @@ class HttpResponse implements \App\Interfaces\Response {
         if(!headers_sent()) {
             header("HTTP/1.1 {$this->status}");
             foreach($this->headers as $key => $value) {
-                header("${$key}: {$value}");
+                header("{$key}: {$value}");
             }
         }
 
