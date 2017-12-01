@@ -268,6 +268,55 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
 
             $this->view->setTemplate('products-search');
         }
+        elseif($this->request->getParam('sub') == 'rent') {
+            if($this->request->issetParam('submit') && $this->request->issetParam('search')) {
+                try {
+                    $search_string = $this->request->getParam('search');
+                    $filter = array(
+                        array(
+                            array('name', 'LIKE', "%{$search_string}%"),
+                            'OR',
+                            array('type', 'LIKE', "%{$search_string}%")
+                        ),
+                        'OR',
+                        array('invNr', 'LIKE', "%{$search_string}%")
+                    );
+
+                    $products = \App\Models\Product::grabByFilter($filter, 8);
+                    $products = array_filter($products, function($p) {
+                        return $p->isAvailable();
+                    });
+
+                    if(count($products) == 0) {
+                        \App\System::getInstance()->addMessage('error', 'Es wurde kein passendes Produkt gefunden!');
+                    }
+                    elseif(count($products) == 1) {
+                        $this->response->setStatus(301);
+                        $this->response->addHeader('Location', '/products/rent/'. current($products)->getId());
+                        $this->response->flush();
+                        return;
+                    }
+                    else {
+                        \App\System::getInstance()->addMessage('info', 'Die Suche lieferte mehrere Ergebnisse.');
+                        $this->view->assign('products', $products);
+                        $this->view->assign('string', $search_string);
+
+                        $rentButton = new \App\Button();
+                        $rentButton->set('href', '/products/rent/__id__');
+                        $rentButton->set('style', 'primary');
+                        $rentButton->set('text', 'Leihen');
+
+                        $this->view->assign('buttons', array($rentButton));
+                    }
+                    //\App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde verliehen!');
+                }
+                catch(\App\Exceptions\NothingFoundException $e) {
+                    \App\System::getInstance()->addMessage('error', 'Es wurde kein passendes Produkt gefunden!');
+                }
+            }
+
+            $this->view->setTemplate('product-search-mask');
+        }
         else {
             $currentPage = $this->request->issetParam('paginatorPage') ? intval($this->request->getParam('paginatorPage')) : 1;
             $itemsPerPage = 8;
@@ -305,7 +354,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
             $this->view->assign('actions', array());
         }
 
-        $this->view->setTemplate('home');
+        $this->view->setTemplate('products-rented');
         $this->renderContent();
     }
 
