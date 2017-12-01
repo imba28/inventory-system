@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="row">
-        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
+        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar mt-3">
             <ul class="nav nav-pills flex-column">
                 <li class="nav-item">
                     <a class="nav-link" href="/products/add">Produkt einpflegen</a>
@@ -22,7 +22,7 @@
                 <form class="ml-4" method='post'>
                     <div class="form-group">
                         <label for="exampleInputEmail1">Name</label>
-                        <input type="text" class="form-control" readonly value="<?= $product->get('name') ?> <?= $product->get('inventarnummer') ?>">
+                        <input type="text" class="form-control" readonly value="<?= $product->get('name') ?> (<?= $product->get('invNr') ?>)">
                     </div>
                     <div class="form-group">
                         <label for="exampleInputPassword1">FHS Nummer</label>
