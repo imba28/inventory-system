@@ -1,15 +1,20 @@
 <div class="container-fluid">
   <div class="row">
-    <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar mt-3">
-      <ul class="nav nav-pills flex-column">
-        <li class="nav-item">
-          <a class="nav-link active" href="#">Übersicht <span class="sr-only">(current)</span></a>
-        </li>
-      </ul>
+    <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="/products/add">Produkt einpflegen</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/products/rent">Produkt verleihen</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/products/return">Produkt zurücknehmen</a>
+            </li>
+        </ul>
     </nav>
-
     <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-      <h1>Übersicht</h1>
+      <h1>Produkte &#187; Verliehen</h1>
       <hr />
       <section class="row text-center placeholders pl-3 pr-3">
           <div class="list-group ">
