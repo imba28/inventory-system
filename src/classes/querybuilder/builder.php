@@ -12,6 +12,7 @@ class Builder {
     protected $joins = array();
     protected $where = array();
     protected $selection = array();
+    protected $group = array();
     protected $order = array();
     protected $limit;
 
@@ -73,11 +74,20 @@ class Builder {
     }
 
 
-    public function orderBy($column, $type){
-        $col = !in_array($column, array("RAND()")) ? $this->sanitizeColumnName($column) : $column;
+    public function orderBy($column, $type = 'DESC'){
+        $col = !in_array($column, array("RAND()")) && !$column instanceof Raw ? $this->sanitizeColumnName($column) : $column;
         $this->order[] = $col . " " . strtoupper($type);
 
         return $this;
+    }
+
+    public function groupBy($arg) {
+        if(is_array($arg)) {
+            foreach($arg as $a) {
+                $this->group[] = $this->sanitizeColumnName($a);
+            }
+        }
+        else $this->group[] = $this->sanitizeColumnName($arg);
     }
 
     public function limit($count){
@@ -189,6 +199,10 @@ class Builder {
             $sql = rtrim($sql, " AND");*/
             list($criteria, $args) = $this->getCriteria();
             $sql .= $criteria;
+        }
+
+        if(count($this->group) > 0){
+            $sql .= " GROUP BY ". join($this->group, ", ");
         }
 
         if(count($this->order) > 0){
@@ -451,9 +465,13 @@ class Builder {
         return new QueryAlias($field, $alias);
     }
 
-    public static function raw($sql){
+    /*public static function raw($sql){
         $query = new QueryBuilderRaw($sql);
         return $query;
+    }*/
+
+    public static function raw($column) {
+        return new Raw($column);
     }
 }
 ?>
