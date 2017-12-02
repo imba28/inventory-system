@@ -43,7 +43,10 @@ class Inventur {
 
     private function getInventurAction(Models\Product $product) {
         try {
-            $action = Models\InventurProduct::grab($product->getId(), 'product_id');
+            $action = current(Models\InventurProduct::grabByFilter(array(
+                array('product', '=', $product),
+                array('inventur', '=', $this->inventurObject)
+            )));
         }
         catch(\App\Exceptions\NothingFoundException $e) {
             $action = Models\InventurProduct::new();
