@@ -41,7 +41,7 @@ abstract class Model {
         return $this->id;
     }
 
-    public function save($head_column = null, $head_id = null) {
+    public function save($head_column = null, $head_id = null, $exception = false) {
         $this->trigger('save');
 
         //$properties = get_object_vars($this);
@@ -71,7 +71,7 @@ abstract class Model {
             }
         }
 
-        if(count($properties_update) == 0) throw new \App\QueryBuilder\NothingChangedException("nothing changed!");
+        if($exception && count($properties_update) == 0) throw new \App\QueryBuilder\NothingChangedException("nothing changed!");
 
         list($table_name, $self_class) = self::getTableName();
 
@@ -94,6 +94,7 @@ abstract class Model {
             $res = $query->insert($properties_update);
 
             if($res === false) {
+                //vd($query);
                 throw new \App\QueryBuilder\QueryBuilderException("could not insert data: {$query->getError()}");
             }
 
@@ -156,13 +157,6 @@ abstract class Model {
 
         if(is_array($filters)) {
             if(count($filters) == 3) {
-                if($filters[2] instanceof \App\Model) {
-                    $filters[2] = $filters[2]->getId();
-                    if(substr($filters[0], -3 != '_id')) {
-                        $filters[0] += '_id';
-                    }
-                }
-
                 $query->where($filters[0], $filters[1], $filters[2]);
             }
             else {
@@ -174,7 +168,7 @@ abstract class Model {
         }
 
         $res = $query->get();
-        
+
         if(!empty($res)) {
             $options = $all ? $res : current($res);
             return array($options, $self_class);
@@ -190,6 +184,7 @@ abstract class Model {
         list($options, $self_class) = self::getOptions(array(
             array($column, '=', $value)
         ));
+
         return new $self_class($options);
     }
 
