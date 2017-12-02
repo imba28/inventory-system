@@ -15,7 +15,7 @@ class Product extends \App\Model {
         if($this->isCreated()) {
             try {
                 $this->images = ProductImage::grabByFilter(array(
-                    array('product_id', '=', $this->id)
+                    array('product', '=', $this)
                 ), false, array('id' => 'ASC'));
             }
             catch( \App\Exceptions\NothingFoundException $e) {
@@ -43,15 +43,12 @@ class Product extends \App\Model {
         return $this->images;
     }
 
-    public function save($head_column = null, $head_id = null) {
+    public function save($head_column = null, $head_id = null, $exception = false) {
         if(!empty($this->images)) {
             $images = $this->images;
             unset($this->images);
 
-            try {
-                parent::save($head_column, $head_id);
-            }
-            catch(\App\QueryBuilder\NothingChangedException $e) {}
+            parent::save($head_column, $head_id);
 
             foreach($images as $image) {
                 $image->save('product_id', $this->getId());
@@ -59,7 +56,7 @@ class Product extends \App\Model {
 
             $this->images = $images;
         }
-        else parent::save();
+        else parent::save($head_column, $head_id, $exception);
     }
 
     public function isAvailable() {
