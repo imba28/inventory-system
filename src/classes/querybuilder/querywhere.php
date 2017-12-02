@@ -17,6 +17,19 @@ class QueryWhere {
         $this->argument_1 = $where[0];
         $this->argument_2 = $where[2];
         $this->operator = $where[1];
+
+        if($this->argument_2 instanceof \App\Model) {
+            $this->argument_2 = $this->argument_2->getId();
+            if(substr($this->argument_1, -3) != '_id') {
+                $this->argument_1 .= '_id';
+            }
+        }
+        elseif($this->argument_1 instanceof \App\Model) {
+            $this->argument_1 = $this->argument_1->getId();
+            if(substr($this->argument_2, -3) != '_id') {
+                $this->argument_2 .= '_id';
+            }
+        }
     }
 
     protected static function validateClause($where){
