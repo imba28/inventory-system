@@ -133,7 +133,7 @@ class Builder {
                 $column = $select;
             }
 
-            if(!in_array($column, $sql_keywords)) {
+            if(!$column instanceof Raw && !in_array($column, $sql_keywords)) {
                 $column = $this->sanitizeColumnName($column);
             }
 
