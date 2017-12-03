@@ -14,10 +14,12 @@
         </ul>
     </nav>
     <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-      <h1>Produkte &#187; Verliehen</h1>
+      <h1>Produkte &#187; Verleih</h1>
       <hr />
-      <section class="row text-center placeholders pl-3 pr-3">
-          <div class="list-group ">
+      <div class="row">
+      <section class="text-center pl-3 pr-3 col-sm-12 col-lg-6">
+          <h3>Momentan verliehen</h3>
+          <div class="list-group">
             <?php
             if(empty($actions)) :
             ?>
@@ -25,15 +27,27 @@
             <?php
             else:
                 foreach($actions as $action): ?>
-                <a href="/product/return/<?= $action->get('product')->getId() ?>" class="list-group-item">
-                    <?= $action->get('product')->get('name') ?> von <?= is_null($action->get('customer')->get('name')) ? $action->get('customer')->get('internal_id') : $action->get('customer')->get('name') ?> <small>seit <?= ago(strtotime($action->get('rentDate'))) ?></small>
-                </a>
+                <div class="list-group-item">
+                    <a href="/product/return/<?= $action->get('product')->getId() ?>"> <?= $action->get('product')->get('name') ?></a>
+                    von <?= is_null($action->get('customer')->get('name')) ? $action->get('customer')->get('internal_id') : $action->get('customer')->get('name') ?> <small>seit <?= ago(strtotime($action->get('rentDate'))) ?></small>
+                </div>
             <?php
                 endforeach;
             endif;
             ?>
         </div>
-      </section>
+        </section>
+        <section class="col-sm-12 col-lg-6">
+            <h3>Beliebte Produkte</h3>
+            <?php foreach($productsArray as $p): ?>
+            <div class="list-group-item">
+                <a href="/product/<?= $p['product']->getId() ?>">
+                    <?= $p['product']->get('name') ?>
+                </a> wurde <b><?= $p['frequency'] ?></b> mal verliehen.
+            </div>
+            <?php endforeach ?>
+        </section>
+    </div>
     </main>
   </div>
 </div>

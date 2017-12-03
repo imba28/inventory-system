@@ -354,6 +354,23 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
             $this->view->assign('actions', array());
         }
 
+        $query = new \App\QueryBuilder\Builder('actions');
+        $query->select(\App\QueryBuilder\Builder::alias('COUNT(*)', 'count'));
+        $query->select('product_id');
+        $query->groupBy('product_id');
+
+        $products = array();
+        foreach($query->get() as $p_info) {
+            try {
+                $products[] = array(
+                    'product' => \App\Models\Product::grab($p_info['product_id']),
+                    'frequency' => $p_info['count']
+                );
+            }
+            catch(\App\Exceptions\NothingFoundException $e) {}
+        }
+
+        $this->view->assign('productsArray', $products);
         $this->view->setTemplate('products-rented');
         $this->renderContent();
     }
