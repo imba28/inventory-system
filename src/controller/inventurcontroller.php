@@ -24,7 +24,7 @@ class InventurController extends \App\BasicController implements \App\Interfaces
                 $this->view->setTemplate('inventur-missing');
             }
             else {
-                $this->error(404);
+                $this->error(404, 'Seite nicht gefunden!');
             }
         }
         else {
@@ -111,11 +111,14 @@ class InventurController extends \App\BasicController implements \App\Interfaces
         $this->renderContent();
     }
 
-    public function error($status) {
+    public function error($status, $message = null) {
         $this->response->setStatus($status);
+        $this->view->assign('errorCode', $status);
+        if(!is_null($message)) $this->view->assign('errorMessage', $message);
+
         $this->view->setTemplate('error');
 
-        $this->renderContent();
+        //$this->renderContent();
     }
 }
 ?>
