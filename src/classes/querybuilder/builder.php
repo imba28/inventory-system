@@ -33,7 +33,11 @@ class Builder {
         $this->logging = $bool;
     }
 
-    public function where($arg1, $operator, $arg2){
+    public function where($arg1, $operator, $arg2 = null){
+        if(is_null($arg2)) {
+            $arg2 = $operator;
+            $operator = '=';
+        }
         try {
             $this->where[] = new QueryWhere(array($arg1, $operator, $arg2));
         }
