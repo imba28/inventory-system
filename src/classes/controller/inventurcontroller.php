@@ -10,21 +10,26 @@ class InventurController extends \App\BasicController implements \App\Interfaces
         $this->inventur = new \App\Inventur();
     }
 
-    public function main() {
+    public function main($params) {
         $this->view->assign('lastInventur', \App\Inventur::getLastInventur());
         $this->view->assign('inventur', $this->inventur);
 
-        if($this->request->issetParam('sub')) {
-            if($this->request->getParam('sub') == 'registered') {
-                $this->view->assign('products', $this->inventur->getRegisteredItems());
-                $this->view->setTemplate('inventur-registered');
-            }
-            elseif($this->request->getParam('sub') == 'missing') {
-                $this->view->assign('products', $this->inventur->getMissingItems());
-                $this->view->setTemplate('inventur-missing');
+        if(isset($params['action'])) {
+            if($this->inventur->isStarted()) {
+                if($params['action'] == 'registered') {
+                    $this->view->assign('products', $this->inventur->getRegisteredItems());
+                    $this->view->setTemplate('inventur-registered');
+                }
+                elseif($params['action'] == 'missing') {
+                    $this->view->assign('products', $this->inventur->getMissingItems());
+                    $this->view->setTemplate('inventur-missing');
+                }
+                else {
+                    $this->error(404, 'Seite nicht gefunden!');
+                }
             }
             else {
-                $this->error(404, 'Seite nicht gefunden!');
+                $this->response->redirect('/inventur');
             }
         }
         else {
@@ -35,17 +40,22 @@ class InventurController extends \App\BasicController implements \App\Interfaces
     }
 
     public function actionInventur() {
-        if($this->request->issetParam('action')) {
-            if($this->request->getParam('action') == 'start') {
-                $this->startInventur();
+        if($this->inventur->isStarted()) {
+            if($this->request->issetParam('action')) {
+                if($this->request->getParam('action') == 'start') {
+                    $this->startInventur();
+                }
+                elseif($this->request->getParam('action') == 'end') {
+                    $this->endInventur();
+                }
+                elseif($this->request->getParam('action') == 'scan_product') {
+                    $this->scanProduct($this->request->getParam('invNr'));
+                }
+                else throw new \App\Exceptions\InvalidOperationException('not a valid action!');
             }
-            elseif($this->request->getParam('action') == 'end') {
-                $this->endInventur();
-            }
-            elseif($this->request->getParam('action') == 'scan_product') {
-                $this->scanProduct($this->request->getParam('invNr'));
-            }
-            else throw new \App\Exceptions\InvalidOperationException('not a valid action!');
+        }
+        else {
+            $this->response->redirect('/inventur');
         }
     }
 
