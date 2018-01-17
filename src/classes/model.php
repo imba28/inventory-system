@@ -71,7 +71,12 @@ abstract class Model {
             }
         }
 
-        if($exception && count($properties_update) == 0) throw new \App\QueryBuilder\NothingChangedException("nothing changed!");
+        if(count($properties_update) == 0) {
+            if($this->isCreated()) {
+                if($exception) throw new \App\QueryBuilder\NothingChangedException("nothing changed!");
+                return false;
+            }
+        }
 
         list($table_name, $self_class) = self::getTableName();
 
