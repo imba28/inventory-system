@@ -14,7 +14,11 @@
           </ul>
         </nav>
         <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-          <h1>Produkte &#187; "{{ search_string }}" ({{ totals }})</h1>
+          <h1>Produkte &#187; Suche
+              {% if search_string is not empty and totals %}
+              "&#187; {{ search_string }}" ({{ totals }})
+              {% endif %}
+          </h1>
           {% block search_header %}
           {% endblock %}
           <hr />
