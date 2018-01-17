@@ -32,7 +32,7 @@ class Router {
             $parts = explode('/', $path);
             foreach($parts as $part) {
                 if(isset($part[0]) && $part[0] === ':') { // dynamic part
-                    $routeOptions['regex'][] = '([\w0-9\-\s,]+)';
+                    $routeOptions['regex'][] = '([\p{N}\p{L}\s\-,]+)'; // matches any unicode character, whitespace, minus and comma.
                     $routeOptions['params'][] = substr($part, 1);
                 }
                 else { // static part
@@ -44,7 +44,7 @@ class Router {
                 }
             }
 
-            $routeOptions['regex'] = '^' . implode('\/', $routeOptions['regex']) . '$';
+            $routeOptions['regex'] = '/^' . implode('\/', $routeOptions['regex']) . '$/ui';
 
             $this->routes[$request_method][$path] = $routeOptions;
         }
@@ -69,6 +69,7 @@ class Router {
 
     public function route() {
         $request_uri = urldecode($_SERVER['REQUEST_URI']);
+
         $request_method = $_SERVER['REQUEST_METHOD'];
         $uri = ltrim(parse_url($request_uri, PHP_URL_PATH), '/');
         $params = parse_url($request_uri, PHP_URL_QUERY);
@@ -89,7 +90,7 @@ class Router {
             }*/
             else {
                 foreach(array_merge($this->routes['ALL'], $this->routes[$request_method]) as $path => $routeOptions) {
-                    if(preg_match("/{$routeOptions['regex']}/", $request_uri, $matches)) {
+                    if(preg_match($routeOptions['regex'], $request_uri, $matches)) {
                         $params = array();
                         array_shift($matches); // remove first capture group match
 
@@ -98,12 +99,6 @@ class Router {
                         }
 
                         return $this->handle($routeOptions['handler'], $params);
-                    }
-                    if(preg_match('/^p\:\((.+)\)$/i', $path, $m)) {
-                        $pattern = '/('.str_replace('/', '\/', $m[1]).')/';
-                        if(preg_match($pattern, $request_uri)) {
-                            return $this->handle($routeOptions['handler']);
-                        }
                     }
                 }
                 throw new \ErrorException("Route `{$uri}`not defined!");
