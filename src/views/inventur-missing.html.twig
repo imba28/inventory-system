@@ -37,6 +37,9 @@
                         </div>
                     </article>
                 {% endfor %}
+                {% if products is empty %}
+                Alle Produkte erfasst, super! Du kannst die Inventur jetzt <a href="/inventur">beenden</a>.
+                {% endif %}
             </section>
         </main>
     </div>
