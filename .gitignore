@@ -5,3 +5,4 @@ public/files/images/*.jpeg
 
 vendor
 *config.php
+cache
