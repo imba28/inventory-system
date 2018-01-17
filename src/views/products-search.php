@@ -37,7 +37,7 @@
           </section>
           <section>
               <?php
-                if(isset($paginator)) echo $paginator->render('/products/search');
+                if(isset($paginator)) echo $paginator->render();
               ?>
           </section>
         </main>

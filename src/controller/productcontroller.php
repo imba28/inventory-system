@@ -52,7 +52,7 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
 
             $query = \App\Models\Product::getQuery($filter);
 
-            $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage);
+            $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage, '/products/search');
 
             $this->view->assign('paginator', $paginator);
             $this->view->assign('totals', $paginator->getTotals());
