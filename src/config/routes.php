@@ -10,7 +10,7 @@ $router->addRoute('all', array('/products/:action', '/products'), 'ProductContro
 $router->addRoute('all', '/customers', 'ProductController#customers');
 
 $router->addRoute('post', '/inventur', 'InventurController#actionInventur');
-$router->addRoute('all', '/inventur/:action', 'InventurController#main');
+$router->addRoute('get', array('/inventur/:action', '/inventur'), 'InventurController#main');
 
 $router->addRoute('get', '*', 'FileController#main');
 ?>
