@@ -35,7 +35,7 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
 
         $search_string = $_SESSION['search_string'];
         $currentPage = isset($params['page']) ? intval($params['page']) : 1;
-        $itemsPerPage = 10;
+        $itemsPerPage = 8;
 
         try {
             $filter = array(
