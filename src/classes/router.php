@@ -13,23 +13,52 @@ class Router {
     );
 
     public function addRoute($request_method, $path, $handler) {
+        if(is_array($path)) {
+            foreach($path as $p) {
+                $this->addRoute($request_method, $p, $handler);
+            }
+            return;
+        }
+
         $request_method = strtoupper($request_method);
+
         if(in_array($request_method, array_keys($this->routes))) {
-            $this->routes[$request_method][$path] = $handler;
+            $routeOptions = array(
+                'regex' => array(),
+                'params' => array(),
+                'handler' => $handler
+            );
+
+            $parts = explode('/', $path);
+            foreach($parts as $part) {
+                vd($part);
+                if(isset($part[0]) && $part[0] === ':') { // dynamic part
+                    $routeOptions['regex'][] = '([a-zA-Z0-9\-]+)';
+                    $routeOptions['param'][] = substr($part, 1);
+                }
+                else { // static part
+                    if($part === '*') $part = '(.+)';
+                    $routeOptions['regex'][] = $part;
+                }
+            }
+
+            $routeOptions['regex'] = '^' . implode('\/', $routeOptions['regex']) . '$';
+
+            $this->routes[$request_method][$path] = $routeOptions;
         }
         else throw new \InvalidArgumentException("{$request_method} is not a valid http request type!");
     }
 
-    public function handle($handle) {
+    public function handle($handle, $params = array()) {
         if($handle instanceof \Closure) {
-            return $handle();
+            return $handle($params);
         }
         else if(is_array($handle) && $handle[0] == 'Controller' && count($handle) == 3) {
             $controller_name = "\App\Controller\\".$handle[1];
             $controller_action = $handle[2];
 
             $controller = new $controller_name();
-            $controller->$controller_action();
+            $controller->$controller_action($params);
         }
         else throw new \InvalidArgumentException('invalid handle!');
     }
@@ -50,16 +79,26 @@ class Router {
                 $handler = $this->routes[$request_method][$uri];
                 return $this->handle($handler);
             }
-            elseif(isset($this->routes['ALL'][$uri])) {
+            /*elseif(isset($this->routes['ALL'][$uri])) {
                 $handler = $this->routes['ALL'][$uri];
                 return $this->handle($handler);
-            }
+            }*/
             else {
-                foreach(array_merge($this->routes['ALL'], $this->routes[$request_method]) as $path => $value) {
+                foreach(array_merge($this->routes['ALL'], $this->routes[$request_method]) as $path => $routeOptions) {
+                    if(preg_match("/{$routeOptions['regex']}/", $request_uri, $matches)) {
+                        $params = array();
+                        array_shift($matches); // remove first capture group match
+
+                        foreach($matches as $idx => $part) {
+                            $params[$routeOptions['params'][$i]] = $part;
+                        }
+
+                        return $this->handle($routeOptions['handler'], $params);
+                    }
                     if(preg_match('/^p\:\((.+)\)$/i', $path, $m)) {
                         $pattern = '/('.str_replace('/', '\/', $m[1]).')/';
                         if(preg_match($pattern, $request_uri)) {
-                            return $this->handle($value);
+                            return $this->handle($routeOptions['handler']);
                         }
                     }
                 }
