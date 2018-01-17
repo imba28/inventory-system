@@ -2,7 +2,7 @@
 namespace App\Controller;
 
 class FileController extends \App\BasicController implements \App\Interfaces\Controller {
-    private static $allowedFileTypes = array('png', 'jpg', 'jpeg', 'png', 'gif', 'html', 'css', 'js');
+    private static $allowedFileTypes = array('png', 'jpg', 'jpeg', 'png', 'gif', 'html', 'css', 'js', 'woff', 'ttf');
 
     public function main($params) {
         $requested_file = ABS_PATH . $this->request->getHeader('REQUEST_URI');
