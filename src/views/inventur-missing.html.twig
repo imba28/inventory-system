@@ -21,7 +21,7 @@
                     {% set available = product.isAvailable() %}
                     <article class="bg-light mb-2 p-3 rounded">
                         <div class="media inventurMissing__product">
-                            <a href="/products/{{ product.getId() }}" class="d-block">
+                            <a href="/product/{{ product.getId() }}" class="d-block">
                                 <img class="align-self-start mr-3 rounded" src="{{ product.getFrontImage().get('src') }}" alt="Generic placeholder image">
                             </a>
                             <div class="media-body">
@@ -29,7 +29,7 @@
                                 <span class="badge badge-warning">Verliehen</span>
                                 {% endif %}
 
-                                <a href="/products/{{ product.getId() }}" class="d-block">
+                                <a href="/product/{{ product.getId() }}" class="d-block">
                                     <h5 class="mt-0 mb-0">{{ product.get('name') }} <small>{{ product.get('type') }}</small></h5>
                                 </a>
                                 <h6>Inventarnummer {{ product.get('invNr') }}</h6>
