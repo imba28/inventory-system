@@ -16,6 +16,14 @@ class HttpResponse implements \App\Interfaces\Response {
         $this->body .= $data;
     }
 
+    public function redirect($location) {
+        $this->setStatus(301);
+        $this->addHeader('Location', $location);
+        $this->flush();
+
+        exit();
+    }
+
     public function flush() {
         if(!headers_sent()) {
             header("HTTP/1.1 {$this->status}");
