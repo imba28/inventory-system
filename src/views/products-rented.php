@@ -28,7 +28,7 @@
             else:
                 foreach($actions as $action): ?>
                 <div class="list-group-item">
-                    <a href="/product/return/<?= $action->get('product')->getId() ?>"> <?= $action->get('product')->get('name') ?></a>
+                    <a href="/product/<?= $action->get('product')->getId() ?>/return"> <?= $action->get('product')->get('name') ?></a>
                     von <?= is_null($action->get('customer')->get('name')) ? $action->get('customer')->get('internal_id') : $action->get('customer')->get('name') ?> <small>seit <?= ago(strtotime($action->get('rentDate'))) ?></small>
                 </div>
             <?php
