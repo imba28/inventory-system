@@ -31,7 +31,7 @@ class Paginator {
         $start      = ($this->currentPage > 0 ) ? 1 : 1;
         $end        = ($this->currentPage > $last ) ? $this->currentPage : $last;
 
-        $html       = '<ul class="' . $list_class . ' mt-4">';
+        $html       = '<ul class="' . $list_class . ' mt-4 justify-content-center">';
 
         $class      = ( $this->currentPage == 1 ) ? "disabled" : "";
         $html       .= '<li class="' . $class . ' page-item"><a class="page-link" href="'.$this->linkRoot.'/' . ( $this->currentPage - 1 ) . '">&laquo;</a></li>';
