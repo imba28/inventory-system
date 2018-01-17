@@ -128,6 +128,10 @@ class Inventur {
 
         try {
             $inventurProduct = \App\Models\inventurProduct::grab($product->getId(), 'product_id');
+
+            if($inventurProduct->isInStock()) {
+                throw new \App\QueryBuilder\NothingChangedException("already scanned!");
+            }
         }
         catch(\App\Exceptions\NothingFoundException $e) {
             $inventurProduct = \App\Models\inventurProduct::new();
