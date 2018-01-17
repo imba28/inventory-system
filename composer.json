@@ -1,5 +1,10 @@
 {
     "name": "sugo/verleihsystem",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/classes"
+        }
+    },
     "require": {
         "phpunit/phpunit": "^6.4",
         "squizlabs/php_codesniffer": "^3.1",

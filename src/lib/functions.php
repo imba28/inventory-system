@@ -1,5 +1,5 @@
 <?php
-function __autoload($class) {
+/*function __autoload($class) {
     $temp = $class;
     $class = preg_replace('/^(app)\\\/i', '', $class);
     $class = str_replace('\\', '/', strtolower($class));
@@ -20,11 +20,11 @@ function __autoload($class) {
         vd(ABS_PATH . "/src/classes/{$class}.php");
         vd(ABS_PATH . "/src/{$class}.php");
         */
-
+        /*
         return false;
         #throw new Exception("Die Klasse `$class` wurde nicht gefunden!");
     }
-}
+}*/
 
 function vd($a) {
     echo "<pre>";
