@@ -23,7 +23,7 @@ class HttpRequest implements \App\Interfaces\Request {
     }
 
     public function getHeader($name) {
-        $name = 'HTTP_'.strtoupper(str_replace('-', '_', $name));
+        $name = strtoupper($name);
         return isset($_SERVER[$name]) ? $_SERVER[$name] : null;
     }
 
