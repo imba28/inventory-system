@@ -8,21 +8,7 @@ require_once('lib/functions.php');
 require_once(ABS_PATH . '/config.php');
 
 $router = App\Router::getInstance();
-
-$router->addRoute('all', array('/', '/home', '/products/return'), 'ProductController#home');
-
-$router->addRoute('all', array('/product/:id', '/product/:id/:action'), 'ProductController#product');
-
-$router->addRoute('all', array('/products/category/:category', '/products/category/:category/:page'), 'ProductController#displayCategory');
-$router->addRoute('all', array('/products/search', '/products/:action/:page'), 'ProductController#search');
-$router->addRoute('all', array('/products/:action', '/products'), 'ProductController#products');
-
-$router->addRoute('all', '/customers', 'ProductController#customers');
-
-$router->addRoute('post', '/inventur', 'InventurController#actionInventur');
-$router->addRoute('all', '/inventur/:action', 'InventurController#main');
-
-$router->addRoute('get', '*', 'FileController#main');
+include(ABS_PATH . '/src/config/routes.php');
 
 \App\Menu::getInstance()->set('items', array(
     'Produkte' => 'products',
