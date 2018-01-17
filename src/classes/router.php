@@ -36,7 +36,10 @@ class Router {
                     $routeOptions['params'][] = substr($part, 1);
                 }
                 else { // static part
-                    if($part === '*') $part = '(.+)';
+                    if($part === '*') {
+                        $routeOptions['params'][] = $part;
+                        $part = '(.+)';
+                    }
                     $routeOptions['regex'][] = $part;
                 }
             }
@@ -89,7 +92,6 @@ class Router {
                     if(preg_match("/{$routeOptions['regex']}/", $request_uri, $matches)) {
                         $params = array();
                         array_shift($matches); // remove first capture group match
-
 
                         foreach($matches as $idx => $part) {
                             $params[$routeOptions['params'][$idx]] = $part;
