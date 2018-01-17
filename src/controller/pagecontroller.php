@@ -2,13 +2,13 @@
 namespace App\Controller;
 
 class PageController extends \App\BasicController implements \App\Interfaces\Controller {
-    public function product() {
-        $product = \App\Models\Product::grab($this->request->getParam('id'));
+    public function product($params) {
+        $product = \App\Models\Product::grab($params['id']);
 
         $this->view->assign('product', $product);
 
-        if($this->request->issetParam('sub')) {
-            if($this->request->getParam('sub') == 'edit') {
+        if(isset($params['action'])) {
+            if($params['action'] == 'edit') {
                 if($this->request->issetParam('submit')) {
                     $params = $this->request->getParams();
                     foreach($params as $key) {
@@ -64,7 +64,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
 
                 $this->view->setTemplate('product-update');
             }
-            elseif($this->request->getParam('sub') == 'rent') {
+            elseif($params['action'] == 'rent') {
                 if(!$product->isAvailable()) {
                     $action = current(\App\Models\Action::grabByFilter(array(
                         array('product_id', '=', $product->getId()),
@@ -103,7 +103,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
                     $this->view->setTemplate('product-rent');
                 }
             }
-            elseif($this->request->getParam('sub') == 'return') {
+            elseif($params['action'] == 'return') {
                 try {
                     $action = \App\Models\Action::grabByFilter(array(
                         array('returnDate' , 'IS', 'NULL'),
@@ -147,7 +147,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
 
                 $this->view->setTemplate('product-return');
             }
-            elseif($this->request->getParam('sub') == 'claim') {
+            elseif($params['action'] == 'claim') {
 
             }
         }
@@ -163,10 +163,12 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
 
             $this->view->setTemplate('product');
         }
+
+        $this->renderContent();
     }
 
-    public function products() {
-        if($this->request->getParam('sub') == 'add') {
+    public function products($params) {
+        if($params['action'] == 'add') {
             //\App\Debugger::log('hello there');
             if($this->request->issetParam('submit')) {
                 $product = \App\Models\Product::new();
@@ -219,7 +221,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
                             }
                         }
 
-                        \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde erstellt! <a href="/products/'. $product->getId() .'">zum Produkt</a>');
+                        \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde erstellt! <a href="/product/'. $product->getId() .'">zum Produkt</a>');
                     }
                     catch(\Exception $e) {
                         \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
@@ -229,7 +231,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
 
             $this->view->setTemplate('product-add');
         }
-        elseif($this->request->getParam('sub') == 'search') {
+        elseif($params['action'] == 'search') {
             if($this->request->issetParam('search_string')) {
                 $_SESSION['search_string'] = $this->request->getParam('search_string');
             }
@@ -269,7 +271,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
 
             $this->view->setTemplate('products-search');
         }
-        elseif($this->request->getParam('sub') == 'rent') {
+        elseif($params['action'] == 'rent') {
             if($this->request->issetParam('submit') && $this->request->issetParam('search')) {
                 try {
                     $search_string = $this->request->getParam('search');
