@@ -167,161 +167,166 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
         $this->renderContent();
     }
 
+    public function search($params) {
+        if($this->request->issetParam('search_string')) {
+            $_SESSION['search_string'] = $this->request->getParam('search_string');
+        }
+
+        $search_string = $_SESSION['search_string'];
+        $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+        $itemsPerPage = 10;
+
+        try {
+            $filter = array(
+                array(
+                    array('name', 'LIKE', "%{$search_string}%"),
+                    'OR',
+                    array('type', 'LIKE', "%{$search_string}%")
+                ),
+                'OR',
+                array('invNr', 'LIKE', "%{$search_string}%")
+            );
+
+            $products = \App\Models\Product::grabByFilter($filter, (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
+
+            $query = \App\Models\Product::getQuery($filter);
+
+            $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage);
+
+            $this->view->assign('paginator', $paginator);
+            $this->view->assign('totals', $paginator->getTotals());
+        }
+        catch(\App\Exceptions\NothingFoundException $e) {
+            $products = array();
+            $this->view->assign('totals', 0);
+            \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
+        }
+
+        $this->view->assign('products', $products);
+        $this->view->assign('search_string', $search_string);
+
+        $this->view->setTemplate('products-search');
+
+        $this->renderContent();
+    }
+
     public function products($params) {
-        if($params['action'] == 'add') {
-            //\App\Debugger::log('hello there');
-            if($this->request->issetParam('submit')) {
-                $product = \App\Models\Product::new();
+        if(isset($params['action'])) {
+            if($params['action'] == 'add') {
+                //\App\Debugger::log('hello there');
+                if($this->request->issetParam('submit')) {
+                    $product = \App\Models\Product::new();
 
-                $params = $this->request->getParams();
+                    $params = $this->request->getParams();
 
-            if(empty($this->request->getParam('name')) /*|| empty($this->request->getParam('invNr'))*/) {
-                    \App\System::getInstance()->addMessage('error', 'Name muss angegeben werden!');
-                }
-                else {
-                    foreach($params as $key) {
-                        $product->set($key, $this->request->getParam($key));
+                if(empty($this->request->getParam('name')) /*|| empty($this->request->getParam('invNr'))*/) {
+                        \App\System::getInstance()->addMessage('error', 'Name muss angegeben werden!');
                     }
+                    else {
+                        foreach($params as $key) {
+                            $product->set($key, $this->request->getParam($key));
+                        }
 
-                    try {
-                        $product->save();
+                        try {
+                            $product->save();
 
-                        if($this->request->issetFile("add-productImage")) {
-                            $files = $this->request->getFiles("add-productImage");
-                            $error = false;
+                            if($this->request->issetFile("add-productImage")) {
+                                $files = $this->request->getFiles("add-productImage");
+                                $error = false;
 
-                            foreach($files as $file) {
-                                $image = new \App\File\Image($file);
+                                foreach($files as $file) {
+                                    $image = new \App\File\Image($file);
 
-                                if($image->isValid()) {
-                                    if($image->save("/images")) {
-                                        $product_image = \App\Models\ProductImage::new();
-                                        $product_image->set('src', "/public/files/images/{$image->getDestination()}");
-                                        $product_image->set('product', $product);
-                                        $product_image->set('title', $image->getInfo('name'));
-                                        if($product_image->save()) {
-                                            $product->addImage($product_image);
+                                    if($image->isValid()) {
+                                        if($image->save("/images")) {
+                                            $product_image = \App\Models\ProductImage::new();
+                                            $product_image->set('src', "/public/files/images/{$image->getDestination()}");
+                                            $product_image->set('product', $product);
+                                            $product_image->set('title', $image->getInfo('name'));
+                                            if($product_image->save()) {
+                                                $product->addImage($product_image);
+                                            }
+                                        }
+                                        else {
+                                            $error = true;
+                                            \App\System::getInstance()->addMessage('error', "Fehler beim Speichern von {$image->getInfo('name')}");
                                         }
                                     }
                                     else {
                                         $error = true;
-                                        \App\System::getInstance()->addMessage('error', "Fehler beim Speichern von {$image->getInfo('name')}");
+                                        if(get_class($image->getError()) !== 'App\File\NoFileSentException') {
+                                            \App\System::getInstance()->addMessage('error', $image->getError()->getMessage());
+                                        }
                                     }
                                 }
-                                else {
-                                    $error = true;
-                                    if(get_class($image->getError()) !== 'App\File\NoFileSentException') {
-                                        \App\System::getInstance()->addMessage('error', $image->getError()->getMessage());
-                                    }
+
+                                if(!$error) {
+                                    \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
                                 }
                             }
 
-                            if(!$error) {
-                                \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
-                            }
+                            \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde erstellt! <a href="/product/'. $product->getId() .'">zum Produkt</a>');
                         }
-
-                        \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde erstellt! <a href="/product/'. $product->getId() .'">zum Produkt</a>');
-                    }
-                    catch(\Exception $e) {
-                        \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
+                        catch(\Exception $e) {
+                            \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
+                        }
                     }
                 }
+
+                $this->view->setTemplate('product-add');
             }
-
-            $this->view->setTemplate('product-add');
-        }
-        elseif($params['action'] == 'search') {
-            if($this->request->issetParam('search_string')) {
-                $_SESSION['search_string'] = $this->request->getParam('search_string');
-            }
-
-            $search_string = $_SESSION['search_string'];
-            $currentPage = $this->request->issetParam('paginatorPage') ? intval($this->request->getParam('paginatorPage')) : 1;
-            $itemsPerPage = 10;
-
-            try {
-                $filter = array(
-                    array(
-                        array('name', 'LIKE', "%{$search_string}%"),
-                        'OR',
-                        array('type', 'LIKE', "%{$search_string}%")
-                    ),
-                    'OR',
-                    array('invNr', 'LIKE', "%{$search_string}%")
-                );
-
-                $products = \App\Models\Product::grabByFilter($filter, (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
-
-                $query = \App\Models\Product::getQuery($filter);
-
-                $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage);
-
-                $this->view->assign('paginator', $paginator);
-                $this->view->assign('totals', $paginator->getTotals());
-            }
-            catch(\App\Exceptions\NothingFoundException $e) {
-                $products = array();
-                $this->view->assign('totals', 0);
-                \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
-            }
-
-            $this->view->assign('products', $products);
-            $this->view->assign('search_string', $search_string);
-
-            $this->view->setTemplate('products-search');
-        }
-        elseif($params['action'] == 'rent') {
-            if($this->request->issetParam('submit') && $this->request->issetParam('search')) {
-                try {
-                    $search_string = $this->request->getParam('search');
-                    $filter = array(
-                        array(
-                            array('name', 'LIKE', "%{$search_string}%"),
+            elseif($params['action'] == 'rent') {
+                if($this->request->issetParam('submit') && $this->request->issetParam('search')) {
+                    try {
+                        $search_string = $this->request->getParam('search');
+                        $filter = array(
+                            array(
+                                array('name', 'LIKE', "%{$search_string}%"),
+                                'OR',
+                                array('type', 'LIKE', "%{$search_string}%")
+                            ),
                             'OR',
-                            array('type', 'LIKE', "%{$search_string}%")
-                        ),
-                        'OR',
-                        array('invNr', 'LIKE', "%{$search_string}%")
-                    );
+                            array('invNr', 'LIKE', "%{$search_string}%")
+                        );
 
-                    $products = \App\Models\Product::grabByFilter($filter, 8);
-                    $products = array_filter($products, function($p) {
-                        return $p->isAvailable();
-                    });
+                        $products = \App\Models\Product::grabByFilter($filter, 8);
+                        $products = array_filter($products, function($p) {
+                            return $p->isAvailable();
+                        });
 
-                    if(count($products) == 0) {
+                        if(count($products) == 0) {
+                            \App\System::getInstance()->addMessage('error', 'Es wurde kein passendes Produkt gefunden!');
+                        }
+                        elseif(count($products) == 1) {
+                            $this->response->setStatus(301);
+                            $this->response->addHeader('Location', '/products/rent/'. current($products)->getId());
+                            $this->response->flush();
+                            return;
+                        }
+                        else {
+                            \App\System::getInstance()->addMessage('info', 'Die Suche lieferte mehrere Ergebnisse.');
+                            $this->view->assign('products', $products);
+                            $this->view->assign('string', $search_string);
+
+                            $rentButton = new \App\Button();
+                            $rentButton->set('href', '/products/rent/__id__');
+                            $rentButton->set('style', 'primary');
+                            $rentButton->set('text', 'Leihen');
+
+                            $this->view->assign('buttons', array($rentButton));
+                        }
+                        //\App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde verliehen!');
+                    }
+                    catch(\App\Exceptions\NothingFoundException $e) {
                         \App\System::getInstance()->addMessage('error', 'Es wurde kein passendes Produkt gefunden!');
                     }
-                    elseif(count($products) == 1) {
-                        $this->response->setStatus(301);
-                        $this->response->addHeader('Location', '/products/rent/'. current($products)->getId());
-                        $this->response->flush();
-                        return;
-                    }
-                    else {
-                        \App\System::getInstance()->addMessage('info', 'Die Suche lieferte mehrere Ergebnisse.');
-                        $this->view->assign('products', $products);
-                        $this->view->assign('string', $search_string);
-
-                        $rentButton = new \App\Button();
-                        $rentButton->set('href', '/products/rent/__id__');
-                        $rentButton->set('style', 'primary');
-                        $rentButton->set('text', 'Leihen');
-
-                        $this->view->assign('buttons', array($rentButton));
-                    }
-                    //\App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde verliehen!');
                 }
-                catch(\App\Exceptions\NothingFoundException $e) {
-                    \App\System::getInstance()->addMessage('error', 'Es wurde kein passendes Produkt gefunden!');
-                }
+
+                $this->view->setTemplate('product-search-mask');
             }
-
-            $this->view->setTemplate('product-search-mask');
         }
         else {
-            $currentPage = $this->request->issetParam('paginatorPage') ? intval($this->request->getParam('paginatorPage')) : 1;
+            $currentPage = isset($params['page']) ? intval($params['page']) : 1;
             $itemsPerPage = 8;
 
             try {
