@@ -7,15 +7,15 @@ session_start();
 require_once('lib/functions.php');
 require_once(ABS_PATH . '/config.php');
 
-use App;
-
 $router = App\Router::getInstance();
 
 $router->addRoute('all', array('/', '/home', '/products/return'), 'ProductController#home');
 
+$router->addRoute('all', array('/product/:id', '/product/:id/:action'), 'ProductController#product');
+
+$router->addRoute('all', array('/products/category/:category', '/products/category/:category/:page'), 'ProductController#displayCategory');
 $router->addRoute('all', array('/products/search', '/products/:action/:page'), 'ProductController#search');
 $router->addRoute('all', array('/products/:action', '/products'), 'ProductController#products');
-$router->addRoute('all', array('/product/:id', '/product/:id/:action'), 'ProductController#product');
 
 $router->addRoute('all', '/customers', 'ProductController#customers');
 

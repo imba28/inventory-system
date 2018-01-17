@@ -110,7 +110,7 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
         $query->select('product_id');
         $query->groupBy('product_id');
 
-         $products = array();
+        $products = array();
         foreach($query->get() as $p_info) {
             try {
                 $products[] = array(
@@ -133,12 +133,45 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
         $this->renderContent();
     }
 
+    public function displayCategory($params) {
+        $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+        $itemsPerPage = 8;
+
+        try {
+            $products = \App\Models\Product::grabByFilter(array(
+                'type', '=', $params['category']
+            ), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
+
+            $query = \App\Models\Product::getQuery(array('type', '=', $params['category']));
+            $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage, '/products/category/' . urlencode($params['category']));
+            $this->view->assign('paginator', $paginator);
+            $this->view->assign('totals', $paginator->getTotals());
+        }
+        catch(\App\Exceptions\NothingFoundException $e) {
+            $products = array();
+            $this->view->assign('totals', 0);
+            \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
+        }
+
+        $query = new \App\QueryBuilder\Builder('products');
+        $query->select(\App\QueryBuilder\Builder::alias($query::raw('DISTINCT type'), 'name'));
+        $query->where('deleted', '0');
+        $this->view->assign('categories', $query->get());
+
+        $this->view->assign('products', $products);
+        $this->view->setTemplate('products');
+
+        $this->renderContent();
+    }
+
     public function error($status) {
         $this->response->setStatus($status);
         $this->view->setTemplate('error');
 
         $this->renderContent();
     }
+
+    // INTERNAL METHODS
 
     private function edit(\App\Models\Product $product) {
         if($this->request->issetParam('submit')) {

@@ -19,7 +19,7 @@
               <?php
                 if(isset($categories)): foreach($categories as $c): ?>
                   <li class="nav-item">
-                    <a class="nav-link" href="/products" onclick="setKategorie(<?= $c['name'] ?>)"><?= $c['name'] ?></a>
+                    <a class="nav-link" href="/products/category/<?= urlencode($c['name']) ?>"><?= $c['name'] ?></a>
                   </li>
               <?php endforeach; endif; ?>
           </ul>
