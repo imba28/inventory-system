@@ -22,7 +22,7 @@ class Builder {
 
     protected static $sql_keywords = array("NOW()", "COUNT(*)", "AUTO_INCREMENT", "CURRENT_DATE", "CURRENT_USER", "DEFAULT", "CURRENT_TIMESTAMP()", "CURTIME()", "CURDATE()", "DAYNAME()", "DAYOFMONTH()", "DAYOFWEEK()", "DAYOFYEAR()");
 
-    public function __construct($table, $debug = false){
+    public function __construct($table, $debug = false) {
         $this->table = $table;
         $this->debug = $debug;
 
@@ -33,7 +33,7 @@ class Builder {
         $this->logging = $bool;
     }
 
-    public function where($arg1, $operator, $arg2 = null){
+    public function where($arg1, $operator, $arg2 = null) {
         if(is_null($arg2)) {
             $arg2 = $operator;
             $operator = '=';
@@ -41,20 +41,20 @@ class Builder {
         try {
             $this->where[] = new QueryWhere(array($arg1, $operator, $arg2));
         }
-        catch(Exception $e){
+        catch(Exception $e) {
             //echo "Fehler: {$e->getMessage()}";
             return false;
         }
         return $this;
     }
 
-    public function whereVisible(){
+    public function whereVisible() {
         $this->where("visible", "=", "1")->where("deleted", "=", "0");
         return $this;
     }
 
 
-    public function next($id = null, $select_columns = array("ID"), $column = null){
+    public function next($id = null, $select_columns = array("ID"), $column = null) {
         $column = is_null($column) ? "ID" : $column;
 
         $this->select($select_columns)->where($column, ">", $id)->orderBy($column, "ASC")->limit(1);
@@ -62,14 +62,14 @@ class Builder {
         return $this;
     }
 
-    public function count(){
+    public function count() {
         $this->selection = array(self::alias('COUNT(*)', 'count'));
         $result = $this->get();
 
         return $result[0]["count"];
     }
 
-    public function prev($id, $select_columns = array("ID"), $column = null){
+    public function prev($id, $select_columns = array("ID"), $column = null) {
         $column = is_null($column) ? "ID" : $column;
 
         $this->select($select_columns)->where($column, "<", $id)->orderBy($column, "DESC")->limit(1);
@@ -78,7 +78,7 @@ class Builder {
     }
 
 
-    public function orderBy($column, $type = 'DESC'){
+    public function orderBy($column, $type = 'DESC') {
         $col = !in_array($column, array("RAND()")) && !$column instanceof Raw ? $this->sanitizeColumnName($column) : $column;
         $this->order[] = $col . " " . strtoupper($type);
 
@@ -94,17 +94,17 @@ class Builder {
         else $this->group[] = $this->sanitizeColumnName($arg);
     }
 
-    public function limit($count){
+    public function limit($count) {
         $this->limit[] = $count;
 
         return $this;
     }
 
-    public function select($columns){
+    public function select($columns) {
         if($this->selection[0] == "*") $this->selection = array();
 
-        if(is_array($columns)){
-            /*foreach($columns as &$column){
+        if(is_array($columns)) {
+            /*foreach($columns as &$column) {
                 $column = $this->sanitizeColumnName($column);
             }*/
 
@@ -117,7 +117,7 @@ class Builder {
         return $this;
     }
 
-    public function join($table, $key, $operator = null, $value = null, $type = 'LEFT'){
+    public function join($table, $key, $operator = null, $value = null, $type = 'LEFT') {
          $joinObject = new QueryJoin($table, $this, $type);
          $joinObject->on($key, $operator, $value);
 
@@ -164,7 +164,7 @@ class Builder {
         return join(", ", $tmp);
     }
 
-    public function get(){
+    public function get() {
         $table_name = getTableName($this->table);
 
         $selection = $this->getSelectStatement();
@@ -172,9 +172,9 @@ class Builder {
         $join_selection = "";
         $join_statement = "";
 
-        if(!empty($this->joins)){
+        if(!empty($this->joins)) {
             $join_selection = ", ";
-            foreach($this->joins as $join){
+            foreach($this->joins as $join) {
                 $join_selection .= $join->getSelectStatement().", ";
                 $join_statement .= $join->getStatement() . " ";
             }
@@ -186,15 +186,15 @@ class Builder {
 
         $args = array();
 
-        if(count($this->where) > 0){
+        if(count($this->where) > 0) {
             /*
             $sql .= " WHERE ";
-            foreach($this->where as $clause){
+            foreach($this->where as $clause) {
                 $sql.= $clause->getCondition($table_name) . " AND";
                 $val = $clause->getValue();
-                if($val !== false){
+                if($val !== false) {
                    // vd($val);
-                    if(is_array($val)){
+                    if(is_array($val)) {
                         foreach($val as $v) if(!is_null($v)) $args[] = $v;
                     }
                     else $args[] = $val;
@@ -205,19 +205,19 @@ class Builder {
             $sql .= $criteria;
         }
 
-        if(count($this->group) > 0){
+        if(count($this->group) > 0) {
             $sql .= " GROUP BY ". join($this->group, ", ");
         }
 
-        if(count($this->order) > 0){
+        if(count($this->order) > 0) {
             $sql .= " ORDER BY ". join($this->order, ", ");
         }
 
-        if(count($this->limit) > 0){
+        if(count($this->limit) > 0) {
             $sql .= " LIMIT ". join($this->limit, ", ");
         }
 
-        if($this->debug){
+        if($this->debug) {
             vd($sql);
             vd($args);
         }
@@ -225,18 +225,18 @@ class Builder {
         return $this->query($sql, $args);
     }
 
-    public function result(){
+    public function result() {
         return isset($this->result) ? $this->result : null;
     }
 
-    public function setTable($table){
+    public function setTable($table) {
         $this->table = $table;
         $this->reset();
 
         return $this;
     }
 
-    public function reset($prop = null){
+    public function reset($prop = null) {
         if(is_null($prop)) {
             $this->selection = array("*");
             $this->where = array();
@@ -252,7 +252,7 @@ class Builder {
         return $this;
     }
 
-    protected function query($sql, $bindings = array()){
+    protected function query($sql, $bindings = array()) {
         try {
             $query = new Query($sql, $this->logging);
             $query->execute($bindings);
@@ -263,7 +263,7 @@ class Builder {
 
             return $this->result;
         }
-        catch(\Exception $e){
+        catch(\Exception $e) {
             $this->result = null;
             $this->last_exception = $e;
         }
@@ -271,17 +271,17 @@ class Builder {
         return false;
     }
 
-    public function describe(){
+    public function describe() {
         return $this->query("SHOW FULL COLUMNS FROM ". getTableName($this->table));
     }
-    public function lastInsertId(){
+    public function lastInsertId() {
         return $this->lastInsertID;
     }
-    public function getError(){
+    public function getError() {
         return !isset($this->last_exception) ? null : self::getErrorMessage($this->last_exception);
     }
 
-    public function find($id, $column = null){
+    public function find($id, $column = null) {
         $column = is_null($column) ? "ID" : $column;
 
         $this->where[] = new QueryWhere(array($column, "=", $id));
@@ -289,7 +289,7 @@ class Builder {
         return $this->get();
     }
 
-    public function update(array $data){
+    public function update(array $data) {
         list($statement, $bindings) = $this->getUpdateStatement($data);
         list($criteria, $where_bindings) = $this->getCriteria();
 
@@ -306,20 +306,20 @@ class Builder {
 
         $sql = join(" ", $sql_arr);
 
-        if($this->debug){
+        if($this->debug) {
             vd($sql);
             vd($bindings);
         }
         return $this->query($sql, $bindings);
     }
 
-    public function delete(){
+    public function delete() {
         return $this->update(array(
             "deleted" => "1"
         ));
     }
 
-    public function insertIgnore(array $data){
+    public function insertIgnore(array $data) {
         list($statement, $bindings) = $this->getInsertStatement($data);
 
         $sql_arr = array(
@@ -336,7 +336,7 @@ class Builder {
     }
 
 
-    public function insert(array $data){
+    public function insert(array $data) {
         list($statement, $bindings) = $this->getInsertStatement($data);
 
         $sql_arr = array(
@@ -347,7 +347,7 @@ class Builder {
 
         $sql = join(" ", $sql_arr);
 
-        if($this->debug){
+        if($this->debug) {
             vd($sql);
             vd($bindings);
         }
@@ -355,17 +355,17 @@ class Builder {
         return $this->query($sql, $bindings) !== false;
     }
 
-    private function getCriteria(){
+    private function getCriteria() {
         $bindings = array();
         $criteria = "";
         $table_name = getTableName($this->table);
 
-        if(count($this->where) > 0){
+        if(count($this->where) > 0) {
             $criteria = " WHERE ";
-            foreach($this->where as $clause){
+            foreach($this->where as $clause) {
                 $criteria .= $clause->getCondition($table_name) . " AND ";
                 $val = $clause->getValue();
-                if($val !== false){
+                if($val !== false) {
                     if(is_array($val)) foreach($val as $v) if(!is_null($v)) $bindings[] = $v;
                     else $bindings[] = $val;
                 }
@@ -376,7 +376,7 @@ class Builder {
         return array($criteria, $bindings);
     }
 
-    private function getInsertStatement($data){
+    private function getInsertStatement($data) {
         $insert = array();
         $values = array();
         $bindings = array();
@@ -399,11 +399,11 @@ class Builder {
         return array($statement, $bindings);
     }
 
-    private function getUpdateStatement($data){
+    private function getUpdateStatement($data) {
         $values = array();
         $statement = "";
 
-        foreach($data as $key => $value){
+        foreach($data as $key => $value) {
             if(is_null($value) || (empty($value) && $value !== 0)) {
                 $statement.= $this->sanitizeColumnName($key) . " = NULL, ";
             }
@@ -419,7 +419,7 @@ class Builder {
         return array($statement, $values);
     }
 
-    /*private function getQuery($type = "select", $data = array()){
+    /*private function getQuery($type = "select", $data = array()) {
         $allowedTypes = array('select', 'insert', 'insertignore', 'replace', 'delete', 'update', 'criteriaonly');
         if (!in_array(strtolower($type), $allowedTypes)) {
             throw new Exception("$type ist kein gültiger Typ!");
@@ -428,33 +428,33 @@ class Builder {
         return "hallo";
     }*/
 
-    public final function sanitizeColumnName($column){
+    public final function sanitizeColumnName($column) {
         $sanitized_column = $column == "*" ? $column : $this->sanitize($column);
         return $this->sanitize(getTableName($this->table)) . "." . $sanitized_column;
     }
 
-    public final function sanitize($value){
+    public final function sanitize($value) {
         return self::SANITIZER . $value . self::SANITIZER;
     }
 
-    private static function getErrorMessage($e){ // TODO
+    private static function getErrorMessage($e) { // TODO
         $error_message = "Es ist ein Fehler bei der Verarbeitung aufgetreten!";
         $error_value = null;
         $error_column = null;
         $error_code = -1;
 
-        if(preg_match("/: ([0-9]+) /", $e->getMessage(), $matches)){
+        if(preg_match("/: ([0-9]+) /", $e->getMessage(), $matches)) {
             $error_code = $matches[1];
-            switch($error_code){
+            switch($error_code) {
                 case 1062: // Duplicate Index
-                    if(preg_match("/entry '(.[^']+)'/", $e->getMessage(), $m)){
+                    if(preg_match("/entry '(.[^']+)'/", $e->getMessage(), $m)) {
                         $error_message = "Es gibt bereits einen Eintrag mit dem Wert <i>{$m[1]}</i>!";
                         $error_value = $m[1];
                     }
                     break;
 
                 case 1048: // Column must not be null
-                    if(preg_match("/Column '(.[^']+)'/", $e->getMessage(), $m)){
+                    if(preg_match("/Column '(.[^']+)'/", $e->getMessage(), $m)) {
                         $error_message = "Dieser Wert darf nicht leer sein!";
                         $error_column = $m[1];
                     }
@@ -465,11 +465,11 @@ class Builder {
         return array($error_code, $error_message, $error_value, $error_column);
     }
 
-    public static function alias($field, $alias){
+    public static function alias($field, $alias) {
         return new QueryAlias($field, $alias);
     }
 
-    /*public static function raw($sql){
+    /*public static function raw($sql) {
         $query = new QueryBuilderRaw($sql);
         return $query;
     }*/

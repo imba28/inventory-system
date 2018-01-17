@@ -20,7 +20,7 @@ class File {
         $this->file_name = sha1($file_parts[0] . time() . rand(0,10));
     }
 
-    public function isValid(){
+    public function isValid() {
         try {
             $tmp_file = $this->file_info['tmp_name'];
 
@@ -65,20 +65,20 @@ class File {
             $this->isValid = true;
             return true;
         }
-        catch(\Exception $e){
+        catch(\Exception $e) {
             $this->error = $e;
             return false;
         }
     }
 
-    public function getSource(){
+    public function getSource() {
         return $this->file_info["tmp_name"];
     }
-    public function getDestination(){
+    public function getDestination() {
         return $this->file_name. "." . $this->file_ext;
     }
 
-    public function getError(){
+    public function getError() {
         if(isset($this->error)) return $this->error;
         return null;
     }
@@ -93,15 +93,15 @@ class File {
         return false;
     }
 
-    public function getInfo($key){
+    public function getInfo($key) {
         if(isset($this->file_info[$key])) return $this->file_info[$key];
         return "";
     }
 
-    public static function delete($source){
-        if(file_exists(ABS_PATH . $source)){
+    public static function delete($source) {
+        if(file_exists(ABS_PATH . $source)) {
             try {
-                if(preg_match("/\/([\w\s]+\/)+/", $source, $matches)){
+                if(preg_match("/\/([\w\s]+\/)+/", $source, $matches)) {
                     $dest = str_replace($matches[0], "/tmp/", $source);
                     $batch = new Batch();
                     $batch->add(new MoveFile(Registry::getConfig()->get("FTP_ABS_PATH") . $source, Registry::getConfig()->get("FTP_ABS_PATH") . $dest));
@@ -109,7 +109,7 @@ class File {
                     return true;
                 }
             }
-            catch(Exception $e){
+            catch(Exception $e) {
                 Debugger::log("Fehler beim Löschen des Bildes `$source`. Meldung: " . $e->getMessage(), 'Fehler');
             }
         }
@@ -117,7 +117,7 @@ class File {
         return false;
     }
 
-    public static function get($file_info){
+    public static function get($file_info) {
         return new File($file_info);
     }
 

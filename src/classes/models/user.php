@@ -9,7 +9,7 @@ class User extends \App\Model {
     public function __construct($options = array()) {
         parent::__construct($options);
 
-        $this->on('save', function($e){
+        $this->on('save', function($e) {
             $user = $e->getContext();
 
             $password = $user->get('password');

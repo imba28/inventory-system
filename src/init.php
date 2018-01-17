@@ -61,7 +61,7 @@ include(ABS_PATH . '/src/config/routes.php');
 try {
     \App\Registry::setDatabase(new \App\Database());
 }
-catch(Exception $e){
+catch(Exception $e) {
     die("Keine Verbindung zur Datenbank möglich:". $e->getMessage());
 }
 ?>

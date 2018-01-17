@@ -11,11 +11,11 @@ class Image extends File {
     );
     protected static $image_whitelist = array(IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF);
 
-    /*public function getDestination(){
+    /*public function getDestination() {
         return $this->file_name. "." .self::$image_types[exif_imagetype($this->getSource())];
     }*/
 
-    public static function getAllowedMimes(){
+    public static function getAllowedMimes() {
         return array(
             'image/jpeg',
             'image/png',

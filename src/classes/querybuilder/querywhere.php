@@ -8,7 +8,7 @@ class QueryWhere {
 
     private static $valid_operators = array("=", "<>", "!=", "<", ">", ">=", "<=", "!<", "!>", "LIKE", "IS", "IS NOT", "OR", "AND");
 
-    public function __construct(array $where){
+    public function __construct(array $where) {
         self::validateClause($where);
 
         if(is_array($where[0])) $where[0] = new QueryWhere($where[0]);
@@ -32,7 +32,7 @@ class QueryWhere {
         }
     }
 
-    protected static function validateClause($where){
+    protected static function validateClause($where) {
         if(count($where) != 3) throw new \InvalidArgumentException("Bedingungen für Where-Clause sind ungültig!");
 
         if((is_array($where[0]) && count($where[0]) < 0) || ($where[0] != "0" && empty($where[0]))) throw new \InvalidArgumentException("Argument 1 `$where[0]` für Where-Clause ist ungültig!");
@@ -40,11 +40,11 @@ class QueryWhere {
         if(!in_array(strtoupper($where[1]), QueryWhere::$valid_operators)) throw new \InvalidArgumentException("Operator `$where[1]` für Where-Clause ist ungültig!");
     }
 
-    public function getCondition($table){
+    public function getCondition($table) {
         $arg1 = $this->argument_1 instanceof QueryWhere ? $this->argument_1->getCondition($table) : QueryWhere::sanitize($this->argument_1, $table);
         $arg2 = $this->argument_2 instanceof QueryWhere ? $this->argument_2->getCondition($table) : $this->argument_2;
 
-        if(!$this->argument_2 instanceof QueryWhere){
+        if(!$this->argument_2 instanceof QueryWhere) {
             if(is_null($arg2) || $arg2 === "NULL") $arg2 = "NULL";
             else $arg2 = "?";
         }
@@ -52,15 +52,15 @@ class QueryWhere {
         return "(" . join(" ", array($arg1, $this->operator, $arg2)) . ")";
     }
 
-    public function getValue(){
-        if($this->argument_1 instanceof QueryWhere || $this->argument_2 instanceof QueryWhere){
+    public function getValue() {
+        if($this->argument_1 instanceof QueryWhere || $this->argument_2 instanceof QueryWhere) {
             $ret = array();
-            if($this->argument_1 instanceof QueryWhere){
+            if($this->argument_1 instanceof QueryWhere) {
                 foreach($this->argument_1->getValue() as $v) if($v !== false) $ret[] = $v;
             }
             elseif(!is_null($this->argument_1) && $this->argument_1 !== "NULL") $ret[] = $this->argument_1;
 
-            if($this->argument_2 instanceof QueryWhere){
+            if($this->argument_2 instanceof QueryWhere) {
                 foreach($this->argument_2->getValue() as $v) if($v !== false) $ret[] = $v;
             }
             elseif(!is_null($this->argument_2) && $this->argument_2 !== "NULL") $ret[] = $this->argument_2;
@@ -70,11 +70,11 @@ class QueryWhere {
         elseif(!is_null($this->argument_2) && $this->argument_2 !== "NULL") return array($this->argument_2);
     }
 
-    private function getColumnName($table, $column){
+    private function getColumnName($table, $column) {
         return $this->sanitizer;
     }
 
-    private final static function sanitize($value, $table){
+    private final static function sanitize($value, $table) {
         return Builder::SANITIZER . $table . Builder::SANITIZER . "." . Builder::SANITIZER . $value . Builder::SANITIZER;
     }
 }

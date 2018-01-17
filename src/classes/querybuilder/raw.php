@@ -4,11 +4,11 @@ namespace App\QueryBuilder;
 class Raw {
     protected $value;
 
-    public function __construct($value){
+    public function __construct($value) {
         $this->value = (string)$value;
     }
 
-    public function __toString(){
+    public function __toString() {
         return (string)$this->value;
     }
 }
