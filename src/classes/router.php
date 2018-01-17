@@ -31,10 +31,9 @@ class Router {
 
             $parts = explode('/', $path);
             foreach($parts as $part) {
-                vd($part);
                 if(isset($part[0]) && $part[0] === ':') { // dynamic part
                     $routeOptions['regex'][] = '([a-zA-Z0-9\-]+)';
-                    $routeOptions['param'][] = substr($part, 1);
+                    $routeOptions['params'][] = substr($part, 1);
                 }
                 else { // static part
                     if($part === '*') $part = '(.+)';
@@ -53,11 +52,13 @@ class Router {
         if($handle instanceof \Closure) {
             return $handle($params);
         }
-        else if(is_array($handle) && $handle[0] == 'Controller' && count($handle) == 3) {
-            $controller_name = "\App\Controller\\".$handle[1];
-            $controller_action = $handle[2];
+        elseif(is_string($handle)) {
+            $split = explode('#', $handle);
 
-            $controller = new $controller_name();
+            $controller_class = "\App\Controller\\{$split[0]}";
+            $controller_action = $split[1];
+
+            $controller = new $controller_class();
             $controller->$controller_action($params);
         }
         else throw new \InvalidArgumentException('invalid handle!');
@@ -89,8 +90,9 @@ class Router {
                         $params = array();
                         array_shift($matches); // remove first capture group match
 
+
                         foreach($matches as $idx => $part) {
-                            $params[$routeOptions['params'][$i]] = $part;
+                            $params[$routeOptions['params'][$idx]] = $part;
                         }
 
                         return $this->handle($routeOptions['handler'], $params);

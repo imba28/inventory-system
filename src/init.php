@@ -10,14 +10,14 @@ require_once(ABS_PATH . '/config.php');
 use App;
 
 $router = App\Router::getInstance();
-$router->addRoute('all', array('/', '/home', '/products/return'), array('Controller', 'PageController', 'home'));
-$router->addRoute('all', array('/products/:action', '/products'), array('Controller', 'PageController', 'products'));
-$router->addRoute('all', array('/product/:id'), array('Controller', 'PageController', 'product'));
-$router->addRoute('all', '/customers', array('Controller', 'PageController', 'customers'));
-$router->addRoute('post', '/inventur', array('Controller', 'InventurController', 'actionInventur'));
-$router->addRoute('all', '/inventur/:action', array('Controller', 'InventurController', 'main'));
+$router->addRoute('all', array('/', '/home', '/products/return'), 'PageController#home');
+$router->addRoute('all', array('/products/:action', '/products'), 'PageController#products');
+$router->addRoute('all', array('/product/:id', '/product/:id/:action'), 'PageController#product');
+$router->addRoute('all', '/customers', 'PageController#customers');
+$router->addRoute('post', '/inventur', 'InventurController#actionInventur');
+$router->addRoute('all', '/inventur/:action', 'InventurController#main');
 
-$router->addRoute('get', '*', array('Controller', 'FileController', 'main'));
+$router->addRoute('get', '*', 'FileController#main');
 
 \App\Menu::getInstance()->set('items', array(
     'Produkte' => 'products',
