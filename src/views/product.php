@@ -64,12 +64,12 @@ $available = $product->isAvailable();
                         </div>
                         <div class="btn-group" role="group" aria-label="Basic example">
                             <?php if($available): ?>
-                                <a href="/product/rent/<?= $product->get('id')?>" class="btn btn-success">Ausleihen</a>
+                                <a href="/product/<?= $product->get('id')?>/rent" class="btn btn-success">Ausleihen</a>
                             <?php else: ?>
-                                <a href="/product/return/<?= $product->get('id')?>" class="btn btn-success">Zurückgeben</a>
+                                <a href="/product/<?= $product->get('id')?>/return" class="btn btn-success">Zurückgeben</a>
                             <?php endif; ?>
-                            <a href="/product/claim/<?= $product->get('id')?>" class="btn btn-default">Reservieren</a>
-                            <a href="/product/edit/<?= $product->get('id')?>" class="btn btn-primary">Bearbeiten</a>
+                            <a href="/product/<?= $product->get('id')?>/claim" class="btn btn-default">Reservieren</a>
+                            <a href="/product/<?= $product->get('id')?>/edit" class="btn btn-primary">Bearbeiten</a>
                         </div>
                     </div>
                 </div>

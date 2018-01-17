@@ -12,6 +12,17 @@
                 <a class="nav-link" href="/products/return">Produkt zurücknehmen</a>
               </li>
           </ul>
+          <ul class="nav nav-pills flex-column mt-4">
+              <li class="nav-item">
+                  Kategorien
+              </li>
+              <?php
+                if(isset($categories)): foreach($categories as $c): ?>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/products" onclick="setKategorie(<?= $c['name'] ?>)"><?= $c['name'] ?></a>
+                  </li>
+              <?php endforeach; endif; ?>
+          </ul>
         </nav>
         <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
           <h1>Produkte (<?= $totals ?>)</h1>

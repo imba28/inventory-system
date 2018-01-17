@@ -15,7 +15,7 @@
         </nav>
         <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
             <h1>Produkt &#187; <?= $product->get('name') ?> &#187; Zurückgeben</h1>
-            <a href="/products/<?= $product->get('id') ?>">Zurück</a>
+            <a href="/product/<?= $product->get('id') ?>">Zurück</a>
             <hr>
             <!-- /.col-lg-3 -->
             <div class="row">
