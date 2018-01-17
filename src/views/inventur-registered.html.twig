@@ -22,7 +22,7 @@
                     <article class="bg-light mb-2 p-3 rounded">
                         <div class="media inventurMissing__product">
                             <a href="/products/{{ product.getId() }}" class="d-block">
-                                <img class="align-self-start mr-3 rounded" src="<{{ product.getFrontImage().get('src') }}" alt="Generic placeholder image">
+                                <img class="align-self-start mr-3 rounded" src="{{ product.getFrontImage().get('src') }}" alt="Generic placeholder image">
                             </a>
                             <div class="media-body">
                                 {% if not available %}
