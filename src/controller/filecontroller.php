@@ -5,9 +5,7 @@ class FileController extends \App\BasicController implements \App\Interfaces\Con
     private static $allowedFileTypes = array('png', 'jpg', 'jpeg', 'png', 'gif', 'html', 'css', 'js');
 
     public function main($params) {
-        vd($params);
-        
-        $requested_file = ABS_PATH . '/' . $this->request->getHeader('REQUEST_URI');
+        $requested_file = ABS_PATH . $this->request->getHeader('REQUEST_URI');
 
         if(file_exists($requested_file)) {
             $path_split = explode('/', $requested_file);
@@ -16,7 +14,7 @@ class FileController extends \App\BasicController implements \App\Interfaces\Con
             if(in_array(end($file_split), self::$allowedFileTypes)) {
                 $this->response->setStatus(200);
 
-                $this->response->addHeader('Content-Type',  fileext_to_mime($requested_file));
+                $this->response->addHeader('Content-Type', fileext_to_mime($requested_file));
                 $this->response->addHeader('Content-Length', filesize($requested_file));
                 $this->response->append(file_get_contents($requested_file));
 
