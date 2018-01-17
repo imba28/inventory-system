@@ -32,7 +32,7 @@ class Router {
             $parts = explode('/', $path);
             foreach($parts as $part) {
                 if(isset($part[0]) && $part[0] === ':') { // dynamic part
-                    $routeOptions['regex'][] = '([a-zA-Z0-9\-]+)';
+                    $routeOptions['regex'][] = '([\w0-9\-\s,]+)';
                     $routeOptions['params'][] = substr($part, 1);
                 }
                 else { // static part
@@ -68,7 +68,7 @@ class Router {
     }
 
     public function route() {
-        $request_uri = $_SERVER['REQUEST_URI'];
+        $request_uri = urldecode($_SERVER['REQUEST_URI']);
         $request_method = $_SERVER['REQUEST_METHOD'];
         $uri = ltrim(parse_url($request_uri, PHP_URL_PATH), '/');
         $params = parse_url($request_uri, PHP_URL_QUERY);
