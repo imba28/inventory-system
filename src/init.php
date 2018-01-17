@@ -11,13 +11,13 @@ use App;
 
 $router = App\Router::getInstance();
 
-$router->addRoute('all', array('/', '/home', '/products/return'), 'PageController#home');
+$router->addRoute('all', array('/', '/home', '/products/return'), 'ProductController#home');
 
-$router->addRoute('all', array('/products/search', '/products/:action/:page'), 'PageController#search');
-$router->addRoute('all', array('/products/:action', '/products'), 'PageController#products');
-$router->addRoute('all', array('/product/:id', '/product/:id/:action'), 'PageController#product');
+$router->addRoute('all', array('/products/search', '/products/:action/:page'), 'ProductController#search');
+$router->addRoute('all', array('/products/:action', '/products'), 'ProductController#products');
+$router->addRoute('all', array('/product/:id', '/product/:id/:action'), 'ProductController#product');
 
-$router->addRoute('all', '/customers', 'PageController#customers');
+$router->addRoute('all', '/customers', 'ProductController#customers');
 
 $router->addRoute('post', '/inventur', 'InventurController#actionInventur');
 $router->addRoute('all', '/inventur/:action', 'InventurController#main');
