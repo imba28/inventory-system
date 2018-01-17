@@ -17,26 +17,26 @@
             <h1>Inventur &#187; vorhandene Produkte</h1>
             <hr />
             <section class="placeholders inventurMissing">
-                <?php foreach($products as $product):
-                    $available = $product->isAvailable();
-                ?>
+                {% for product in products %}
+                    {% set available = product.isAvailable() %}
                     <article class="bg-light mb-2 p-3 rounded">
                         <div class="media inventurMissing__product">
-                            <a href="/products/<?= $product->getId() ?>" class="d-block">
-                                <img class="align-self-start mr-3 rounded" src="<?= $product->getFrontImage()->get('src') ?>" alt="Generic placeholder image">
+                            <a href="/products/{{ product.getId() }}" class="d-block">
+                                <img class="align-self-start mr-3 rounded" src="<{{ product.getFrontImage().get('src') }}" alt="Generic placeholder image">
                             </a>
                             <div class="media-body">
-                                <?php if(!$available): ?>
-                                    <span class="badge badge-warning">Verliehen</span>
-                                <?php endif ?>
-                                <a href="/products/<?= $product->getId() ?>" class="d-block">
-                                    <h5 class="mt-0 mb-0"><?= $product->get('name') ?> <small><?= $product->get('type') ?></small></h5>
+                                {% if not available %}
+                                <span class="badge badge-warning">Verliehen</span>
+                                {% endif %}
+
+                                <a href="/products/{{ product.getId() }}" class="d-block">
+                                    <h5 class="mt-0 mb-0">{{ product.get('name') }} <small>{{ product.get('type') }}</small></h5>
                                 </a>
-                                <h6>Inventarnummer <?= $product->get('invNr') ?></h6>
+                                <h6>Inventarnummer {{ product.get('invNr') }}</h6>
                             </div>
                         </div>
                     </article>
-                <?php endforeach; ?>
+                {% endfor %}
             </section>
         </main>
     </div>

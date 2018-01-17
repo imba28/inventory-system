@@ -121,7 +121,7 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
             catch(\App\Exceptions\NothingFoundException $e) {}
         }
 
-        $this->view->assign('productsArray', $products);
+        $this->view->assign('topProducts', $products);
         $this->view->setTemplate('products-rented');
         $this->renderContent();
     }
@@ -423,7 +423,8 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
                 else {
                     \App\System::getInstance()->addMessage('info', 'Die Suche lieferte mehrere Ergebnisse.');
                     $this->view->assign('products', $products);
-                    $this->view->assign('string', $search_string);
+                    $this->view->assign('search_string', $search_string);
+                    $this->view->assign('totals', count($products));
 
                     $rentButton = new \App\Button();
                     $rentButton->set('href', '/product/__id__/rent');
@@ -439,7 +440,7 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
             }
         }
 
-        $this->view->setTemplate('product-search-mask');
+        $this->view->setTemplate('products-search-mask');
     }
 
     private function displayProducts($params) {

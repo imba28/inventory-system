@@ -13,13 +13,13 @@
             <section class="placeholders">
                 <div class="error">
                     <p class="error__code">
-                        <?= $errorCode ?>
+                        {{ errorCode }}
                     </p>
-                    <?php if(isset($errorMessage)): ?>
+                    {% if errorMessage %}
                     <p class="error__message">
-                        <?= $errorMessage ?>
+                        {{ errorMessage }}
                     </p>
-                    <?php endif ?>
+                    {% endif %}
                 </div>
             </section>
         </main>

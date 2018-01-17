@@ -14,8 +14,19 @@ class View {
     }
 
     public function render() {
-        $template_path = ABS_PATH."/src/views/{$this->template}.php";
-        if(file_exists($template_path)) {
+        $template_file = "{$this->template}.html.twig";
+        if(file_exists(ABS_PATH."/src/views/" . $template_file)) {
+            $loader = new \Twig_Loader_Filesystem(ABS_PATH."/src/views/");
+            $twig = new \Twig_Environment($loader, array(
+                //'cache' => ABS_PATH . '/cache/twig'
+            ));
+
+            $twig->addFilter(new \Twig_Filter('ago', function ($string) {
+                return ago(strtotime($string));
+            }));
+
+            return $twig->render($template_file, $this->data);
+
             extract($this->data);
 
             ob_start();

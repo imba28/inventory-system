@@ -1,0 +1,49 @@
+{% macro render(product, title, button_text, back_link) %}
+<h1>Produkte
+    {{ title ? ('&#187; ' ~ title)|raw : '' }}
+</h1>
+<a href="{{ back_link ? back_link : '/products' }}">Zurück</a>
+<hr>
+<!-- /.col-lg-3 -->
+<div class="row">
+    <form class="ml-4 col-md-6" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="exampleInputEmail1">Name</label>
+            <input type="text" class="form-control" placeholder="Produktname eingeben" name="name" value="{{ product.get('name') }}">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputEmail1">Inventarnummer</label>
+            <input type="text" class="form-control" placeholder="Inventarnummer eingeben" name="invNr" value="{{ product.get('invNr') }}">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">Type</label>
+            <input type="text" class="form-control" placeholder="Type" name="type" value="{{ product.get('type') }}">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">Beschreibung</label>
+            <textarea class="form-control" name="description" placeholder="Beschreibung eingeben">{{ product.get('description') }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">Anmerkung</label>
+            <textarea class="form-control" name="note" placeholder="Anmerkung eingeben">{{ product.get('note') }}</textarea>
+        </div>
+        <div class="form-group">
+            <ul class="productimages row">
+                {% if product %}
+                    {% for image in product.getImages() %}
+                        <li class="col col-md-3">
+                            <button type="button" class="btn btn-danger btn-sm">x</button>
+                            <img src="{{ image.get('src') }}" alt="{{ image.get('title') }}" class="d-block w-100">
+                            <p>
+                                {{ image.get('title') }}
+                            </p>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+            <input type="file" name="add-productImage[]" multiple="multiple">
+        </div>
+        <button type="submit" name="submit" class="btn btn-primary">{{ button_text ? button_text : 'Speichern' }}</button>
+    </form>
+</div>
+{% endmacro %}

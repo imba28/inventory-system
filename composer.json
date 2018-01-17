@@ -12,7 +12,8 @@
         "pdepend/pdepend": "^2.5",
         "phpmd/phpmd": "^2.6",
         "sebastian/phpcpd": "^3.0",
-        "theseer/phpdox": "^0.10.1"
+        "theseer/phpdox": "^0.10.1",
+        "twig/twig": "~2.0"
     },
     "authors": [
         {

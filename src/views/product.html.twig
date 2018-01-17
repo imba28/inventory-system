@@ -1,0 +1,111 @@
+{% set available = product.isAvailable() %}
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="/products/add">Produkt einpflegen</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/products/rent">Produkt verleihen</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/products/return">Produkt zurücknehmen</a>
+                </li>
+            </ul>
+        </nav>
+        <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
+            <h1>Produkte &#187;
+                {{ product.get('name') }}</h1>
+            <a href="/products">Zurück</a>
+            <hr>
+            <!-- /.col-lg-3 -->
+            <div class="row">
+                <div class="col col-sm-6 col-lg-4">
+                    <div class="card">
+                        {{ available ? '<span class="badge badge-success">Verfügbar</span>' : '<span class="badge badge-danger">Verliehen</span>' }}
+                        <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for key, image in product.getImages() %}
+                                    <div class="carousel-item {{ key == 0 ? 'active' : '' }}">
+                                        <img class="d-block w-100" src="{{ image.get('src') }}" alt="{{ image.get('title') }}">
+                                    </div>
+                                {% endfor %}
+                                {% if product.getImages()is empty %}
+                                    <div class="carousel-item active"><img class="d-block w-100" src="http://via.placeholder.com/900x400"></div>
+                                {% endif %}
+                            </div>
+                            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title">{{ product.get('name') }}</h3>
+                            <h5 class="card-type font-italic">{{ product.get('type') }}</h5>
+                            <div class="card-text">
+                                {{ product.get('description') }}
+                            </div>
+                            {% if product.get('note') %}
+                                <div class="alert alert-info" role="alert">
+                                    <strong>Anmerkung:</strong>
+                                    {{ product.get('note') }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            {% if available %}
+                                <a href="/product/{{ product.getId() }}/rent" class="btn btn-success">Ausleihen</a>
+                            {% else %}
+                                <a href="/product/{{ product.getId() }}/return" class="btn btn-success">Zurückgeben</a>
+                            {% endif %}
+                            <a href="/product/{{ product.getId() }}/claim" class="btn btn-default">Reservieren</a>
+                            <a href="/product/{{ product.getId() }}/edit" class="btn btn-primary">Bearbeiten</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-6 col-lg-8">
+                    <!-- /.card -->
+                    <div class="card card-outline-secondary">
+                        <div class="card-header">
+                            Historie
+                        </div>
+                        <div class="card-body">
+                            {% if rentHistory is empty %}
+                                <small class="\" text-muted="text-muted" font-weight-bold\""="font-weight-bold\""">{{ product.get('name') }}
+                                    wurde noch nicht verliehen.</small>
+                            {% else %}
+                                {% for rentAction in rentHistory %}
+                                    {% if rentAction.isProductReturned() == false %}
+                                        <small class="text-muted font-weight-bold">
+                                            Ausgeliehen von
+                                            {{ rentAction.get('customer').get('name') ? rentAction.get('customer').get('name') : rentAction.get('customer').get('invNr') }}
+                                            seit dem
+                                            {{ rentAction.get('rentDate')|date('d.m.Y') }}
+                                        </small>
+                                    {% else %}
+                                        <small class="text-muted">
+                                            Ausgeliehen von
+                                            {{ rentAction.get('customer').get('name') }}
+                                            vom
+                                            {{ rentAction.get('rentDate')|date('d.m.Y') }}
+                                            bis zum
+                                            {{ rentAction.get('returnDate')|date('d.m.Y') }}
+                                        </small>
+                                    {% endif %}
+                                    <hr>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</div>
+</div>

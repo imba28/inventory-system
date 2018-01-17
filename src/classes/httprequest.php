@@ -14,6 +14,10 @@ class HttpRequest implements \App\Interfaces\Request {
         return isset($this->params[$param]);
     }
 
+    public function get($param) { // Alias für Views
+        return $this->getParam($param);
+    }
+
     public function getParam($param) {
         return isset($this->params[$param]) ? $this->params[$param] : null;
     }
