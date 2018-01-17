@@ -48,7 +48,7 @@
           </section>
           <section>
               <?php
-                if(isset($paginator)) echo $paginator->render('/products');
+                if(isset($paginator)) echo $paginator->render();
               ?>
           </section>
         </main>

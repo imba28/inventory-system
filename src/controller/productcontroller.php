@@ -417,7 +417,7 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
             $products = \App\Models\Product::grabByFilter(array(), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
             $query = \App\Models\Product::getQuery(array());
-            $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage);
+            $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage, '/products');
             $this->view->assign('paginator', $paginator);
             $this->view->assign('totals', $paginator->getTotals());
         }
