@@ -419,10 +419,7 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
                     \App\System::getInstance()->addMessage('error', 'Es wurde kein passendes Produkt gefunden!');
                 }
                 elseif(count($products) == 1) {
-                    $this->response->setStatus(301);
-                    $this->response->addHeader('Location', '/product/'. current($products)->getId() . '/rent');
-                    $this->response->flush();
-                    return;
+                    $this->response->redirect('/product/'. current($products)->getId() . '/rent');
                 }
                 else {
                     \App\System::getInstance()->addMessage('info', 'Die Suche lieferte mehrere Ergebnisse.');
