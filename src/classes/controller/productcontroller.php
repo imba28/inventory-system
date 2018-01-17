@@ -396,6 +396,10 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
         if($this->request->issetParam('submit') && $this->request->issetParam('search')) {
             try {
                 $search_string = $this->request->getParam('search');
+
+                $this->view->assign('search_string', $search_string);
+                $this->view->assign('totals', 0);
+
                 $filter = array(
                     array(
                         array('name', 'LIKE', "%{$search_string}%"),
@@ -423,7 +427,6 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
                 else {
                     \App\System::getInstance()->addMessage('info', 'Die Suche lieferte mehrere Ergebnisse.');
                     $this->view->assign('products', $products);
-                    $this->view->assign('search_string', $search_string);
                     $this->view->assign('totals', count($products));
 
                     $rentButton = new \App\Button();
