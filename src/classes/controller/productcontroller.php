@@ -174,10 +174,17 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
     // INTERNAL METHODS
 
     private function edit(\App\Models\Product $product) {
+        $this->view->setTemplate('product-update');
+
         if($this->request->issetParam('submit')) {
             $params = $this->request->getParams();
             foreach($params as $key) {
                 $product->set($key, $this->request->getParam($key));
+            }
+
+            if(empty($product->get('name')) || empty($product->get('invNr'))) {
+                \App\System::getInstance()->addMessage('error', 'Name/Inventar Nummer muss angegeben werden!');
+                return;
             }
 
             try {
@@ -226,8 +233,6 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
                 \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
             }
         }
-
-        $this->view->setTemplate('product-update');
     }
 
     private function rent(\App\Models\Product $product) {
@@ -335,8 +340,8 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
 
             $params = $this->request->getParams();
 
-        if(empty($this->request->getParam('name')) /*|| empty($this->request->getParam('invNr'))*/) {
-                \App\System::getInstance()->addMessage('error', 'Name muss angegeben werden!');
+            if(empty($this->request->getParam('name')) || empty($this->request->getParam('invNr'))) {
+                \App\System::getInstance()->addMessage('error', 'Name/Inventar Nummer muss angegeben werden!');
             }
             else {
                 foreach($params as $key) {
