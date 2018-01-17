@@ -154,7 +154,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
         else {
             try {
                 $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array(
-                    array('product_id', '=', $this->request->getParam('id'))
+                    array('product', '=', $product)
                 ), 10));
             }
             catch(\App\Exceptions\NothingFoundException $e) {
