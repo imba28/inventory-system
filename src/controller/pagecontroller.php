@@ -2,170 +2,171 @@
 namespace App\Controller;
 
 class PageController extends \App\BasicController implements \App\Interfaces\Controller {
-    public function products() {
-        if($this->request->issetParam('id')) {
-            $product = \App\Models\Product::grab($this->request->getParam('id'));
+    public function product() {
+        $product = \App\Models\Product::grab($this->request->getParam('id'));
 
-            $this->view->assign('product', $product);
+        $this->view->assign('product', $product);
 
-            if($this->request->issetParam('sub')) {
-                if($this->request->getParam('sub') == 'edit') {
-                    if($this->request->issetParam('submit')) {
-                        $params = $this->request->getParams();
-                        foreach($params as $key) {
-                            $product->set($key, $this->request->getParam($key));
-                        }
-
-                        try {
-                            $product->save();
-                            \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde aktualisiert!');
-                        }
-                        catch(\App\QueryBuilder\NothingChangedException $e) {
-                            //\App\System::getInstance()->addMessage('info', 'Es wurde nichts geändert.');
-                        }
-                        catch(\Exception $e) {
-                            \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
-                        }
+        if($this->request->issetParam('sub')) {
+            if($this->request->getParam('sub') == 'edit') {
+                if($this->request->issetParam('submit')) {
+                    $params = $this->request->getParams();
+                    foreach($params as $key) {
+                        $product->set($key, $this->request->getParam($key));
                     }
 
-                    if($this->request->issetFile("add-productImage")) {
-                        $files = $this->request->getFiles("add-productImage");
-                        $error = false;
+                    try {
+                        $product->save();
+                        \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde aktualisiert!');
+                    }
+                    catch(\App\QueryBuilder\NothingChangedException $e) {
+                        //\App\System::getInstance()->addMessage('info', 'Es wurde nichts geändert.');
+                    }
+                    catch(\Exception $e) {
+                        \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
+                    }
+                }
 
-                        foreach($files as $file) {
-                            $image = new \App\File\Image($file);
+                if($this->request->issetFile("add-productImage")) {
+                    $files = $this->request->getFiles("add-productImage");
+                    $error = false;
 
-                            if($image->isValid()) {
-                                if($image->save("/images")) {
-                                    $product_image = \App\Models\ProductImage::new();
-                                    $product_image->set('src', "/public/files/images/{$image->getDestination()}");
-                                    $product_image->set('product', $product);
-                                    $product_image->set('title', $image->getInfo('name'));
-                                    if($product_image->save()) {
-                                        $product->addImage($product_image);
-                                    }
-                                }
-                                else {
-                                    $error = true;
-                                    \App\System::getInstance()->addMessage('error', "Fehler beim Speichern von {$image->getInfo('name')}");
+                    foreach($files as $file) {
+                        $image = new \App\File\Image($file);
+
+                        if($image->isValid()) {
+                            if($image->save("/images")) {
+                                $product_image = \App\Models\ProductImage::new();
+                                $product_image->set('src', "/public/files/images/{$image->getDestination()}");
+                                $product_image->set('product', $product);
+                                $product_image->set('title', $image->getInfo('name'));
+                                if($product_image->save()) {
+                                    $product->addImage($product_image);
                                 }
                             }
                             else {
                                 $error = true;
-                                if(get_class($image->getError()) !== 'App\File\NoFileSentException') {
-                                    \App\System::getInstance()->addMessage('error', $image->getError()->getMessage());
-                                }
+                                \App\System::getInstance()->addMessage('error', "Fehler beim Speichern von {$image->getInfo('name')}");
                             }
                         }
-
-                        if(!$error) {
-                            \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
+                        else {
+                            $error = true;
+                            if(get_class($image->getError()) !== 'App\File\NoFileSentException') {
+                                \App\System::getInstance()->addMessage('error', $image->getError()->getMessage());
+                            }
                         }
                     }
 
-                    $this->view->setTemplate('product-update');
+                    if(!$error) {
+                        \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
+                    }
                 }
-                elseif($this->request->getParam('sub') == 'rent') {
-                    if(!$product->isAvailable()) {
-                        $action = current(\App\Models\Action::grabByFilter(array(
-                            array('product_id', '=', $product->getId()),
-                            array('returnDate', 'IS', 'NULL')
-                        )));
 
-                        $this->view->assign('action', $action);
-                        $this->view->setTemplate('product-rented');
+                $this->view->setTemplate('product-update');
+            }
+            elseif($this->request->getParam('sub') == 'rent') {
+                if(!$product->isAvailable()) {
+                    $action = current(\App\Models\Action::grabByFilter(array(
+                        array('product_id', '=', $product->getId()),
+                        array('returnDate', 'IS', 'NULL')
+                    )));
+
+                    $this->view->assign('action', $action);
+                    $this->view->setTemplate('product-rented');
+                }
+                else {
+                    if($this->request->issetParam('submit')) {
+                        try {
+                            $customer = \App\Models\Customer::grab($this->request->getParam('internal_id'), 'internal_id');
+                        }
+                        catch(\App\Exceptions\NothingFoundException $e) {
+                            $customer = \App\Models\Customer::new();
+                            $customer->set('internal_id', $this->request->getParam('internal_id'));
+                        }
+
+                        $expectedReturnDate = !empty($this->request->getParam('expectedReturnDate')) ? $this->request->getParam('expectedReturnDate') : null;
+
+                        $action = \App\Models\Action::new();
+                        $action->set('product', $product);
+                        $action->set('customer', $customer);
+                        $action->set('rentDate', 'NOW()');
+                        $action->set('expectedReturnDate', $expectedReturnDate);
+
+                        if($action->save()) {
+                            \App\System::getInstance()->addMessage('success', 'Produkt verliehen!');
+                        }
+                        else {
+                            \App\System::getInstance()->addMessage('error', 'Produkt konnte nicht verliehen werden!');
+                        }
+                    }
+
+                    $this->view->setTemplate('product-rent');
+                }
+            }
+            elseif($this->request->getParam('sub') == 'return') {
+                try {
+                    $action = \App\Models\Action::grabByFilter(array(
+                        array('returnDate' , 'IS', 'NULL'),
+                        array('product_id', '=', $product->getId())
+                    ));
+
+                    if(count($action) == 1) {
+                        $action = current($action);
+                    }
+                    elseif(count($action) == 0) {
+                        \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
                     }
                     else {
-                        if($this->request->issetParam('submit')) {
-                            try {
-                                $customer = \App\Models\Customer::grab($this->request->getParam('internal_id'), 'internal_id');
-                            }
-                            catch(\App\Exceptions\NothingFoundException $e) {
-                                $customer = \App\Models\Customer::new();
-                                $customer->set('internal_id', $this->request->getParam('internal_id'));
-                            }
-
-                            $expectedReturnDate = !empty($this->request->getParam('expectedReturnDate')) ? $this->request->getParam('expectedReturnDate') : null;
-
-                            $action = \App\Models\Action::new();
-                            $action->set('product', $product);
-                            $action->set('customer', $customer);
-                            $action->set('rentDate', 'NOW()');
-                            $action->set('expectedReturnDate', $expectedReturnDate);
-
-                            if($action->save()) {
-                                \App\System::getInstance()->addMessage('success', 'Produkt verliehen!');
-                            }
-                            else {
-                                \App\System::getInstance()->addMessage('error', 'Produkt konnte nicht verliehen werden!');
-                            }
-                        }
-
-                        $this->view->setTemplate('product-rent');
+                        \App\Debugger::log("Es gibt mehrere aktive Aktionen für das Produkt {$product->getId()}! DAS SOLLTE NICHT PASSIEREN!", 'fatal');
+                        \App\System::getInstance()->addMessage('error', 'Fehler beim Zurückgeben!');
                     }
-                }
-                elseif($this->request->getParam('sub') == 'return') {
-                    try {
-                        $action = \App\Models\Action::grabByFilter(array(
-                            array('returnDate' , 'IS', 'NULL'),
-                            array('product_id', '=', $product->getId())
-                        ));
 
-                        if(count($action) == 1) {
-                            $action = current($action);
-                        }
-                        elseif(count($action) == 0) {
+                    if($this->request->issetParam('submit')) {
+                        if($product->isAvailable()) {
                             \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
                         }
                         else {
-                            \App\Debugger::log("Es gibt mehrere aktive Aktionen für das Produkt {$product->getId()}! DAS SOLLTE NICHT PASSIEREN!", 'fatal');
-                            \App\System::getInstance()->addMessage('error', 'Fehler beim Zurückgeben!');
-                        }
-
-                        if($this->request->issetParam('submit')) {
-                            if($product->isAvailable()) {
-                                \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
-                            }
-                            else {
-                                if($this->request->issetParam('returnDate')) {
-                                    $date = \DateTime::createFromFormat('d.m.Y', $this->request->getParam('returnDate'));
-                                    if($date !== false) {
-                                        $action->returnProduct($date->format('Y-m-d H:i:s'));
-                                    }
-                                    else {
-                                        $action->returnProduct();
-                                    }
+                            if($this->request->issetParam('returnDate')) {
+                                $date = \DateTime::createFromFormat('d.m.Y', $this->request->getParam('returnDate'));
+                                if($date !== false) {
+                                    $action->returnProduct($date->format('Y-m-d H:i:s'));
                                 }
-                                else $action->returnProduct();
-
-                                \App\System::getInstance()->addMessage('success', "{$product->get('name')} wurde erfolgreich zurückgegeben!");
+                                else {
+                                    $action->returnProduct();
+                                }
                             }
+                            else $action->returnProduct();
+
+                            \App\System::getInstance()->addMessage('success', "{$product->get('name')} wurde erfolgreich zurückgegeben!");
                         }
                     }
-                    catch(\Exception $e) {
-                        \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
-                    }
-
-                    $this->view->setTemplate('product-return');
                 }
-                elseif($this->request->getParam('sub') == 'claim') {
-
+                catch(\Exception $e) {
+                    \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
                 }
+
+                $this->view->setTemplate('product-return');
             }
-            else {
-                try {
-                    $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array(
-                        array('product_id', '=', $this->request->getParam('id'))
-                    ), 10));
-                }
-                catch(\App\Exceptions\NothingFoundException $e) {
-                    $this->view->assign('rentHistory', array());
-                }
+            elseif($this->request->getParam('sub') == 'claim') {
 
-                $this->view->setTemplate('product');
             }
         }
-        elseif($this->request->getParam('sub') == 'add') {
+        else {
+            try {
+                $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array(
+                    array('product_id', '=', $this->request->getParam('id'))
+                ), 10));
+            }
+            catch(\App\Exceptions\NothingFoundException $e) {
+                $this->view->assign('rentHistory', array());
+            }
+
+            $this->view->setTemplate('product');
+        }
+    }
+
+    public function products() {
+        if($this->request->getParam('sub') == 'add') {
             //\App\Debugger::log('hello there');
             if($this->request->issetParam('submit')) {
                 $product = \App\Models\Product::new();
@@ -335,6 +336,11 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
                 \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
             }
 
+            $query = new \App\QueryBuilder\Builder('products', true);
+            $query->select(\App\QueryBuilder\Builder::alias($query::raw('DISTINCT type'), 'name'));
+            $query->where('deleted', '0');
+            $this->view->assign('categories', $query->get());
+
             $this->view->assign('products', $products);
             $this->view->setTemplate('products');
             /*$this->view->assign('products', \App\Models\Product::grabAll());
@@ -354,12 +360,12 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
             $this->view->assign('actions', array());
         }
 
-        $query = new \App\QueryBuilder\Builder('actions');
+        $query = new \App\QueryBuilder\Builder('actions' );
         $query->select(\App\QueryBuilder\Builder::alias('COUNT(*)', 'count'));
         $query->select('product_id');
         $query->groupBy('product_id');
 
-        $products = array();
+         $products = array();
         foreach($query->get() as $p_info) {
             try {
                 $products[] = array(
