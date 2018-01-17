@@ -427,7 +427,7 @@ class PageController extends \App\BasicController implements \App\Interfaces\Con
             \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
         }
 
-        $query = new \App\QueryBuilder\Builder('products', true);
+        $query = new \App\QueryBuilder\Builder('products');
         $query->select(\App\QueryBuilder\Builder::alias($query::raw('DISTINCT type'), 'name'));
         $query->where('deleted', '0');
         $this->view->assign('categories', $query->get());
