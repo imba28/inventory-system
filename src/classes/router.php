@@ -4,6 +4,8 @@ namespace App;
 class Router {
     use \App\Traits\Singleton;
 
+    private static $routeCount = 0;
+
     protected $routes = array(
         'ALL' => array(),
         'GET' => array(),
@@ -46,7 +48,7 @@ class Router {
 
             $routeOptions['regex'] = '/^' . implode('\/', $routeOptions['regex']) . '$/ui';
 
-            $this->routes[$request_method][$path] = $routeOptions;
+            $this->routes[$request_method][self::$routeCount++] = $routeOptions;
         }
         else throw new \InvalidArgumentException("{$request_method} is not a valid http request type!");
     }
@@ -85,47 +87,40 @@ class Router {
             if(empty($version)) {
                 throw new \InvalidArgumentException('Invalid API Version!');
             }*/
-            $uri = preg_replace('/^\/api\/(v[0-9]+)\//', '', $uri);
-            if(isset($this->routes[$request_method][$uri])) {
-                $handler = $this->routes[$request_method][$uri];
-                return $this->handle($handler);
-            }
-            /*elseif(isset($this->routes['ALL'][$uri])) {
-                $handler = $this->routes['ALL'][$uri];
-                return $this->handle($handler);
-            }*/
-            else {
-                foreach(array_merge($this->routes['ALL'], $this->routes[$request_method]) as $path => $routeOptions) {
-                    if(preg_match($routeOptions['regex'], $request_uri, $matches)) {
-                        $params = array();
-                        array_shift($matches); // remove first capture group match
+        $uri = preg_replace('/^\/api\/(v[0-9]+)\//', '', $uri);
+        if(isset($this->routes[$request_method][$uri])) {
+            $handler = $this->routes[$request_method][$uri];
+            return $this->handle($handler);
+        }
+        /*elseif(isset($this->routes['ALL'][$uri])) {
+            $handler = $this->routes['ALL'][$uri];
+            return $this->handle($handler);
+        }*/
+        else {
+            $routes = $this->routes[$request_method] + $this->routes['ALL'];
+            ksort($routes);
 
-                        foreach($matches as $idx => $part) {
-                            $params[$routeOptions['params'][$idx]] = $part;
-                        }
+            $this->findHandler($routes, $request_uri);
 
-                        return $this->handle($routeOptions['handler'], $params);
-                    }
+            throw new \ErrorException("Route `{$uri}`not defined!");
+        }
+    }
+
+    private function findHandler(array $routes, $request_uri) {
+        foreach($routes as $path => $routeOptions) {
+            if(preg_match($routeOptions['regex'], $request_uri, $matches)) {
+                $params = array();
+                array_shift($matches); // remove first capture group match
+
+                foreach($matches as $idx => $part) {
+                    $params[$routeOptions['params'][$idx]] = $part;
                 }
-                throw new \ErrorException("Route `{$uri}`not defined!");
+
+                return $this->handle($routeOptions['handler'], $params);
             }
-            // $exp = explode('/', $uri);
-            //
-            // if(count($exp) > 1 && count($exp) % 2 != 0) throw new \InvalidArgumentException('Arguments do not match!');
-            //
-            // for($i = 0; $i < count($exp); $i += 2) {
-            //     $a = $exp[$i];
-            //     if(count($exp) !== 1) $b = $exp[$i+1];
-            //
-            //     if(!isset($query)) {
-            //         $query = new App\QueryBuilder\Builder($a);
-            //     }
-            //     if(isset($b)) {
-            //         $query->where('id', '=', $b)
-            //     }
-            // }
-        /*}
-        else throw new \InvalidArgumentException('Invalid API Version!');*/
+        }
+
+        return false;
     }
 }
 ?>
