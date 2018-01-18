@@ -62,7 +62,13 @@ class Router {
             $controller_action = $split[1];
 
             $controller = new $controller_class();
-            $controller->$controller_action($params);
+
+            if(is_callable(array($controller, $controller_action), true)) {
+                $controller->handle($controller_action, $params);
+            }
+            else {
+                $controller->error(501, "{$controller_class} does not provide {$controller_action}()!");
+            }
         }
         else throw new \InvalidArgumentException('invalid handle!');
     }

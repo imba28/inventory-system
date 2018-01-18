@@ -38,6 +38,11 @@ abstract class BasicController {
         throw new \InvalidArgumentException("Layout {$this->layout}-{$type}` does not exists!`");
     }
 
+    public function handle($method, $args) {
+        $this->$method($args);
+        exit();
+    }
+
     abstract public function error($status);
 }
 
