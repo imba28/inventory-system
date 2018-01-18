@@ -86,7 +86,7 @@ abstract class Model {
             //$properties['stamp'] = 'NOW()'; // set last update date
             $res = $query->where('id', '=', $this->id)->update($properties_update);
             if($res === false) {
-                throw new \App\QueryBuilder\QueryBuilderException("could not update data: {$query->getError()}");
+                throw new \App\QueryBuilder\QueryBuilderException("could not update data",  $query->getError());
             }
         }
         else {
@@ -99,12 +99,13 @@ abstract class Model {
             $res = $query->insert($properties_update);
 
             if($res === false) {
-                //vd($query);
-                throw new \App\QueryBuilder\QueryBuilderException("could not insert data: {$query->getError()}");
+                throw new \App\QueryBuilder\QueryBuilderException("could not insert data", $query->getError());
             }
 
             $this->id = $query->lastInsertId();
             $this->data['id'] = $this->id;
+
+            self::$instances[get_called_class()][$this->getId()] = $this;
         }
 
         return true;
@@ -236,12 +237,17 @@ abstract class Model {
         return new $self_class();
     }
 
-    public static function delete(integer $id) {
-        $this->trigger('delete');
-
-        $obj = self::grab($id);
-        $obj->set('deleted', 1);
-        return $obj->save();
+    public static function delete(int $id) {
+        try {
+            $obj = self::grab($id);
+            $obj->trigger('delete');
+            $obj->set('deleted', 1);
+            
+            return $obj->save();
+        }
+        catch(\App\Exceptions\NothingFoundException $e) {
+            return false;
+        }
     }
 
     protected static function getTableName() {

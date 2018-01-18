@@ -184,8 +184,15 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
                 $product->save();
                 \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde aktualisiert!');
             }
+            catch(\App\QueryBuilder\QueryBuilderException $e) {
+                list($error_code, $error_message, $error_value, $error_column) = $e->getData();
+                \App\System::getInstance()->addMessage('error', $error_message);
+            }
             catch(\App\QueryBuilder\NothingChangedException $e) {
                 //\App\System::getInstance()->addMessage('info', 'Es wurde nichts geändert.');
+            }
+            catch(\InvalidOperationException $e) {
+                \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern! ' . $e->getMessage());
             }
             catch(\Exception $e) {
                 \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
@@ -380,6 +387,10 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
                     }
 
                     \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde erstellt! <a href="/product/'. $product->getId() .'">zum Produkt</a>');
+                }
+                catch(\App\QueryBuilder\QueryBuilderException $e) {
+                    list($error_code, $error_message, $error_value, $error_column) = $e->getData();
+                    \App\System::getInstance()->addMessage('error', $error_message);
                 }
                 catch(\Exception $e) {
                     \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
