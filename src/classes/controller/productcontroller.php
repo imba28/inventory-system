@@ -126,13 +126,6 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
         $this->renderContent();
     }
 
-    public function customers() {
-        $this->view->assign('customers', \App\Models\Customer::grabAll());
-        $this->view->setTemplate('customers');
-
-        $this->renderContent();
-    }
-
     public function displayCategory($params) {
         $currentPage = isset($params['page']) ? intval($params['page']) : 1;
         $itemsPerPage = 8;

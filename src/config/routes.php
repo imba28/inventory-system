@@ -7,7 +7,11 @@ $router->addRoute('all', array('/products/category/:category', '/products/catego
 $router->addRoute('all', array('/products/search', '/products/:action/:page'), 'ProductController#search');
 $router->addRoute('all', array('/products/:action', '/products'), 'ProductController#products');
 
-$router->addRoute('all', '/customers', 'ProductController#customers');
+$router->addRoute('all', '/customers', 'CustomerController#customers');
+$router->addRoute('all', '/customers/:action', 'CustomerController#action');
+$router->addRoute('all', '/customer/:id', 'CustomerController#customer');
+$router->addRoute('post', '/customer/:id/delete', 'CustomerController#delete');
+$router->addRoute('all', '/customer/:id/:action', 'CustomerController#action');
 
 $router->addRoute('post', '/inventur', 'InventurController#actionInventur');
 $router->addRoute('get', array('/inventur/:action', '/inventur'), 'InventurController#main');
