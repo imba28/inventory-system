@@ -85,6 +85,7 @@ abstract class Model {
         if($this->isCreated()) {
             //$properties['stamp'] = 'NOW()'; // set last update date
             $res = $query->where('id', '=', $this->id)->update($properties_update);
+
             if($res === false) {
                 throw new \App\QueryBuilder\QueryBuilderException("could not update data",  $query->getError());
             }
@@ -242,7 +243,7 @@ abstract class Model {
             $obj = self::grab($id);
             $obj->trigger('delete');
             $obj->set('deleted', 1);
-            
+
             return $obj->save();
         }
         catch(\App\Exceptions\NothingFoundException $e) {

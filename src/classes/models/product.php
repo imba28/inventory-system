@@ -56,7 +56,9 @@ class Product extends \App\Model {
 
             $this->images = $images;
         }
-        else parent::save($head_column, $head_id, $exception);
+        else {
+            parent::save($head_column, $head_id, $exception);
+        }
     }
 
     public function isAvailable() {

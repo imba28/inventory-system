@@ -82,20 +82,11 @@ class Router {
         $uri = ltrim(parse_url($request_uri, PHP_URL_PATH), '/');
         $params = parse_url($request_uri, PHP_URL_QUERY);
 
-        /*if(preg_match('/^\/api\/(v[0-9]+)\//', $uri, $match)) {
-            $version = intval(preg_replace('/[\D]/', '', $match[1]));
-            if(empty($version)) {
-                throw new \InvalidArgumentException('Invalid API Version!');
-            }*/
         $uri = preg_replace('/^\/api\/(v[0-9]+)\//', '', $uri);
         if(isset($this->routes[$request_method][$uri])) {
             $handler = $this->routes[$request_method][$uri];
             return $this->handle($handler);
         }
-        /*elseif(isset($this->routes['ALL'][$uri])) {
-            $handler = $this->routes['ALL'][$uri];
-            return $this->handle($handler);
-        }*/
         else {
             $routes = $this->routes[$request_method] + $this->routes['ALL'];
             ksort($routes);
