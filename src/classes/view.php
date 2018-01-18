@@ -17,13 +17,24 @@ class View {
         $template_file = "{$this->template}.html.twig";
         if(file_exists(ABS_PATH."/src/views/" . $template_file)) {
             $loader = new \Twig_Loader_Filesystem(ABS_PATH."/src/views/");
-            $twig = new \Twig_Environment($loader, array(
-                //'cache' => ABS_PATH . '/cache/twig'
-            ));
+
+            $twigOptions = array();
+
+            if(Configuration::get('env') === 'dev') {
+                $twigOptions['debug'] = true;
+            }
+            else {
+                $twigOptions['cache'] = ABS_PATH . '/cache/twig';
+            }
+
+            $twig = new \Twig_Environment($loader, $twigOptions);
 
             $twig->addFilter(new \Twig_Filter('ago', function ($string) {
                 return ago(strtotime($string));
             }));
+
+            $twig->addExtension(new \Twig_Extension_Debug());
+
 
             return $twig->render($template_file, $this->data);
 
