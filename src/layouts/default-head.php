@@ -7,6 +7,7 @@
     <meta name="author" content="">
     <title>MMT Verleihmanager</title>
 
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="/src/css/bootstrap.min.css" rel="stylesheet">
     <link href="/src/css/bootstrap.datepicker.min.css" rel="stylesheet">
     <link href="/src/css/style.css" rel="stylesheet">
