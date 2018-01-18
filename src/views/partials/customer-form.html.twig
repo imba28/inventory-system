@@ -1,0 +1,29 @@
+{% macro render(customer, title, button_text, back_link) %}
+<h1>Kunde
+    {{ title ? ('&#187; ' ~ title)|raw : '' }}
+</h1>
+<a href="{{ back_link ? back_link : '/customers' }}">Zurück</a>
+<hr>
+<!-- /.col-lg-3 -->
+<div class="row">
+    <form class="ml-4 col-md-6" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">*Name</label>
+            <input id="name" type="text" class="form-control" placeholder="Name eingeben" name="name" value="{{ customer.get('name') }}">
+        </div>
+        <div class="form-group">
+            <label for="fhs">*FHS Nummer</label>
+            <input id="fhs" type="text" class="form-control" placeholder="FHS Nummer eingeben" name="internal_id" value="{{ customer.get('internal_id') }}">
+        </div>
+        <div class="form-group">
+            <label for="email">E-Mail Adresse</label>
+            <input id="email" type="text" class="form-control" placeholder="E-Mail Adresse eingeben" name="email" value="{{ customer.get('email') }}">
+        </div>
+        <div class="form-group">
+            <label for="phone">Telefonnummer</label>
+            <input id="phone" type="text" class="form-control" placeholder="Telefonnummer eingeben" name="phone" value="{{ customer.get('phone') }}">
+        </div>
+        <button type="submit" name="submit" class="btn btn-primary">{{ button_text ? button_text : 'Speichern' }}</button>
+    </form>
+</div>
+{% endmacro %}
