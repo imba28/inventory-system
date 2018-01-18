@@ -3,29 +3,47 @@ namespace App\Controller;
 
 class ProductController extends \App\BasicController implements \App\Interfaces\Controller {
     public function product($params) {
-        $product = \App\Models\Product::grab($params['id']);
+        try {
+            $product = \App\Models\Product::grab($params['id']);
 
-        $this->view->assign('product', $product);
+            $this->view->assign('product', $product);
 
-        if(isset($params['action'])) {
-            if($params['action'] == 'edit') {
-                $this->edit($product);
+            if(isset($params['action'])) {
+                if($params['action'] == 'edit') {
+                    $this->edit($product);
+                }
+                elseif($params['action'] == 'rent') {
+                    $this->rent($product);
+                }
+                elseif($params['action'] == 'return') {
+                    $this->return($product);
+                }
+                elseif($params['action'] == 'claim') {
+                    //TODO: implements claim product
+                }
             }
-            elseif($params['action'] == 'rent') {
-                $this->rent($product);
-            }
-            elseif($params['action'] == 'return') {
-                $this->return($product);
-            }
-            elseif($params['action'] == 'claim') {
-                //TODO: implements claim product
+            else {
+                $this->display($product);
             }
         }
-        else {
-            $this->display($product);
+        catch(\App\Exceptions\NothingFoundException $e) {
+            $this->error(404, 'Produkt wurde nicht gefunden!');
         }
 
         $this->renderContent();
+    }
+
+    public function delete(array $params) {
+        if(isset($params['id'])) {
+            if(\App\Models\Product::delete(intval($params['id'])) === false) {
+                \App\System::getInstance()->addMessage('error', 'Es ist ein Fehler beim Löschen aufgetreten!');
+            }
+            else {
+                \App\System::getInstance()->addMessage('success', 'Produkt wurde gelöscht.');
+            }
+
+            $this->products(array());
+        }
     }
 
     public function search($params) {
@@ -157,11 +175,13 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
         $this->renderContent();
     }
 
-    public function error($status) {
+    public function error($status, $message = '') {
         $this->response->setStatus($status);
         $this->view->setTemplate('error');
-
+        $this->view->assign('errorCode', $status);
+        $this->view->assign('errorMessage', $message);
         $this->renderContent();
+        exit();
     }
 
     // INTERNAL METHODS

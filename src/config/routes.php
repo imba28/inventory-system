@@ -1,6 +1,7 @@
 <?php
 $router->addRoute('all', array('/', '/home', '/products/return'), 'ProductController#home');
 
+$router->addRoute('post', '/product/:id/delete', 'ProductController#delete');
 $router->addRoute('all', array('/product/:id', '/product/:id/:action'), 'ProductController#product');
 
 $router->addRoute('all', array('/products/category/:category', '/products/category/:category/:page'), 'ProductController#displayCategory');

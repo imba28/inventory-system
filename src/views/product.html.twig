@@ -65,6 +65,9 @@
                             {% endif %}
                             <a href="/product/{{ product.getId() }}/claim" class="btn btn-default">Reservieren</a>
                             <a href="/product/{{ product.getId() }}/edit" class="btn btn-primary">Bearbeiten</a>
+                            <form method="post" action="/product/{{ product.getId() }}/delete">
+                                <button type="submit" class="btn btn-danger">Löschen</button>
+                            </form>
                         </div>
                     </div>
                 </div>
