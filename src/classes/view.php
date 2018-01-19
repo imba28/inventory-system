@@ -37,17 +37,16 @@ class View {
 
 
             return $twig->render($template_file, $this->data);
-
-            extract($this->data);
+            /*extract($this->data);
 
             ob_start();
             include($template_path);
             $content = ob_get_contents();
             ob_end_clean();
 
-            return $content;
+            return $content;*/
         }
-        throw new \Exception("Template `{$template_path}` not found!");
+        throw new \Exception("Template `{$this->template}` not found!");
     }
 }
 ?>
