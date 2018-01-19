@@ -93,7 +93,7 @@
                         </div>
                         <div class="card-body">
                             {% if rentHistory is empty %}
-                                <small class="\" text-muted="text-muted" font-weight-bold\""="font-weight-bold\""">{{ product.get('name') }}
+                                <small class="text-muted font-weight-bold">{{ product.get('name') }}
                                     wurde noch nicht verliehen.</small>
                             {% else %}
                                 {% for rentAction in rentHistory %}
