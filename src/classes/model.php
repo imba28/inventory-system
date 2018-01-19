@@ -163,7 +163,7 @@ abstract class Model {
         }
 
         if(is_array($filters)) {
-            if(count($filters) == 3) {
+            if(count($filters) == 3 && is_string($filters[1])) {
                 $query->where($filters[0], $filters[1], $filters[2]);
             }
             else {
