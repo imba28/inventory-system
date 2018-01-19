@@ -18,6 +18,9 @@ class ProductController extends ApplicationController {
                 elseif($params['action'] == 'return') {
                     $this->return($product);
                 }
+                elseif($params['action'] == 'request') {
+                    $this->request($product);
+                }
                 elseif($params['action'] == 'claim') {
                     //TODO: implements claim product
                 }
@@ -503,6 +506,16 @@ class ProductController extends ApplicationController {
 
         $this->view->assign('products', $products);
         $this->view->setTemplate('products');
+    }
+
+    private function request(\App\Models\Product $product) {
+        if($product->isAvailable()) {
+            $this->view->setTemplate('product-request');
+        }
+        else {
+            \App\System::getInstance()->addMessage('error', 'Produkt ist bereits verliehen!');
+            $this->redirectToRoute("/product/{$product->getId()}");
+        }
     }
 }
 ?>

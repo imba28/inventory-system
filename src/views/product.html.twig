@@ -1,9 +1,9 @@
 {% set available = product.isAvailable() %}
 <div class="container-fluid">
     <div class="row">
-        {% if isUserSignedIn %}
         <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
             <ul class="nav nav-pills flex-column">
+                {% if isUserSignedIn %}
                 <li class="nav-item">
                     <a class="nav-link" href="/products/add">Produkt einpflegen</a>
                 </li>
@@ -13,9 +13,15 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/products/return">Produkt zurücknehmen</a>
                 </li>
+                {% else %}
+                {% if available %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/product/{{ product.getId() }}/request">Produkt leihen</a>
+                </li>
+                {% endif %}
+                {% endif %}
             </ul>
         </nav>
-        {% endif %}
         <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
             <h1>Produkte &#187;
                 {{ product.get('name') }}</h1>
@@ -59,18 +65,24 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <div class="btn-group" role="group" aria-label="Basic example">
-                            {% if available %}
-                                <a href="/product/{{ product.getId() }}/rent" class="btn btn-success">Ausleihen</a>
-                            {% else %}
-                                <a href="/product/{{ product.getId() }}/return" class="btn btn-success">Zurückgeben</a>
-                            {% endif %}
-                            <a href="/product/{{ product.getId() }}/claim" class="btn btn-default">Reservieren</a>
-                            <a href="/product/{{ product.getId() }}/edit" class="btn btn-primary">Bearbeiten</a>
-                            <form method="post" action="/product/{{ product.getId() }}/delete">
-                                <button type="submit" class="btn btn-danger">Löschen</button>
-                            </form>
-                        </div>
+                        <form method="post" action="/product/{{ product.getId() }}/delete">
+                            <div class="btn-group p-3" role="group" aria-label="Basic example">
+                                {% if isUserSignedIn %}
+                                    {% if available %}
+                                        <a href="/product/{{ product.getId() }}/rent" class="btn btn-success">Ausleihen</a>
+                                    {% else %}
+                                        <a href="/product/{{ product.getId() }}/return" class="btn btn-success">Zurückgeben</a>
+                                    {% endif %}
+                                    <a href="/product/{{ product.getId() }}/edit" class="btn btn-primary">Bearbeiten</a>
+                                        <button type="submit" class="btn btn-danger">Löschen</button>
+                                {% else %}
+                                {% if available %}
+                                <a href="/product/{{ product.getId() }}/request" class="btn btn-primary">Produkt leihen</a>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                        </form>
+
                     </div>
                 </div>
                 <div class="col col-sm-6 col-lg-8">
