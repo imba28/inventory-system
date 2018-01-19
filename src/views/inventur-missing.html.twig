@@ -33,6 +33,11 @@
                                     <h5 class="mt-0 mb-0">{{ product.get('name') }} <small>{{ product.get('type') }}</small></h5>
                                 </a>
                                 <h6>Inventarnummer {{ product.get('invNr') }}</h6>
+                                <form method="post" action="/inventur">
+                                    <input type="hidden" name="action" value="missing_product" />
+                                    <input type="hidden" name="invNr" value="{{ product.get('invNr') }}" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Produkt fehlt</button>
+                                </form>
                             </div>
                         </div>
                     </article>

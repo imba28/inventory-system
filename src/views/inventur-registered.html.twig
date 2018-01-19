@@ -25,6 +25,9 @@
                                 <img class="align-self-start mr-3 rounded" src="{{ product.getFrontImage().get('src') }}" alt="Generic placeholder image">
                             </a>
                             <div class="media-body">
+                                {% if inventurActions[product.getId()] and inventurActions[product.getId()].get('missing') == 1 %}
+                                    <span class="badge badge-danger">Fehlt</span>
+                                {% endif %}
                                 {% if not available %}
                                 <span class="badge badge-warning">Verliehen</span>
                                 {% endif %}

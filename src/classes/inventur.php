@@ -135,7 +135,11 @@ class Inventur {
         $inventurProduct;
 
         try {
-            $inventurProduct = \App\Models\inventurProduct::grab($product->getId(), 'product_id');
+            $inventurProduct = current(\App\Models\inventurProduct::grabByFilter(array(
+                array('product', '=', $product),
+                'AND',
+                array('inventur', '=', $this->inventurObject)
+            )));
 
             if($inventurProduct->isInStock()) {
                 throw new \App\QueryBuilder\NothingChangedException("already scanned!");
@@ -147,6 +151,53 @@ class Inventur {
         }
 
         $inventurProduct->set('in_stock', '1');
+        $inventurProduct->set('inventur', $this->inventurObject);
+
+        function indexOf($array, $product) {
+            foreach($array as $key => $value) {
+                if($value->getId() === $product->getId()) {
+                    return $key;
+                }
+            }
+            return false;
+        }
+
+        if($inventurProduct->save()) {
+            if(($key = indexOf($this->itemsMissing, $product)) !== FALSE) {
+                unset($this->itemsMissing[$key]);
+                $this->itemsMissing = array_values($this->itemsMissing);
+
+                $this->itemsRegistered[] = $product;
+                return true;
+            }
+
+            return false;
+        }
+        return false;
+    }
+
+
+    public function missingProduct(\App\Models\Product $product) {
+        $inventurProduct;
+
+        try {
+            $inventurProduct = current(\App\Models\inventurProduct::grabByFilter(array(
+                array('product', '=', $product),
+                'AND',
+                array('inventur', '=', $this->inventurObject)
+            )));
+
+            if($inventurProduct->isInStock()) {
+                throw new \App\QueryBuilder\NothingChangedException("already scanned!");
+            }
+        }
+        catch(\App\Exceptions\NothingFoundException $e) {
+            $inventurProduct = \App\Models\inventurProduct::new();
+            $inventurProduct->set('product', $product);
+        }
+
+        $inventurProduct->set('in_stock', '1');
+        $inventurProduct->set('missing', '1');
         $inventurProduct->set('inventur', $this->inventurObject);
 
         function indexOf($array, $product) {
