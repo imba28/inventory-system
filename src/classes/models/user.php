@@ -12,13 +12,14 @@ class User extends \App\Model {
         $this->on('save', function($e) {
             $user = $e->getContext();
 
-            $password = $user->get('password');
-            $salt = strtr(base64_encode(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM)), '+', '.');
-            $salt = sprintf("$2a$%02d$", 10) . $salt;
-            $password = crypt($password, $salt);
+            $password = self::getHashedString($user->get('password'));
 
             $user->set('password', $password);
         });
+    }
+
+    public static function getHashedString($string): string {
+        return password_hash($string, PASSWORD_BCRYPT);
     }
 }
 ?>
