@@ -81,7 +81,7 @@ class ProductController extends ApplicationController {
         catch(\App\Exceptions\NothingFoundException $e) {
             $products = array();
             $this->view->assign('totals', 0);
-            \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
+            \App\System::getInstance()->addMessage('info', 'Deine Suche lieferte keine Ergebnisse!');
         }
 
         $this->view->assign('products', $products);
@@ -276,6 +276,10 @@ class ProductController extends ApplicationController {
                 catch(\App\Exceptions\NothingFoundException $e) {
                     $customer = \App\Models\Customer::new();
                     $customer->set('internal_id', $this->request->getParam('internal_id'));
+
+                    $customer->save();
+
+                    \App\System::getInstance()->addMessage('info', "Ein neuer Kunde <a href='/customer/{$customer->getId()}/edit'> {$customer->get('internal_id')}</a> wurde angelegt.");
                 }
 
                 $expectedReturnDate = !empty($this->request->getParam('expectedReturnDate')) ? $this->request->getParam('expectedReturnDate') : null;
@@ -467,7 +471,7 @@ class ProductController extends ApplicationController {
                     $rentButton = new \App\Button();
                     $rentButton->set('href', '/product/__id__/rent');
                     $rentButton->set('style', 'primary');
-                    $rentButton->set('text', 'Leihen');
+                    $rentButton->set('text', 'Verleihen');
 
                     $this->view->assign('buttons', array($rentButton));
                 }
