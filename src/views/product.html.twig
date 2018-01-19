@@ -103,6 +103,10 @@
                                             {{ rentAction.get('customer').get('name') ? rentAction.get('customer').get('name') : rentAction.get('customer').get('invNr') }}
                                             seit dem
                                             {{ rentAction.get('rentDate')|date('d.m.Y') }}
+
+                                            {% if rentAction.get('expectedReturnDate') %}
+                                            bis voraussichtlich zum {{ rentAction.get('expectedReturnDate')|date('d.m.Y') }}
+                                            {% endif %}
                                         </small>
                                     {% else %}
                                         <small class="text-muted">
