@@ -1,5 +1,6 @@
 <?php
-App\Configuration::set('env', 'dev');
+\App\Configuration::set('env', 'dev');
+\App\Configuration::set('admin_email', 'max@mustermann.net');
 
 \App\Configuration::set('DB_HOST', '127.0.0.1');
 \App\Configuration::set('DB_DB', 'verleihsystem');

@@ -21,14 +21,26 @@
             <hr>
             <div class="row">
                 <form class="ml-4" method='post'>
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input type="text" class="form-control" name='name' placeholder="Name eingeben" value="{{ request.getParam('name') }}">
+                    <div class="text-muted">
+                        Bitte fülle folgendes Formular aus, damit wir einen Termin zum Abholen festlegen können.
+                    </div>
+                    <div class="text-muted">
+                        Alternativ kannst du auch eine E-Mail an
+                        {% for email in admin_email %}
+                            <a href="mailto:{{ email }}?subject={{ ('MMT Verleih: Anfrage für Produkt ' ~ product.get('name'))|url_encode }}">{{ email }}</a>
+                        {% endfor %}
+                        senden.
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="name">Dein Name</label>
+                        <input type="text" class="form-control" name='name' placeholder="Max Mustermann" value="{{ request.getParam('name') }}">
                     </div>
                     <div class="form-group">
-                        <label for="name">Nachricht</label>
-                        <textarea class="textarea" name='message' placeholder="Beschreibe bitte kurz, wofür du das Produkt benötigst">{{ request.getParam('message') }}</textarea>
+                        <label for="name">Deine E-Mail Adresse</label>
+                        <input type="text" class="form-control" name='aklnslknat' placeholder="max@mustermann.com" value="{{ request.getParam('aklnslknat') }}">
                     </div>
+                    <input type="email" name="email" class="d-none" />
+
                     <button type="submit" name="submit" class="btn btn-primary">Leihen beantragen</button>
                 </form>
             </div>

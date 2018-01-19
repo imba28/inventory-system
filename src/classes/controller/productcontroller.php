@@ -515,7 +515,36 @@ class ProductController extends ApplicationController {
 
     private function request(\App\Models\Product $product) {
         if($product->isAvailable()) {
+            $adminEmail = \App\Configuration::get('admin_email');
+            if(!is_array($adminEmail)) $adminEmail = array($adminEmail);
+
+            $this->view->assign('admin_email', $adminEmail);
             $this->view->setTemplate('product-request');
+
+            if($this->request->issetParam('submit')) {
+                if(empty($this->request->get('email'))) {
+                    // honeypot für bots o.Ä. echte email adresse ist in 'aklnslknat'
+                    if(empty($this->request->get('aklnslknat'))) {
+                        \App\System::getInstance()->addMessage('error', 'Bitte gib deine E-Mail Adresse an!');
+                    }
+                    else {
+                        $to = implode($adminEmail, ';');
+                        $subject = "MMT Verleih: Anfrage für Produkt {$product->get('name')}";
+                        $message = "Anfrage für Verleih von {$product->get('name')} von {$this->request->get('name')}.";
+                        $header = 'From: webmaster@example.com' . "\r\n" .
+                            'Reply-To: '. $this->request->get('aklnslknat') . "\r\n" .
+                            'X-Mailer: PHP/' . phpversion();
+
+                        if(mail($to, $subject, $message, $header)) {
+                            \App\System::getInstance()->addMessage('success', 'Deine Anfrage wurde erfolgreich gesendet!');
+                        }
+                        else {
+                            \App\System::getInstance()->addMessage('error', 'Deine Anfrage konnte leider nicht gesendet werden!');
+                        }
+                    }
+
+                }
+            }
         }
         else {
             \App\System::getInstance()->addMessage('error', 'Produkt ist bereits verliehen!');
