@@ -1,7 +1,7 @@
 <?php
 namespace App\Controller;
 
-class InventurController extends \App\BasicController implements \App\Interfaces\Controller {
+class InventurController extends ApplicationController {
     protected $inventur;
 
     public function __construct($layout = 'default') {

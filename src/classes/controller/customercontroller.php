@@ -1,7 +1,7 @@
 <?php
 namespace App\Controller;
 
-class CustomerController extends \App\BasicController {
+class CustomerController extends ApplicationController {
     public function customers() {
         $this->view->assign('customers', \App\Models\Customer::grabAll());
         $this->view->setTemplate('customers');

@@ -1,7 +1,7 @@
 <?php
 namespace App\Controller;
 
-class ProductController extends \App\BasicController implements \App\Interfaces\Controller {
+class ProductController extends ApplicationController {
     public function product($params) {
         try {
             $product = \App\Models\Product::grab($params['id']);

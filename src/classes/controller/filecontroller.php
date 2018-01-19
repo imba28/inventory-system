@@ -1,7 +1,7 @@
 <?php
 namespace App\Controller;
 
-class FileController extends \App\BasicController implements \App\Interfaces\Controller {
+class FileController extends ApplicationController {
     private static $allowedFileTypes = array('png', 'jpg', 'jpeg', 'png', 'gif', 'html', 'css', 'js', 'woff', 'ttf');
 
     public function main($params) {
