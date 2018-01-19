@@ -7,7 +7,8 @@ class InventurController extends ApplicationController {
     public function __construct($layout = 'default') {
         parent::__construct($layout);
 
-        $this->inventur = new \App\Inventur();
+        $this->authenticateUser();
+        $this->inventur = new \App\Inventur();    
     }
 
     public function main($params) {

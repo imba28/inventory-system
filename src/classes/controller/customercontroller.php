@@ -2,6 +2,12 @@
 namespace App\Controller;
 
 class CustomerController extends ApplicationController {
+    public function __construct($layout = 'default') {
+        parent::__construct($layout);
+
+        $this->authenticateUser();
+    }
+
     public function customers() {
         $this->view->assign('customers', \App\Models\Customer::grabAll());
         $this->view->setTemplate('customers');
