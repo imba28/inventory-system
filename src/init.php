@@ -52,12 +52,6 @@ else {
 $router = App\Router::getInstance();
 include(ABS_PATH . '/src/config/routes.php');
 
-\App\Menu::getInstance()->set('items', array(
-    'Produkte' => 'products',
-    'Kunden' => 'customers',
-    'Inventur' => 'inventur'
-));
-
 try {
     \App\Registry::setDatabase(new \App\Database());
 }
