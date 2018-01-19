@@ -40,6 +40,8 @@ abstract class BasicController {
 
     public function handle($method, $args) {
         $this->$method($args);
+        
+        $this->renderContent();
         exit();
     }
 

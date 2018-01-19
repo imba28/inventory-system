@@ -29,8 +29,6 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
         catch(\App\Exceptions\NothingFoundException $e) {
             $this->error(404, 'Produkt wurde nicht gefunden!');
         }
-
-        $this->renderContent();
     }
 
     public function delete(array $params) {
@@ -85,8 +83,6 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
         $this->view->assign('search_string', $search_string);
 
         $this->view->setTemplate('products-search');
-
-        $this->renderContent();
     }
 
     public function products($params) {
@@ -109,8 +105,6 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
             /*$this->view->assign('products', \App\Models\Product::grabAll());
             $this->view->setTemplate('products');*/
         }
-
-        $this->renderContent();
     }
 
     public function home() {
@@ -141,7 +135,6 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
 
         $this->view->assign('topProducts', $products);
         $this->view->setTemplate('products-rented');
-        $this->renderContent();
     }
 
     public function displayCategory($params) {
@@ -171,8 +164,6 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
 
         $this->view->assign('products', $products);
         $this->view->setTemplate('products');
-
-        $this->renderContent();
     }
 
     public function error($status, $message = '') {
@@ -180,8 +171,6 @@ class ProductController extends \App\BasicController implements \App\Interfaces\
         $this->view->setTemplate('error');
         $this->view->assign('errorCode', $status);
         $this->view->assign('errorMessage', $message);
-        $this->renderContent();
-        exit();
     }
 
     // INTERNAL METHODS

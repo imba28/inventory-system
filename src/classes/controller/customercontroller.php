@@ -5,8 +5,6 @@ class CustomerController extends \App\BasicController {
     public function customers() {
         $this->view->assign('customers', \App\Models\Customer::grabAll());
         $this->view->setTemplate('customers');
-
-        $this->renderContent();
     }
 
     public function customer(array $params) {
@@ -24,8 +22,6 @@ class CustomerController extends \App\BasicController {
             $this->view->assign('customer', $customer);
             $this->view->assign('rentHistory', $rentalHistory);
             $this->view->setTemplate('customer');
-
-            $this->renderContent();
         }
         else {
             $this->error(404);
@@ -54,8 +50,6 @@ class CustomerController extends \App\BasicController {
                 $this->error(404);
             }
         }
-
-        $this->renderContent();
     }
 
     private function edit(\App\Models\Customer $customer) {
@@ -105,8 +99,6 @@ class CustomerController extends \App\BasicController {
 
             $this->view->assign('customers', \App\Models\Customer::grabAll());
             $this->view->setTemplate('customers');
-
-            $this->renderContent();
         }
     }
 
@@ -119,8 +111,6 @@ class CustomerController extends \App\BasicController {
     public function error($status) {
         $this->response->setStatus($status);
         $this->view->setTemplate('error');
-
-        $this->renderContent();
     }
 }
 ?>

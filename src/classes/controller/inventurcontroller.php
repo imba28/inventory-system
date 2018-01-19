@@ -35,8 +35,6 @@ class InventurController extends \App\BasicController implements \App\Interfaces
         else {
             $this->view->setTemplate('inventur');
         }
-
-        $this->renderContent();
     }
 
     public function actionInventur() {
@@ -83,7 +81,6 @@ class InventurController extends \App\BasicController implements \App\Interfaces
         $this->view->assign('lastInventur', \App\Inventur::getLastInventur());
 
         $this->view->setTemplate('inventur');
-        $this->renderContent();
     }
 
     private function startInventur() {
@@ -99,7 +96,6 @@ class InventurController extends \App\BasicController implements \App\Interfaces
         $this->view->assign('lastInventur', \App\Inventur::getLastInventur());
 
         $this->view->setTemplate('inventur');
-        $this->renderContent();
     }
 
     private function endInventur() {
@@ -118,7 +114,6 @@ class InventurController extends \App\BasicController implements \App\Interfaces
         $this->view->assign('lastInventur', \App\Inventur::getLastInventur());
 
         $this->view->setTemplate('inventur');
-        $this->renderContent();
     }
 
     public function error($status, $message = null) {
@@ -127,8 +122,6 @@ class InventurController extends \App\BasicController implements \App\Interfaces
         if(!is_null($message)) $this->view->assign('errorMessage', $message);
 
         $this->view->setTemplate('error');
-
-        //$this->renderContent();
     }
 }
 ?>
