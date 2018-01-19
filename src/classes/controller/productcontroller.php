@@ -128,6 +128,7 @@ class ProductController extends ApplicationController {
             $query->select('product_id');
             $query->groupBy('product_id');
             $query->orderBy(\App\QueryBuilder\Builder::raw('count'));
+            $query->orderBy('product_id');
 
             $products = array();
             foreach($query->get() as $p_info) {
@@ -165,7 +166,7 @@ class ProductController extends ApplicationController {
         catch(\App\Exceptions\NothingFoundException $e) {
             $products = array();
             $this->view->assign('totals', 0);
-            \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
+            \App\System::getInstance()->addMessage('info', 'Deine Suche lieferte keine Ergebnisse!');
         }
 
         $query = new \App\QueryBuilder\Builder('products');
