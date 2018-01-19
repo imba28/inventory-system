@@ -75,10 +75,10 @@ class Router {
         else throw new \InvalidArgumentException('invalid handle!');
     }
 
-    public function route() {
-        $request_uri = urldecode($_SERVER['REQUEST_URI']);
+    public function route($request_uri = null, $request_method = null) {
+        if(is_null($request_uri)) $request_uri = urldecode($_SERVER['REQUEST_URI']);
+        if(is_null($request_method)) $request_method = $_SERVER['REQUEST_METHOD'];
 
-        $request_method = $_SERVER['REQUEST_METHOD'];
         $uri = ltrim(parse_url($request_uri, PHP_URL_PATH), '/');
         $params = parse_url($request_uri, PHP_URL_QUERY);
 
