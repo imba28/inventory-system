@@ -39,6 +39,13 @@ class InventurController extends ApplicationController {
         }
     }
 
+    public function list() {
+        $inventurList = \App\Models\Inventur::grabAll();
+
+        $this->view->assign('inventurList', $inventurList);
+        $this->view->setTemplate('inventur-list');
+    }
+
     public function actionInventur() {
         if($this->request->issetParam('action')) {
             if($this->request->getParam('action') == 'start') {

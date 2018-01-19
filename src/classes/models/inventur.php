@@ -9,4 +9,8 @@ class Inventur extends \App\Model {
     public function isStarted() {
         return !is_null($this->startDate);
     }
+
+    public function isFinished() {
+        return !is_null($this->finishDate);
+    }
 }
