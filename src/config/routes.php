@@ -17,5 +17,9 @@ $router->addRoute('all', '/customer/:id/:action', 'CustomerController#action');
 $router->addRoute('post', '/inventur', 'InventurController#actionInventur');
 $router->addRoute('get', array('/inventur/:action', '/inventur'), 'InventurController#main');
 
+$router->addRoute('get', '/login', 'SessionController#loginForm');
+$router->addRoute('post', '/login', 'SessionController#login');
+$router->addRoute('post', '/logout', 'SessionController#logout');
+
 $router->addRoute('get', '*', 'FileController#main');
 ?>

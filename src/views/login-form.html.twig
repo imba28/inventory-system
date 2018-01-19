@@ -1,0 +1,15 @@
+<div class="container-fluid">
+    <div class="row">
+        <main class="col-sm-12 ml-sm-auto col-md-12 pt-4" role="main">
+            <form class="form-signin text-center" action="/login" method="post">
+                <img class="mb-4" src="https://getbootstrap.com/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
+                <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+                <label for="username" class="sr-only">Benutzername</label>
+                <input type="text" id="username" class="form-control" required="required" name="username" autofocus="autofocus" value="{{ request.get('username') }}" placeholder="Benutzername">
+                <label for="pwd" class="sr-only">Password</label>
+                <input type="password" id="pwd" name="password" class="form-control" required="required" placeholder="Passwort">
+                <button class="btn btn-lg btn-primary btn-block mt-3" type="submit">Sign in</button>
+            </form>
+        </main>
+    </div>
+</div>
