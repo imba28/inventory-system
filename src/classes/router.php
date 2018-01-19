@@ -34,8 +34,15 @@ class Router {
             $parts = explode('/', $path);
             foreach($parts as $part) {
                 if(isset($part[0]) && $part[0] === ':') { // dynamic part
-                    $routeOptions['regex'][] = '([\p{N}\p{L}\s\-,]+)'; // matches any unicode character, whitespace, minus and comma.
-                    $routeOptions['params'][] = substr($part, 1);
+                    if($part[1] === '_') { // _ ist zeichen für Zahl
+                        $routeOptions['regex'][] = '([0-9]+)'; 
+                        $routeOptions['params'][] = substr($part, 2);
+                    }
+                    else {
+                        $routeOptions['regex'][] = '([\p{N}\p{L}\s\-,]+)'; // matches any unicode character, whitespace, minus and comma.
+                        $routeOptions['params'][] = substr($part, 1);
+                    }
+
                 }
                 else { // static part
                     if($part === '*') {
