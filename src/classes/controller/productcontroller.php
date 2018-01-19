@@ -123,10 +123,11 @@ class ProductController extends ApplicationController {
                 $this->view->assign('actions', array());
             }
 
-            $query = new \App\QueryBuilder\Builder('actions' );
+            $query = new \App\QueryBuilder\Builder('actions');
             $query->select(\App\QueryBuilder\Builder::alias('COUNT(*)', 'count'));
             $query->select('product_id');
             $query->groupBy('product_id');
+            $query->orderBy(\App\QueryBuilder\Builder::raw('count'));
 
             $products = array();
             foreach($query->get() as $p_info) {
