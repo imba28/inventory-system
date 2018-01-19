@@ -11,6 +11,8 @@ class Inventur {
     private $totalItems = 0;
     private $inventurObject;
 
+    private $inventurActions = array();
+
     public function __construct() {
         try {
             $this->inventurObject = current(Models\Inventur::grabByFilter(array(
@@ -31,13 +33,15 @@ class Inventur {
 
             $this->totalItems++;
 
-            $inventurProduct = $this->getInventurAction($product);
-            if($inventurProduct->isInStock()) {
+            $inventurAction = $this->getInventurAction($product);
+            if($inventurAction->isInStock()) {
                 $this->itemsRegistered[] = $product;
             }
             else {
                 $this->itemsMissing[] = $product;
             }
+
+            $this->inventurActions[$product->getId()] = $inventurAction;
         }
     }
 
@@ -102,6 +106,10 @@ class Inventur {
 
     public function getModel() {
         return $this->inventurObject;
+    }
+
+    public function getInventurActions() {
+        return $this->inventurActions;
     }
 
     public function getTotalCount() {
