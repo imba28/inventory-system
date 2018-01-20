@@ -17,7 +17,13 @@ abstract class Model {
                 if(ClassManager::markedNotExisting($class_name) == false) {
                     if(class_exists($class_name)) {
                         $key = $m[1];
-                        $value = $class_name::grab($value);
+                        try {
+                            $value = $class_name::grab($value);
+                        }
+                        catch(\App\Exceptions\NothingFoundException $e) {
+                            \App\Debugger::log("{$class_name} with id {$value} not found!", 'warning');
+                            $value = null;
+                        }
                     }
                 }
             }
