@@ -105,9 +105,15 @@ class Router {
     }
 
     private function findHandler(array $routes, $request_uri) {
+        $params = array();
+
+        if(preg_match('/.(json)$/', $request_uri, $matches)) {
+            $params['response_type'] = $matches[1];
+            $request_uri = str_replace($matches[0], '', $request_uri);
+        }
+
         foreach($routes as $path => $routeOptions) {
             if(preg_match($routeOptions['regex'], $request_uri, $matches)) {
-                $params = array();
                 array_shift($matches); // remove first capture group match
 
                 foreach($matches as $idx => $part) {

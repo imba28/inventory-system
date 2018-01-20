@@ -47,6 +47,20 @@ abstract class Model {
         return $this->id;
     }
 
+    public function toJson() {
+        $json = array();
+
+        foreach($this->data as $key => $value) {
+            if($this->data[$key] instanceof \App\Model) {
+                $value = $value->toJson();
+            }
+
+            $json[$key] = $value;
+        }
+        
+        return json_encode($json);
+    }
+
     public function save($head_column = null, $head_id = null, $exception = false) {
         $this->trigger('save');
 

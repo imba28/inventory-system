@@ -26,6 +26,12 @@ class ProductController extends ApplicationController {
                 }
             }
             else {
+                if(isset($params['response_type']) && $params['response_type'] === 'json') {
+                    $this->response->append($product->toJson());
+                    $this->response->addHeader('Content-Type', 'application/json');
+                    $this->response->flush();
+                    exit();
+                }
                 $this->display($product);
             }
         }
@@ -488,6 +494,20 @@ class ProductController extends ApplicationController {
     }
 
     private function displayProducts($params) {
+        if(@$params['response_type'] === 'json') {
+            $products = \App\Models\Product::grabAll();
+            $response = array();
+
+            foreach($products as $product) {
+                $response[] = json_decode($product->toJson());
+            }
+
+            $this->response->append(json_encode($response));
+            $this->response->addHeader('Content-Type', 'application/json');
+            $this->response->flush();
+            exit();
+        }
+
         $currentPage = isset($params['page']) ? intval($params['page']) : 1;
         $itemsPerPage = 8;
 
