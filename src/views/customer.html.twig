@@ -6,9 +6,9 @@
                     <a class="nav-link" href="/customers">Übersicht</a>
                 </li>
                 {% if isUserSignedIn %}
-                <li class="nav-item">
-                    <a class="nav-link" href="/customers/add">Kunde anlegen</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers/add">Kunde anlegen</a>
+                    </li>
                 {% endif %}
             </ul>
         </nav>
@@ -48,7 +48,8 @@
                                 {% for rentAction in rentHistory %}
                                     {% if rentAction.isProductReturned() == false %}
                                         <small class="text-muted font-weight-bold">
-                                            <i class="fa fa-asterisk" aria-hidden="true"></i> <a href="/product/{{ rentAction.get('product').getId() }}">{{ rentAction.get('product').get('name') }}</a>
+                                            <i class="fa fa-asterisk" aria-hidden="true"></i>
+                                            <a href="/product/{{ rentAction.get('product').getId() }}">{{ rentAction.get('product').get('name') }}</a>
                                             seit dem
                                             {{ rentAction.get('rentDate')|date('d.m.Y') }}
                                         </small>
@@ -68,8 +69,6 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
-</main>
-</div>
 </div>
