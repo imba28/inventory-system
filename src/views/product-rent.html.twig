@@ -23,23 +23,44 @@
             <div class="row">
                 <form class="ml-4" method='post'>
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Name</label>
-                        <input type="text" class="form-control" readonly="readonly" value="{{ product.get('name') }} ({{ product.get('invNr') }})">
+                        <label for="name">Name</label>
+                        <input id="name" type="text" class="form-control" readonly="readonly" value="{{ product.get('name') }} ({{ product.get('invNr') }})">
                     </div>
                     <div class="form-group">
-                        <label for="exampleInputPassword1">FHS Nummer</label>
-                        <input type="text" class="form-control" placeholder="FHS Nummer eingeben" name='internal_id' value="{{ request.getParam('internal_id') }}">
+                        <label for="internal_id">FHS Nummer</label>
+                        <input id="internal_id" type="text" class="form-control" placeholder="FHS Nummer eingeben" name='internal_id' value="{{ request.getParam('internal_id') }}" autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label for="exampleInputPassword1">Voraussichtliches Rückgabedatum</label>
-                        <input type="text" class="form-control datepicker" name='expectedReturnDate' placeholder="Rückgabedatum eingeben" value="{{ request.getParam('expectedReturnDate') }}">
+                        <label for="expectedReturnDate">Voraussichtliches Rückgabedatum</label>
+                        <input id="expectedReturnDate" type="text" class="form-control datepicker" name='expectedReturnDate' placeholder="Rückgabedatum eingeben" value="{{ request.getParam('expectedReturnDate') }}">
                     </div>
 
                     <button type="submit" name="submit" class="btn btn-primary">Leihen</button>
                 </form>
             </div>
-        </div>
+        </main>
     </div>
-</main>
 </div>
-</div>
+<script src="/src/js/auto-complete.min.js"></script>
+<script>
+$(document).ready(function() {
+    $.getJSON('/customers.json', {}, function(data) {
+        data = data.map(function(item) {
+            return item.internal_id;
+        });
+
+        new autoComplete({
+            selector: '#internal_id',
+            minChars: 1,
+            source: function(term, suggest){
+                term = term.toLowerCase();
+                var matches = [];
+                for (i = 0; i < data.length; i++) {
+                    if (data[i].toLowerCase().indexOf(term) > -1) matches.push(data[i]);
+                }
+                suggest(matches);
+            }
+        });
+    });
+});
+</script>
