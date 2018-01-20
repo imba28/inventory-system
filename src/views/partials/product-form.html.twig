@@ -6,26 +6,26 @@
 <hr>
 <!-- /.col-lg-3 -->
 <div class="row">
-    <form class="ml-4 col-md-6" method="post" enctype="multipart/form-data">
+    <form class="ml-4 col-md-6" method="post" id="product-form" enctype="multipart/form-data">
         <div class="form-group">
-            <label for="exampleInputEmail1">Name</label>
-            <input type="text" class="form-control" placeholder="Produktname eingeben" name="name" value="{{ product.get('name') }}">
+            <label for="name">Name</label>
+            <input id="name" type="text" class="form-control" placeholder="Produktname eingeben" name="name" value="{{ product.get('name') }}">
         </div>
         <div class="form-group">
-            <label for="exampleInputEmail1">Inventarnummer</label>
-            <input type="text" class="form-control" placeholder="Inventarnummer eingeben" name="invNr" value="{{ product.get('invNr') }}">
+            <label for="invnr">Inventarnummer</label>
+            <input id="invnr" type="text" class="form-control" placeholder="Inventarnummer eingeben" name="invNr" value="{{ product.get('invNr') }}">
         </div>
         <div class="form-group">
-            <label for="exampleInputPassword1">Type</label>
-            <input type="text" class="form-control" placeholder="Type" name="type" value="{{ product.get('type') }}">
+            <label for="type">Type</label>
+            <input id="type" type="text" class="form-control" placeholder="Type" name="type" value="{{ product.get('type') }}" autocomplete="off">
         </div>
         <div class="form-group">
-            <label for="exampleInputPassword1">Beschreibung</label>
-            <textarea class="form-control textarea" name="description" placeholder="Beschreibung eingeben">{{ product.get('description') }}</textarea>
+            <label for="desc">Beschreibung</label>
+            <textarea id="desc" class="form-control textarea" name="description" placeholder="Beschreibung eingeben">{{ product.get('description') }}</textarea>
         </div>
         <div class="form-group">
-            <label for="exampleInputPassword1">Anmerkung</label>
-            <textarea class="form-control textarea" name="note" placeholder="Anmerkung eingeben">{{ product.get('note') }}</textarea>
+            <label for="note">Anmerkung</label>
+            <textarea id="note" class="form-control textarea" name="note" placeholder="Anmerkung eingeben">{{ product.get('note') }}</textarea>
         </div>
         <div class="form-group">
             <ul class="productimages row">
@@ -45,5 +45,30 @@
         </div>
         <button type="submit" name="submit" class="btn btn-primary">{{ button_text ? button_text : 'Speichern' }}</button>
     </form>
+    <script src="/src/js/auto-complete.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $.getJSON('/products/category.json', {}, function(data) {
+            data = data.map(function(item) {
+                return item.name;
+            });
+
+            new autoComplete({
+                selector: '#type',
+                minChars: 0,
+                source: function(term, suggest){
+                    term = term.toLowerCase();
+                    var matches = [];
+                    for (i = 0; i < data.length; i++) {
+                        if (data[i].toLowerCase().indexOf(term) > -1) matches.push(data[i]);
+                    }
+
+                    suggest(matches);
+                }
+            });
+        });
+    });
+
+    </script>
 </div>
 {% endmacro %}
