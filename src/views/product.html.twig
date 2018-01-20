@@ -100,7 +100,11 @@
                                     {% if rentAction.isProductReturned() == false %}
                                         <small class="text-muted font-weight-bold">
                                             Ausgeliehen von
+                                            {% if rentAction.get('customer') %}
                                             {{ rentAction.get('customer').get('name') ? rentAction.get('customer').get('name') : rentAction.get('customer').get('invNr') }}
+                                            {% else %}
+                                            <i>gelöscht</i>
+                                            {% endif %}
                                             seit dem
                                             {{ rentAction.get('rentDate')|date('d.m.Y') }}
 
@@ -111,7 +115,11 @@
                                     {% else %}
                                         <small class="text-muted">
                                             Ausgeliehen von
-                                            {{ rentAction.get('customer').get('name') }}
+                                            {% if rentAction.get('customer') %}
+                                            {{ rentAction.get('customer').get('name') ? rentAction.get('customer').get('name') : rentAction.get('customer').get('invNr') }}
+                                            {% else %}
+                                            <i>gelöscht</i>
+                                            {% endif %}
                                             vom
                                             {{ rentAction.get('rentDate')|date('d.m.Y') }}
                                             bis zum
