@@ -155,6 +155,19 @@ class ProductController extends ApplicationController {
         }
     }
 
+    public function displayCategories($params) {
+        $categories = $this->getCategories();
+        if(isset($params['response_type']) && $params['response_type'] === 'json') {
+            $this->response->append(json_encode($categories));
+            $this->response->addHeader('Content-Type', 'application/json');
+            $this->response->flush();
+            exit();
+        }
+        else {
+            $this->redirectToRoute('/products');
+        }
+    }
+
     public function displayCategory($params) {
         $currentPage = isset($params['page']) ? intval($params['page']) : 1;
         $itemsPerPage = 8;
@@ -359,9 +372,7 @@ class ProductController extends ApplicationController {
 
     private function display(\App\Models\Product $product) {
         try {
-            $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array(
-                array('product', '=', $product)
-            ), 10));
+            $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array('product', '=', $product), 10));
         }
         catch(\App\Exceptions\NothingFoundException $e) {
             $this->view->assign('rentHistory', array());
@@ -520,13 +531,18 @@ class ProductController extends ApplicationController {
             \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
         }
 
-        $query = new \App\QueryBuilder\Builder('products');
-        $query->select(\App\QueryBuilder\Builder::alias($query::raw('DISTINCT type'), 'name'));
-        $query->where('deleted', '0');
-        $this->view->assign('categories', $query->get());
+        $this->view->assign('categories', $this->getCategories());
 
         $this->view->assign('products', $products);
         $this->view->setTemplate('products');
+    }
+
+    private function getCategories() {
+        $query = new \App\QueryBuilder\Builder('products');
+        $query->select(\App\QueryBuilder\Builder::alias($query::raw('DISTINCT type'), 'name'));
+        $query->where('deleted', '0');
+
+        return $query->get();
     }
 
     private function request(\App\Models\Product $product) {

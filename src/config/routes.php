@@ -5,6 +5,7 @@ $router->addRoute('post', '/product/:id/delete', 'ProductController#delete');
 $router->addRoute('all', array('/product/:id', '/product/:id/:action'), 'ProductController#product');
 
 $router->addRoute('all', array('/products/category/:category', '/products/category/:category/:page'), 'ProductController#displayCategory');
+$router->addRoute('get', '/products/category', 'ProductController#displayCategories');
 $router->addRoute('all', array('/products/search', '/products/:action/:page'), 'ProductController#search');
 $router->addRoute('all', array('/products/:action', '/products'), 'ProductController#products');
 
