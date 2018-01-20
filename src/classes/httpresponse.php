@@ -25,6 +25,8 @@ class HttpResponse implements \App\Interfaces\Response {
     }
 
     public function flush() {
+        $this->addHeader('Content-Length', strlen($this->body));
+
         if(!headers_sent()) {
             header("HTTP/1.1 {$this->status}");
             foreach($this->headers as $key => $value) {
