@@ -2,6 +2,10 @@ body, html {
     height: 100vh;
 }
 
+body {
+    background: pink;
+}
+
 .system-status .alert {
     margin-bottom: 0;
 }
