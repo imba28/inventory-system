@@ -563,7 +563,6 @@ class ProductController extends ApplicationController {
                             \App\System::getInstance()->addMessage('error', 'Deine Anfrage konnte leider nicht gesendet werden!');
                         }
                     }
-
                 }
             }
         }

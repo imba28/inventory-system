@@ -13,8 +13,8 @@ abstract class Model implements \JsonSerializable {
     public function __construct($options = array()) {
         foreach($options as $key => $value) {
             if(preg_match('/([\w]+)_id$/', $key, $m)) {
-                $class_name = '\App\Models\\'.$m[1];
-                if(ClassManager::markedNotExisting($class_name) == false) {
+                $class_name = '\App\Models\\'.ucfirst($m[1]);
+                //if(ClassManager::markedNotExisting($class_name) == false) {
                     if(class_exists($class_name)) {
                         $key = $m[1];
                         try {
@@ -25,7 +25,7 @@ abstract class Model implements \JsonSerializable {
                             $value = null;
                         }
                     }
-                }
+                //}
             }
             if(property_exists($this, $key)) {
                 $this->$key = $value;
