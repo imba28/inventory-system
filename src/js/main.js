@@ -23,4 +23,18 @@ $(document).ready(function(){
         force_p_newlines : false,
         forced_root_block : ''
     });
+
+    $(".btn.btn-danger[type='submit']").click(function() {
+        var confirm = $(this).data("confirm");
+        if(confirm) {
+            var answer = prompt('Das Löschen kann nicht rückgängig gemacht werden. Bitte bestätige die Aktion, in dem du den Namen eingibst:');
+
+            if(answer !== confirm) return false;
+        }
+        else {
+            if(window.confirm('Das Löschen kann nicht rückgängig gemacht werden. Bitte bestätige diese Aktion.') === false) {
+                return false;
+            }
+        }
+    });
 });
