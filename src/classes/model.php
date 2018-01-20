@@ -1,7 +1,7 @@
 <?php
 namespace App;
 
-abstract class Model {
+abstract class Model implements \JsonSerializable {
     use Traits\GetSetData;
     use Traits\Events;
 
@@ -47,7 +47,7 @@ abstract class Model {
         return $this->id;
     }
 
-    public function toJson() {
+    public function jsonSerialize() {
         $json = array();
 
         foreach($this->data as $key => $value) {
@@ -57,8 +57,8 @@ abstract class Model {
 
             $json[$key] = $value;
         }
-        
-        return json_encode($json);
+
+        return $json;
     }
 
     public function save($head_column = null, $head_id = null, $exception = false) {

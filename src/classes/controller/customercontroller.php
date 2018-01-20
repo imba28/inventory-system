@@ -11,13 +11,7 @@ class CustomerController extends ApplicationController {
     public function customers($params) {
         $customers = \App\Models\Customer::grabAll();
         if(@$params['response_type'] === 'json') {
-            $response = array();
-
-            foreach($customers as $customer) {
-                $response[] = json_decode($customer->toJson());
-            }
-
-            $this->response->append(json_encode($response));
+            $this->response->append(json_encode($customers));
             $this->response->addHeader('Content-Type', 'application/json');
             $this->response->flush();
             exit();
@@ -31,12 +25,12 @@ class CustomerController extends ApplicationController {
             $customer = \App\Models\Customer::grab($params['id']);
 
             if(@$params['response_type'] === 'json') {
-                $this->response->append($customer->toJson());
+                $this->response->append(json_encode($customer));
                 $this->response->addHeader('Content-Type', 'application/json');
                 $this->response->flush();
                 exit();
             }
-            
+
             $rentalHistory = array();
 
             try {
