@@ -40,8 +40,15 @@ abstract class BasicController {
 
     public function handle($method, $args) {
         $this->$method($args);
-        
+
         $this->renderContent();
+        exit();
+    }
+
+    protected function renderJson($obj) {
+        $this->response->append(json_encode($obj));
+        $this->response->addHeader('Content-Type', 'application/json');
+        $this->response->flush();
         exit();
     }
 

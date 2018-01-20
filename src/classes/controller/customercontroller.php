@@ -11,10 +11,7 @@ class CustomerController extends ApplicationController {
     public function customers($params) {
         $customers = \App\Models\Customer::grabAll();
         if(@$params['response_type'] === 'json') {
-            $this->response->append(json_encode($customers));
-            $this->response->addHeader('Content-Type', 'application/json');
-            $this->response->flush();
-            exit();
+            $this->renderJson($customers);
         }
         $this->view->assign('customers', $customers);
         $this->view->setTemplate('customers');
@@ -25,10 +22,7 @@ class CustomerController extends ApplicationController {
             $customer = \App\Models\Customer::grab($params['id']);
 
             if(@$params['response_type'] === 'json') {
-                $this->response->append(json_encode($customer));
-                $this->response->addHeader('Content-Type', 'application/json');
-                $this->response->flush();
-                exit();
+                $this->renderJson($customer);
             }
 
             $rentalHistory = array();
