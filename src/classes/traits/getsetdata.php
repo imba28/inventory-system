@@ -7,6 +7,7 @@ trait GetSetData {
     public function set($property, $value) {
         if(property_exists($this, $property)) {
             $this->data[$property] = $value;
+            $this->trigger('set', $this, array('property' => $property, 'value' => $value));
         }
         return false;
     }
