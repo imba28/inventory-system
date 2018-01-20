@@ -14,9 +14,11 @@ trait Events {
 
     protected final function trigger($eventName, $context = null, $info = array()) {
         if(isset($this->events[$eventName])) {
+            $event = $context;
             if(!$event instanceof \App\Event) {
                 $event = new \App\Event($eventName, $context, $info);
             }
+
             foreach($this->events[$eventName] as $eventHandler) {
                 $eventHandler($event);
             }
