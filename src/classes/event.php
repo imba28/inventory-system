@@ -17,7 +17,7 @@ class Event {
         return $this->eventContext;
     }
     public function getInfo() {
-        return $this->eventContext;
+        return $this->eventInfo;
     }
     public function setInfo(array $a) {
         $this->eventInfo = $a;
