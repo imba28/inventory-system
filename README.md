@@ -127,6 +127,7 @@ Zum Entwickeln kann der integrierte Webserver von PHP verwendet werden:
 <?php
 \App\Configuration::set('env', 'dev');
 \App\Configuration::set('site_name', 'MMT Verleihmanager');
+\App\Configuration::set('admin_email', 'max@mustermann.net');
 
 \App\Configuration::set('DB_HOST', '127.0.0.1');
 \App\Configuration::set('DB_DB', 'verleih');
