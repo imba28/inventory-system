@@ -3,6 +3,7 @@ public/files/images/*.jpg
 public/files/images/*.gif
 public/files/images/*.jpeg
 
+results
 vendor
 *config.php
 cache
