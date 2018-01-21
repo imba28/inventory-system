@@ -10,5 +10,6 @@
     </filter>
     <logging>
         <log type="coverage-html" target="./results/phpunit/"/>
+        <log type="coverage-clover" target="./results/clover.xml"/>
     </logging>
 </phpunit>
