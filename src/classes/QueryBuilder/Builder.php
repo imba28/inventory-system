@@ -20,6 +20,8 @@ class Builder {
     protected $lastInsertID;
     protected $last_exception;
 
+    private static $tablePrefix = null;
+
     protected static $sql_keywords = array("NOW()", "COUNT(*)", "AUTO_INCREMENT", "CURRENT_DATE", "CURRENT_USER", "DEFAULT", "CURRENT_TIMESTAMP()", "CURTIME()", "CURDATE()", "DAYNAME()", "DAYOFMONTH()", "DAYOFWEEK()", "DAYOFYEAR()");
 
     public function __construct($table, $debug = false) {
@@ -33,7 +35,16 @@ class Builder {
         $this->logging = $bool;
     }
 
-    public function where($arg1, $operator, $arg2 = null) {
+    public function where($arg1, $operator = 'AND', $arg2 = null) {
+        if(is_array($arg1) && $arg2 == null) {
+            foreach($arg1 as $arg) {
+                if(!is_array($arg) || count($arg) != 3) throw new \InvalidArgumentException('Invalid nested where arguments! Expected argument to be array of length 3, got '. gettype($arg) .' of length '.count($arg).'!');
+
+                $this->where($arg[0], $arg[1], $arg[2]);
+            }
+            return;
+        }
+
         if(is_null($arg2)) {
             $arg2 = $operator;
             $operator = '=';
@@ -48,16 +59,9 @@ class Builder {
         return $this;
     }
 
-    public function whereVisible() {
-        $this->where("visible", "=", "1")->where("deleted", "=", "0");
-        return $this;
-    }
-
-
-    public function next($id = null, $select_columns = array("ID"), $column = null) {
-        $column = is_null($column) ? "ID" : $column;
-
-        $this->select($select_columns)->where($column, ">", $id)->orderBy($column, "ASC")->limit(1);
+    public function next($id, $select_columns = null, $column = 'id') {
+        if($select_columns != null) $this->select($select_columns);
+        $this->where($column, ">", $id)->orderBy($column, "ASC")->limit(1);
 
         return $this;
     }
@@ -69,10 +73,9 @@ class Builder {
         return $result[0]["count"];
     }
 
-    public function prev($id, $select_columns = array("ID"), $column = null) {
-        $column = is_null($column) ? "ID" : $column;
-
-        $this->select($select_columns)->where($column, "<", $id)->orderBy($column, "DESC")->limit(1);
+    public function prev($id, $select_columns = null, $column = 'id') {
+        if($select_columns != null) $this->select($select_columns);
+        $this->where($column, "<", $id)->orderBy($column, "DESC")->limit(1);
 
         return $this;
     }
@@ -165,57 +168,8 @@ class Builder {
     }
 
     public function get() {
-        $table_name = getTableName($this->table);
-
-        $selection = $this->getSelectStatement();
-
-        $join_selection = "";
-        $join_statement = "";
-
-        if(!empty($this->joins)) {
-            $join_selection = ", ";
-            foreach($this->joins as $join) {
-                $join_selection .= $join->getSelectStatement().", ";
-                $join_statement .= $join->getStatement() . " ";
-            }
-            $join_selection = rtrim($join_selection , ", ");
-        }
-
-        $sql = "SELECT $selection $join_selection FROM " . $this->sanitize($table_name);
-        $sql .= $join_statement;
-
-        $args = array();
-
-        if(count($this->where) > 0) {
-            /*
-            $sql .= " WHERE ";
-            foreach($this->where as $clause) {
-                $sql.= $clause->getCondition($table_name) . " AND";
-                $val = $clause->getValue();
-                if($val !== false) {
-                   // vd($val);
-                    if(is_array($val)) {
-                        foreach($val as $v) if(!is_null($v)) $args[] = $v;
-                    }
-                    else $args[] = $val;
-                }
-            }
-            $sql = rtrim($sql, " AND");*/
-            list($criteria, $args) = $this->getCriteria();
-            $sql .= $criteria;
-        }
-
-        if(count($this->group) > 0) {
-            $sql .= " GROUP BY ". join($this->group, ", ");
-        }
-
-        if(count($this->order) > 0) {
-            $sql .= " ORDER BY ". join($this->order, ", ");
-        }
-
-        if(count($this->limit) > 0) {
-            $sql .= " LIMIT ". join($this->limit, ", ");
-        }
+        $sql = $this->getSQL();
+        $args = $this->getCriteriaBindings();
 
         if($this->debug) {
             vd($sql);
@@ -272,7 +226,7 @@ class Builder {
     }
 
     public function describe() {
-        return $this->query("SHOW FULL COLUMNS FROM ". getTableName($this->table));
+        return $this->query("SHOW FULL COLUMNS FROM ". self::getTableName($this->table));
     }
     public function lastInsertId() {
         return $this->lastInsertID;
@@ -291,14 +245,15 @@ class Builder {
 
     public function update(array $data) {
         list($statement, $bindings) = $this->getUpdateStatement($data);
-        list($criteria, $where_bindings) = $this->getCriteria();
+        $criteria = $this->getCriteriaString();
+        $where_bindings = $this->getCriteriaBindings();
 
         $bindings = array_merge($bindings, $where_bindings);
         $limit = isset($this->limit) ? 'LIMIT ' . join(", ", $this->limit) : '';
 
         $sql_arr = array(
             "UPDATE",
-            $this->sanitize(getTableName($this->table)),
+            $this->sanitize(self::getTableName($this->table)),
             "SET " . $statement,
             $criteria,
             $limit
@@ -324,7 +279,7 @@ class Builder {
 
         $sql_arr = array(
             "INSERT IGNORE INTO",
-            $this->sanitize(getTableName($this->table)),
+            $this->sanitize(self::getTableName($this->table)),
             $statement
         );
 
@@ -341,7 +296,7 @@ class Builder {
 
         $sql_arr = array(
             "INSERT INTO",
-            $this->sanitize(getTableName($this->table)),
+            $this->sanitize(self::getTableName($this->table)),
             $statement
         );
 
@@ -355,25 +310,95 @@ class Builder {
         return $this->query($sql, $bindings) !== false;
     }
 
-    private function getCriteria() {
-        $bindings = array();
+    private function getCriteriaString() {
         $criteria = "";
-        $table_name = getTableName($this->table);
+        $table_name = self::getTableName($this->table);
 
         if(count($this->where) > 0) {
             $criteria = " WHERE ";
             foreach($this->where as $clause) {
                 $criteria .= $clause->getCondition($table_name) . " AND ";
+            }
+            $criteria = rtrim($criteria, " AND ");
+        }
+
+        return $criteria;
+    }
+
+    private function getCriteriaBindings() {
+        $bindings = array();
+        $table_name = self::getTableName($this->table);
+
+        if(count($this->where) > 0) {
+            foreach($this->where as $clause) {
                 $val = $clause->getValue();
                 if($val !== false) {
                     if(is_array($val)) foreach($val as $v) if(!is_null($v)) $bindings[] = $v;
                     else $bindings[] = $val;
                 }
             }
-            $criteria = rtrim($criteria, " AND ");
         }
 
-        return array($criteria, $bindings);
+        return  $bindings;
+    }
+
+    public function getSQL() {
+        $table_name = self::getTableName($this->table);
+        $selection = $this->getSelectStatement();
+
+        $join_statement = array();
+
+        if(!empty($this->joins)) {
+            $join_selection = array();
+
+            foreach($this->joins as $join) {
+                $join_selection[] = $join->getSelectStatement();
+                $join_statement[] = $join->getStatement();
+            }
+
+            $selection .= ", {$join_selection}";
+        }
+
+        $join_statement = implode($join_statement, ' ');
+
+        $sql = "SELECT $selection FROM " . $this->sanitize($table_name);
+        $sql .= $join_statement;
+
+        if(count($this->where) > 0) {
+            /*
+            $sql .= " WHERE ";
+            foreach($this->where as $clause) {
+                $sql.= $clause->getCondition($table_name) . " AND";
+                $val = $clause->getValue();
+                if($val !== false) {
+                   // vd($val);
+                    if(is_array($val)) {
+                        foreach($val as $v) if(!is_null($v)) $args[] = $v;
+                    }
+                    else $args[] = $val;
+                }
+            }
+            $sql = rtrim($sql, " AND");*/
+            $sql .= $this->getCriteriaString();
+        }
+
+        if(count($this->group) > 0) {
+            $sql .= " GROUP BY ". join($this->group, ", ");
+        }
+
+        if(count($this->order) > 0) {
+            $sql .= " ORDER BY ". join($this->order, ", ");
+        }
+
+        if(count($this->limit) > 0) {
+            $sql .= " LIMIT ". join($this->limit, ", ");
+        }
+
+        return $sql;
+    }
+
+    public function __toString() {
+        return $this->getSQL();
     }
 
     private function getInsertStatement($data) {
@@ -430,7 +455,7 @@ class Builder {
 
     public final function sanitizeColumnName($column) {
         $sanitized_column = $column == "*" ? $column : $this->sanitize($column);
-        return $this->sanitize(getTableName($this->table)) . "." . $sanitized_column;
+        return $this->sanitize(self::getTableName($this->table)) . "." . $sanitized_column;
     }
 
     public final function sanitize($value) {
@@ -476,6 +501,15 @@ class Builder {
 
     public static function raw($column) {
         return new Raw($column);
+    }
+
+    private static function getTableName($table) {
+        if(is_null(self::$tablePrefix)) return $table;
+        return self::$tablePrefix . "_{$table}";
+    }
+
+    private static function setTablePrefix($prefix) {
+        self::$tablePrefix = $prefix;
     }
 }
 ?>
