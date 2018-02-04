@@ -2,7 +2,7 @@
 namespace App\QueryBuilder;
 
 class QueryAlias {
-    use \App\Traits\getSet;
+    use \App\Traits\GetSet;
 
     protected $name;
     protected $alias;
