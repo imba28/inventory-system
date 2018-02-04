@@ -513,7 +513,7 @@ class Builder {
         return self::$tablePrefix . "_{$table}";
     }
 
-    private static function setTablePrefix($prefix) {
+    public static function setTablePrefix($prefix) {
         self::$tablePrefix = $prefix;
     }
 }
