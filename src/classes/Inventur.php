@@ -23,44 +23,9 @@ class Inventur {
             $this->inventurObject = Models\Inventur::new();
         }
 
-        foreach(Models\Product::grabAll() as $product) {
-            if($product->isAvailable()) {
-                $this->itemsAvailable[] = $product;
-            }
-            else {
-                $this->itemsRented[] = $product;
-            }
-
-            $this->totalItems++;
-
-            $inventurAction = $this->getInventurAction($product);
-            if($inventurAction->isInStock()) {
-                $this->itemsRegistered[] = $product;
-            }
-            else {
-                $this->itemsMissing[] = $product;
-            }
-
-            $this->inventurActions[$product->getId()] = $inventurAction;
+        if($this->isStarted()) {
+            $this->loadInventurActions();
         }
-    }
-
-    private function getInventurAction(Models\Product $product) {
-        try {
-            $action = current(Models\InventurProduct::grabByFilter(array(
-                array('product', '=', $product),
-                array('inventur', '=', $this->inventurObject)
-            )));
-        }
-        catch(\App\Exceptions\NothingFoundException $e) {
-            $action = Models\InventurProduct::new();
-            $action->set('product', $product);
-            $action->set('inventur', $this->inventurObject);
-
-            $action->save();
-        }
-
-        return $action;
     }
 
     public function start(\App\Models\User $startedBy) {
@@ -144,6 +109,7 @@ class Inventur {
         catch(\App\Exceptions\NothingFoundException $e) {
             $inventurProduct = \App\Models\inventurProduct::new();
             $inventurProduct->set('product', $product);
+            $inventurProduct->set('user', $this->inventurObject->get('user'));
         }
 
         $inventurProduct->set('in_stock', '1');
@@ -194,6 +160,7 @@ class Inventur {
 
         $inventurProduct->set('in_stock', '1');
         $inventurProduct->set('missing', '1');
+        $inventurProduct->set('user', $this->inventurObject->get('user'));
         $inventurProduct->set('inventur', $this->inventurObject);
 
         function indexOf($array, $product) {
@@ -206,7 +173,7 @@ class Inventur {
         }
 
         if($inventurProduct->save()) {
-            if(($key = indexOf($this->itemsMissing, $product)) !== FALSE) {
+            if(($key = indexOf($this->itemsMissing, $product)) !== false) {
                 unset($this->itemsMissing[$key]);
                 $this->itemsMissing = array_values($this->itemsMissing);
 
@@ -217,6 +184,49 @@ class Inventur {
             return false;
         }
         return false;
+    }
+
+    private function loadInventurActions() {
+        foreach(Models\Product::grabAll() as $product) {
+            if($product->isAvailable()) {
+                $this->itemsAvailable[] = $product;
+            }
+            else {
+                $this->itemsRented[] = $product;
+            }
+
+            $this->totalItems++;
+
+            $inventurAction = $this->getInventurAction($product);
+            if($inventurAction->isInStock()) {
+                $this->itemsRegistered[] = $product;
+            }
+            else {
+                $this->itemsMissing[] = $product;
+            }
+            $inventurAction->set('user', $this->inventurObject->get('user'));
+
+            $this->inventurActions[$product->getId()] = $inventurAction;
+        }
+    }
+
+    private function getInventurAction(Models\Product $product) {
+        try {
+            $action = current(Models\InventurProduct::grabByFilter(array(
+                array('product', '=', $product),
+                array('inventur', '=', $this->inventurObject)
+            )));
+        }
+        catch(\App\Exceptions\NothingFoundException $e) {
+            $action = Models\InventurProduct::new();
+            $action->set('product', $product);
+            $action->set('inventur', $this->inventurObject);
+            $action->set('user', $this->inventurObject->get('user'));
+
+            $action->save();
+        }
+
+        return $action;
     }
 }
 ?>
