@@ -4,9 +4,9 @@ namespace App\Controller;
 class InventurController extends ApplicationController {
     protected $inventur;
 
-    public function __construct($layout = 'default') {
-        parent::__construct($layout);
-
+    public function __construct($responseType = 'html', $layout = 'default') {
+        parent::__construct($responseType, $layout);
+        
         $this->authenticateUser();
         $this->inventur = new \App\Inventur();
     }

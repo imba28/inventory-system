@@ -6,13 +6,15 @@ abstract class BasicController {
     protected $response;
     protected $view;
 
+    protected $responseType;
     protected $beforeActions;
 
-    public function __construct($layout = 'default') {
+    public function __construct($responseType = 'html', $layout = 'default') {
         $this->layout = $layout;
+        $this->responseType = $responseType;
         $this->response = new \App\HttpResponse();
         $this->request = new \App\HttpRequest();
-        $this->view = new \App\View();
+        $this->view = \App\ViewFactory::build($responseType, $layout);
 
         $this->beforeActions = array();
 

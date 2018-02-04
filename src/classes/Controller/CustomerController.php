@@ -4,8 +4,8 @@ namespace App\Controller;
 class CustomerController extends ApplicationController {
     private $customer;
 
-    public function __construct($layout = 'default') {
-        parent::__construct($layout);
+    public function __construct($responseType = 'html', $layout = 'default') {
+        parent::__construct($responseType, $layout);
 
         $this->authenticateUser();
 

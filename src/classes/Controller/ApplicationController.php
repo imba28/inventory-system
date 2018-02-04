@@ -4,8 +4,8 @@ namespace App\Controller;
 abstract class ApplicationController extends \App\BasicController {
     private $currentUser;
 
-    public function __construct($layout = 'default') {
-        parent::__construct($layout);
+    public function __construct($responseType = 'html', $layout = 'default') {
+        parent::__construct($responseType, $layout);
 
         $this->view->assign('currentUser', $this->getCurrentUser());
         $this->view->assign('isUserSignedIn', $this->isUserSignedIn());

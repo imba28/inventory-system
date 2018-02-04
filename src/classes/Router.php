@@ -60,7 +60,7 @@ class Router {
         else throw new \InvalidArgumentException("{$request_method} is not a valid http request type!");
     }
 
-    public function handle($handle, $params = array()) {
+    public function handle($handle, $params = array(), $response_type = 'html') {
         if($handle instanceof \Closure) {
             return $handle($params);
         }
@@ -70,7 +70,7 @@ class Router {
             $controller_class = "\App\Controller\\{$split[0]}";
             $controller_action = $split[1];
 
-            $controller = new $controller_class();
+            $controller = new $controller_class($response_type);
 
             if(is_callable(array($controller, $controller_action), true)) {
                 $controller->handle($controller_action, $params);
@@ -106,9 +106,10 @@ class Router {
 
     private function findHandler(array $routes, $request_uri) {
         $params = array();
+        $response_type = 'html';
 
-        if(preg_match('/.(json)$/', $request_uri, $matches)) {
-            $params['response_type'] = $matches[1];
+        if(preg_match('/.(json|html|xml)$/', $request_uri, $matches)) {
+            $response_type = $matches[1];
             $request_uri = str_replace($matches[0], '', $request_uri);
         }
 
@@ -120,7 +121,7 @@ class Router {
                     $params[$routeOptions['params'][$idx]] = $part;
                 }
 
-                return $this->handle($routeOptions['handler'], $params);
+                return $this->handle($routeOptions['handler'], $params, $response_type);
             }
         }
 

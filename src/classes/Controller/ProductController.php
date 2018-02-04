@@ -2,8 +2,8 @@
 namespace App\Controller;
 
 class ProductController extends ApplicationController {
-    public function __construct($layout = 'default') {
-        parent::__construct($layout);
+    public function __construct($responseType = 'html', $layout = 'default') {
+        parent::__construct($responseType, $layout);
 
         $this->beforeAction('product', function($params) {
             try {
