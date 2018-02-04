@@ -73,5 +73,22 @@ class Product extends \App\Model {
             return true;
         }
     }
+
+    public function jsonSerialize(): array {
+        $json = $this->data;
+        $json['images'] = array();
+
+        foreach($this->images as $image) {
+            $object = new \stdClass();
+            foreach ($image->data as $key => $value) {
+                if($value instanceof \App\Model) continue;
+                $object->$key = $value;
+            }
+
+            $json['images'][] = $object;
+        }
+
+        return $json;
+    }
 }
 ?>

@@ -52,8 +52,10 @@ abstract class Model implements \JsonSerializable {
         $json = array();
 
         foreach($this->data as $key => $value) {
+            if($key == 'deleted') continue;
+
             if($this->data[$key] instanceof \App\Model) {
-                $value = $value->toJson();
+                $value = $value->jsonSerialize();
             }
 
             $json[$key] = $value;
