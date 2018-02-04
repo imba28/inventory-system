@@ -94,6 +94,8 @@ class Builder {
             }
         }
         else $this->group[] = $this->sanitizeColumnName($arg);
+
+        return $this;
     }
 
     public function limit($count) {
@@ -193,13 +195,15 @@ class Builder {
 
     public function reset($prop = null) {
         if(is_null($prop)) {
-            $this->selection = array("*");
-            $this->where = array();
-            $this->order = array();
             $this->joins = array();
+            $this->where = array();
+            $this->selection = array("*");
+            $this->order = array();
+            $this->group = array();
+            $this->limit = array();
         }
         else {
-            if(in_array($prop, array('limit', 'selection', 'where', 'order', 'joins'))) {
+            if(in_array($prop, array('limit', 'selection', 'where', 'order', 'joins', 'group'))) {
                 $this->$prop = array();
             }
         }
