@@ -6,11 +6,15 @@ abstract class BasicController {
     protected $response;
     protected $view;
 
+    protected $beforeActions;
+
     public function __construct($layout = 'default') {
         $this->layout = $layout;
         $this->response = new \App\HttpResponse();
         $this->request = new \App\HttpRequest();
         $this->view = new \App\View();
+
+        $this->beforeActions = array();
 
         $this->view->assign('request', $this->request);
     }
@@ -31,6 +35,18 @@ abstract class BasicController {
         return $content;
     }
 
+    protected function beforeAction($method, $methodToCall) {
+        if(is_array($method)) {
+            foreach($method as $m) {
+                $this->beforeAction($m, $methodToCall);
+            }
+            return;
+        }
+
+        if(!isset($this->beforeActions[$method])) $this->beforeActions[$method] = array();
+        $this->beforeActions[$method][] = $methodToCall;
+    }
+
     protected function getLayoutComponent($type = 'head') {
         if(file_exists(ABS_PATH."/src/layouts/{$this->layout}-{$type}.php")) {
             return $this->bufferContent(ABS_PATH."/src/layouts/{$this->layout}-{$type}.php");
@@ -39,6 +55,7 @@ abstract class BasicController {
     }
 
     public function handle($method, $args) {
+        $this->callBeforeActions($method, $args);
         $this->$method($args);
 
         $this->renderContent();
@@ -50,6 +67,23 @@ abstract class BasicController {
         $this->response->addHeader('Content-Type', 'application/json');
         $this->response->flush();
         exit();
+    }
+
+    private function callBeforeActions($method, $args) {
+        if(isset($this->beforeActions[$method])) {
+            foreach($this->beforeActions[$method] as $function)  {
+                if($function instanceof \Closure) {
+                    call_user_func_array($function, array($args));
+                }
+                elseif(is_callable(array($this, $function), false, $callableName)) {
+                    $this->$function($args);
+                }
+                elseif(function_exists($function)) {
+                    $function($args);
+                }
+                else \App\Debugger::log('warning', "Cannot find method to call `{$function}`!");
+            }
+        }
     }
 
     abstract public function error($status);

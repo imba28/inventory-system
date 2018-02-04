@@ -1,4 +1,5 @@
 {% macro render(customer, title, button_text, back_link) %}
+{% set action = customer.getId() is not null ? '/customer/' ~ customer.getId() : '/customers' %}
 <h1>Kunde
     {{ title ? ('&#187; ' ~ title)|raw : '' }}
 </h1>
@@ -6,7 +7,7 @@
 <hr>
 <!-- /.col-lg-3 -->
 <div class="row">
-    <form class="ml-4 col-md-6" method="post" enctype="multipart/form-data">
+    <form class="ml-4 col-md-6" action="{{ action }}" method="post" enctype="multipart/form-data">
         <div class="form-group">
             <label for="name">*Name</label>
             <input id="name" type="text" class="form-control" placeholder="Name eingeben" name="name" value="{{ customer.get('name') }}">

@@ -2,24 +2,36 @@
 namespace App\Controller;
 
 class ProductController extends ApplicationController {
-    public function product($params) {
-        try {
-            $product = \App\Models\Product::grab($params['id']);
+    public function __construct($layout = 'default') {
+        parent::__construct($layout);
 
-            $this->view->assign('product', $product);
+        $this->beforeAction('product', function($params) {
+            try {
+                $this->product = \App\Models\Product::grab($params['id']);
+            }
+            catch(\App\Exceptions\NothingFoundException $e) {
+                $this->product = null;
+            }
+        });
+    }
+
+    public function product($params) {
+        if(is_null($this->product)) $this->error(404, 'Produkt wurde nicht gefunden!');
+        else {
+            $this->view->assign('product', $this->product);
 
             if(isset($params['action'])) {
                 if($params['action'] == 'edit') {
-                    $this->edit($product);
+                    $this->edit();
                 }
                 elseif($params['action'] == 'rent') {
-                    $this->rent($product);
+                    $this->rent();
                 }
                 elseif($params['action'] == 'return') {
-                    $this->return($product);
+                    $this->return();
                 }
                 elseif($params['action'] == 'request') {
-                    $this->request($product);
+                    $this->request();
                 }
                 elseif($params['action'] == 'claim') {
                     //TODO: implements claim product
@@ -27,13 +39,10 @@ class ProductController extends ApplicationController {
             }
             else {
                 if(isset($params['response_type']) && $params['response_type'] === 'json') {
-                    $this->renderJson($product);
+                    $this->renderJson($this->product);
                 }
-                $this->display($product);
+                $this->display($this->product);
             }
-        }
-        catch(\App\Exceptions\NothingFoundException $e) {
-            $this->error(404, 'Produkt wurde nicht gefunden!');
         }
     }
 
@@ -200,7 +209,7 @@ class ProductController extends ApplicationController {
 
     // INTERNAL METHODS
 
-    private function edit(\App\Models\Product $product) {
+    private function edit() {
         $this->authenticateUser();
 
         $this->view->setTemplate('product-update');
@@ -208,17 +217,17 @@ class ProductController extends ApplicationController {
         if($this->request->issetParam('submit')) {
             $params = $this->request->getParams();
             foreach($params as $key) {
-                $product->set($key, $this->request->getParam($key));
+                $this->product->set($key, $this->request->getParam($key));
             }
 
-            if(empty($product->get('name')) || empty($product->get('invNr'))) {
+            if(empty($this->product->get('name')) || empty($this->product->get('invNr'))) {
                 \App\System::getInstance()->addMessage('error', 'Name/Inventar Nummer muss angegeben werden!');
                 return;
             }
 
             try {
-                $product->save();
-                \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde aktualisiert!');
+                $this->product->save();
+                \App\System::getInstance()->addMessage('success', $this->product->get('name'). ' wurde aktualisiert!');
             }
             catch(\App\QueryBuilder\QueryBuilderException $e) {
                 list($error_code, $error_message, $error_value, $error_column) = $e->getData();
@@ -246,10 +255,10 @@ class ProductController extends ApplicationController {
                     if($image->save("/images")) {
                         $product_image = \App\Models\ProductImage::new();
                         $product_image->set('src', "/public/files/images/{$image->getDestination()}");
-                        $product_image->set('product', $product);
+                        $product_image->set('product', $this->product);
                         $product_image->set('title', $image->getInfo('name'));
                         if($product_image->save()) {
-                            $product->addImage($product_image);
+                            $this->product->addImage($product_image);
                         }
                     }
                     else {
@@ -271,12 +280,12 @@ class ProductController extends ApplicationController {
         }
     }
 
-    private function rent(\App\Models\Product $product) {
+    private function rent() {
         $this->authenticateUser();
 
-        if(!$product->isAvailable()) {
+        if(!$this->product->isAvailable()) {
             $action = current(\App\Models\Action::grabByFilter(array(
-                array('product_id', '=', $product->getId()),
+                array('product_id', '=', $this->product->getId()),
                 array('returnDate', 'IS', 'NULL')
             )));
 
@@ -300,7 +309,7 @@ class ProductController extends ApplicationController {
                 $expectedReturnDate = !empty($this->request->getParam('expectedReturnDate')) ? $this->request->getParam('expectedReturnDate') : null;
 
                 $action = \App\Models\Action::new();
-                $action->set('product', $product);
+                $action->set('product', $this->product);
                 $action->set('customer', $customer);
                 $action->set('rentDate', 'NOW()');
                 $action->set('expectedReturnDate', $expectedReturnDate);
@@ -317,13 +326,13 @@ class ProductController extends ApplicationController {
         }
     }
 
-    private function return(\App\Models\Product $product) {
+    private function return() {
         $this->authenticateUser();
 
         try {
             $action = \App\Models\Action::grabByFilter(array(
                 array('returnDate' , 'IS', 'NULL'),
-                array('product_id', '=', $product->getId())
+                array('product_id', '=', $this->product->getId())
             ));
 
             if(count($action) == 1) {
@@ -333,12 +342,12 @@ class ProductController extends ApplicationController {
                 \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
             }
             else {
-                \App\Debugger::log("Es gibt mehrere aktive Aktionen für das Produkt {$product->getId()}! DAS SOLLTE NICHT PASSIEREN!", 'fatal');
+                \App\Debugger::log("Es gibt mehrere aktive Aktionen für das Produkt {$this->product->getId()}! DAS SOLLTE NICHT PASSIEREN!", 'fatal');
                 \App\System::getInstance()->addMessage('error', 'Fehler beim Zurückgeben!');
             }
 
             if($this->request->issetParam('submit')) {
-                if($product->isAvailable()) {
+                if($this->product->isAvailable()) {
                     \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
                 }
                 else {
@@ -353,7 +362,7 @@ class ProductController extends ApplicationController {
                     }
                     else $action->returnProduct();
 
-                    \App\System::getInstance()->addMessage('success', "{$product->get('name')} wurde erfolgreich zurückgegeben!");
+                    \App\System::getInstance()->addMessage('success', "{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
                 }
             }
         }
@@ -364,9 +373,9 @@ class ProductController extends ApplicationController {
         $this->view->setTemplate('product-return');
     }
 
-    private function display(\App\Models\Product $product) {
+    private function display() {
         try {
-            $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array('product', '=', $product), 10));
+            $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array('product', '=', $this->product), 10));
         }
         catch(\App\Exceptions\NothingFoundException $e) {
             $this->view->assign('rentHistory', array());
@@ -380,7 +389,7 @@ class ProductController extends ApplicationController {
 
         //\App\Debugger::log('hello there');
         if($this->request->issetParam('submit')) {
-            $product = \App\Models\Product::new();
+            $this->product = \App\Models\Product::new();
 
             $params = $this->request->getParams();
 
@@ -389,11 +398,11 @@ class ProductController extends ApplicationController {
             }
             else {
                 foreach($params as $key) {
-                    $product->set($key, $this->request->getParam($key));
+                    $this->product->set($key, $this->request->getParam($key));
                 }
 
                 try {
-                    $product->save();
+                    $this->product->save();
 
                     if($this->request->issetFile("add-productImage")) {
                         $files = $this->request->getFiles("add-productImage");
@@ -406,10 +415,10 @@ class ProductController extends ApplicationController {
                                 if($image->save("/images")) {
                                     $product_image = \App\Models\ProductImage::new();
                                     $product_image->set('src', "/public/files/images/{$image->getDestination()}");
-                                    $product_image->set('product', $product);
+                                    $product_image->set('product', $this->product);
                                     $product_image->set('title', $image->getInfo('name'));
                                     if($product_image->save()) {
-                                        $product->addImage($product_image);
+                                        $this->product->addImage($product_image);
                                     }
                                 }
                                 else {
@@ -430,7 +439,7 @@ class ProductController extends ApplicationController {
                         }
                     }
 
-                    \App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde erstellt! <a href="/product/'. $product->getId() .'">zum Produkt</a>');
+                    \App\System::getInstance()->addMessage('success', $this->product->get('name'). ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>');
                 }
                 catch(\App\QueryBuilder\QueryBuilderException $e) {
                     list($error_code, $error_message, $error_value, $error_column) = $e->getData();
@@ -534,8 +543,8 @@ class ProductController extends ApplicationController {
         return $query->get();
     }
 
-    private function request(\App\Models\Product $product) {
-        if($product->isAvailable()) {
+    private function request() {
+        if($this->product->isAvailable()) {
             $adminEmail = \App\Configuration::get('admin_email');
             if(!is_array($adminEmail)) $adminEmail = array($adminEmail);
 
@@ -550,8 +559,8 @@ class ProductController extends ApplicationController {
                     }
                     else {
                         $to = implode($adminEmail, ';');
-                        $subject = "MMT Verleih: Anfrage für Produkt {$product->get('name')}";
-                        $message = "Anfrage für Verleih von {$product->get('name')} von {$this->request->get('name')}.";
+                        $subject = "MMT Verleih: Anfrage für Produkt {$this->product->get('name')}";
+                        $message = "Anfrage für Verleih von {$this->product->get('name')} von {$this->request->get('name')}.";
                         $header = 'From: webmaster@example.com' . "\r\n" .
                             'Reply-To: '. $this->request->get('aklnslknat') . "\r\n" .
                             'X-Mailer: PHP/' . phpversion();
@@ -568,7 +577,7 @@ class ProductController extends ApplicationController {
         }
         else {
             \App\System::getInstance()->addMessage('error', 'Produkt ist bereits verliehen!');
-            $this->redirectToRoute("/product/{$product->getId()}");
+            $this->redirectToRoute("/product/{$this->product->getId()}");
         }
     }
 }

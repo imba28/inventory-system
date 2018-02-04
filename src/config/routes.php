@@ -9,11 +9,15 @@ $router->addRoute('get', '/products/category', 'ProductController#displayCategor
 $router->addRoute('all', array('/products/search', '/products/:action/:page'), 'ProductController#search');
 $router->addRoute('all', array('/products/:action', '/products'), 'ProductController#products');
 
-$router->addRoute('all', '/customers', 'CustomerController#customers');
-$router->addRoute('all', '/customers/:action', 'CustomerController#action');
-$router->addRoute('all', '/customer/:id', 'CustomerController#customer');
+$router->addRoute('get', '/customers', 'CustomerController#index');
+$router->addRoute('post', '/customers', 'CustomerController#create');
+$router->addRoute('all', '/customers/new', 'CustomerController#new');
+
+$router->addRoute('get', '/customer/:_id', 'CustomerController#show');
+$router->addRoute('get', '/customer/:_id/edit', 'CustomerController#edit');
+$router->addRoute('post', '/customer/:id', 'CustomerController#update');
 $router->addRoute('post', '/customer/:id/delete', 'CustomerController#delete');
-$router->addRoute('all', '/customer/:id/:action', 'CustomerController#action');
+//$router->addRoute('all', '/customer/:id/:action', 'CustomerController#action');
 
 $router->addRoute('post', '/inventur', 'InventurController#actionInventur');
 $router->addRoute('get', '/inventur/:_id', 'InventurController#show');

@@ -61,6 +61,10 @@ abstract class Model implements \JsonSerializable {
         return $json;
     }
 
+    public function remove() {
+        return self::delete($this->getId());
+    }
+
     public function save($head_column = null, $head_id = null, $exception = false) {
         $this->trigger('save');
 

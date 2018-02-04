@@ -2,13 +2,25 @@
 namespace App\Controller;
 
 class CustomerController extends ApplicationController {
+    private $customer;
+
     public function __construct($layout = 'default') {
         parent::__construct($layout);
 
         $this->authenticateUser();
+
+        $this->beforeAction(array('show', 'update', 'delete', 'edit'), function($params) {
+            try {
+                $this->customer = \App\Models\Customer::grab($params['id']);
+                $this->view->assign('customer', $this->customer);
+            }
+            catch(\App\Exceptions\NothingFoundException $e) {
+                $this->error(404);
+            }
+        });
     }
 
-    public function customers($params) {
+    public function index($params = array()) {
         $customers = \App\Models\Customer::grabAll();
         if(@$params['response_type'] === 'json') {
             $this->renderJson($customers);
@@ -17,73 +29,38 @@ class CustomerController extends ApplicationController {
         $this->view->setTemplate('customers');
     }
 
-    public function customer(array $params) {
-        if(isset($params['id'])) {
-            $customer = \App\Models\Customer::grab($params['id']);
+    public function show(array $params) {
+        if(@$params['response_type'] === 'json') {
+            $this->renderJson($this->customer);
+        }
 
-            if(@$params['response_type'] === 'json') {
-                $this->renderJson($customer);
-            }
+        $rentalHistory = array();
 
-            $rentalHistory = array();
+        try {
+            $rentalHistory = \App\Models\Action::grabByFilter(array(
+                array('customer', '=', $this->customer)
+            ), 10, array('returnDate' => 'ASC'));
+        }
+        catch(\App\Exceptions\NothingFoundException $e) { }
 
-            try {
-                $rentalHistory = \App\Models\Action::grabByFilter(array(
-                    array('customer', '=', $customer)
-                ), 10, array('returnDate' => 'ASC'));
-            }
-            catch(\App\Exceptions\NothingFoundException $e) { }
+        $this->view->assign('rentHistory', $rentalHistory);
+        $this->view->setTemplate('customer');
+    }
 
-            $this->view->assign('customer', $customer);
-            $this->view->assign('rentHistory', $rentalHistory);
-            $this->view->setTemplate('customer');
+    public function update() {
+        $params = $this->request->getParams();
+        foreach($params as $key) {
+            $this->customer->set($key, $this->request->getParam($key));
+        }
+
+        if(empty($this->customer->get('name')) || empty($this->customer->get('internal_id'))) {
+            \App\System::getInstance()->addMessage('error', 'Name/FHS Nummer muss angegeben werden!');
         }
         else {
-            $this->error(404);
-        }
-    }
-
-    public function action(array $params) {
-        if(isset($params['id'])) {
-            $customer = \App\Models\Customer::grab($params['id']);
-            $this->view->assign('customer', $customer);
-
-            if(isset($params['action'])) {
-                if($params['action'] === 'edit') {
-                    $this->edit($customer);
-                }
-                else {
-                    $this->error(404);
-                }
-            }
-        }
-        elseif(isset($params['action'])) {
-            if($params['action'] === 'add') {
-                $this->add();
-            }
-            else {
-                $this->error(404);
-            }
-        }
-    }
-
-    private function edit(\App\Models\Customer $customer) {
-        $this->view->setTemplate('customer-update');
-
-        if($this->request->issetParam('submit')) {
-            $params = $this->request->getParams();
-            foreach($params as $key) {
-                $customer->set($key, $this->request->getParam($key));
-            }
-
-            if(empty($customer->get('name')) || empty($customer->get('internal_id'))) {
-                \App\System::getInstance()->addMessage('error', 'Name/FHS Nummer muss angegeben werden!');
-                return;
-            }
-
             try {
-                $customer->save();
-                \App\System::getInstance()->addMessage('success', "<a href='/customer/{$customer->getId()}'>{$customer->get('name')}</a> wurde gespeichert!");
+                $this->customer->save();
+                \App\System::getInstance()->addMessage('success', "<a href='/customer/{$this->customer->getId()}'>{$this->customer->get('name')}</a> wurde gespeichert!");
+
             }
             catch(\App\QueryBuilder\QueryBuilderException $e) {
                 list($error_code, $error_message, $error_value, $error_column) = $e->getData();
@@ -101,31 +78,46 @@ class CustomerController extends ApplicationController {
                 \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
             }
         }
+
+        $this->edit(); // show edit form
     }
 
-    public function delete($params) {
-        if(isset($params['id'])) {
-            if(\App\Models\Customer::delete(intval($params['id']))) {
-                \App\System::getInstance()->addMessage('success', 'Kunde wurde gelöscht.');
-            }
-            else {
-                \App\System::getInstance()->addMessage('error', 'Es ist ein Fehler beim Löschen aufgetreten!');
-            }
+    public function edit() {
+        $this->view->setTemplate('customer-update');
+    }
 
-            $this->view->assign('customers', \App\Models\Customer::grabAll());
-            $this->view->setTemplate('customers');
+    public function create() {
+        $this->new();
+        $this->update();
+        $this->view->setTemplate('customer-add');
+    }
+
+    public function delete() {
+        if($this->customer->remove()) {
+            \App\System::getInstance()->addMessage('success', 'Kunde wurde gelöscht.');
         }
+        else {
+            \App\System::getInstance()->addMessage('error', 'Es ist ein Fehler beim Löschen aufgetreten!');
+        }
+
+        $this->index();
     }
 
-    private function add() {
-        $this->edit(\App\Models\Customer::new());
+    public function new() {
+        $this->customer = \App\Models\Customer::new();
+        $this->view->assign('customer', $this->customer);
 
         $this->view->setTemplate('customer-add');
     }
 
-    public function error($status) {
+    public function error($status, $message = "Dieser Kunde konnte leider nicht gefunden werden!") {
         $this->response->setStatus($status);
         $this->view->setTemplate('error');
+        $this->view->assign('errorCode', $status);
+        $this->view->assign('errorMessage', $message);
+
+        $this->renderContent();
+        exit();
     }
 }
 ?>
