@@ -49,7 +49,11 @@
     <script>
     $(document).ready(function() {
         $.getJSON('/products/category.json', {}, function(data) {
-            data = data.map(function(item) {
+            data = data
+            .filter(function(item) {
+                return item.name !== null;
+            })
+            .map(function(item) {
                 return item.name;
             });
 
