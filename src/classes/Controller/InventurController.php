@@ -8,7 +8,7 @@ class InventurController extends ApplicationController {
         parent::__construct($layout);
 
         $this->authenticateUser();
-        $this->inventur = new \App\Inventur();    
+        $this->inventur = new \App\Inventur();
     }
 
     public function main($params) {
@@ -169,7 +169,7 @@ class InventurController extends ApplicationController {
             \App\System::getInstance()->addMessage('error', 'Inventur wurde bereits gestartet!');
         }
         else {
-            $this->inventur->start();
+            $this->inventur->start($this->getCurrentUser());
             \App\System::getInstance()->addMessage('success', 'Inventur wurde erfolgreich gestartet!');
             $this->redirectToRoute('/inventur', 'GET');
         }

@@ -257,6 +257,8 @@ class ProductController extends ApplicationController {
                         $product_image->set('src', "/public/files/images/{$image->getDestination()}");
                         $product_image->set('product', $this->product);
                         $product_image->set('title', $image->getInfo('name'));
+                        $product_image->set('user', $this->getCurrentUser());
+
                         if($product_image->save()) {
                             $this->product->addImage($product_image);
                         }
@@ -299,6 +301,7 @@ class ProductController extends ApplicationController {
                 }
                 catch(\App\Exceptions\NothingFoundException $e) {
                     $customer = \App\Models\Customer::new();
+                    $customer->set('user', $this->getCurrentUser());
                     $customer->set('internal_id', $this->request->getParam('internal_id'));
 
                     $customer->save();
@@ -313,6 +316,7 @@ class ProductController extends ApplicationController {
                 $action->set('customer', $customer);
                 $action->set('rentDate', 'NOW()');
                 $action->set('expectedReturnDate', $expectedReturnDate);
+                $action->set('user', $this->getCurrentUser());
 
                 if($action->save()) {
                     \App\System::getInstance()->addMessage('success', 'Produkt verliehen!');
@@ -390,7 +394,8 @@ class ProductController extends ApplicationController {
         //\App\Debugger::log('hello there');
         if($this->request->issetParam('submit')) {
             $this->product = \App\Models\Product::new();
-
+            $this->product->set('user', $this->getCurrentUser());
+            
             $params = $this->request->getParams();
 
             if(empty($this->request->getParam('name')) || empty($this->request->getParam('invNr'))) {
@@ -417,6 +422,8 @@ class ProductController extends ApplicationController {
                                     $product_image->set('src', "/public/files/images/{$image->getDestination()}");
                                     $product_image->set('product', $this->product);
                                     $product_image->set('title', $image->getInfo('name'));
+                                    $product_image->set('user', $this->getCurrentUser());
+
                                     if($product_image->save()) {
                                         $this->product->addImage($product_image);
                                     }

@@ -105,6 +105,7 @@ class CustomerController extends ApplicationController {
 
     public function new() {
         $this->customer = \App\Models\Customer::new();
+        $this->customer->set('user', $this->getCurrentUser());
         $this->view->assign('customer', $this->customer);
 
         $this->view->setTemplate('customer-add');

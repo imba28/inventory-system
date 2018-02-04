@@ -63,13 +63,9 @@ class Inventur {
         return $action;
     }
 
-    public function start() {
+    public function start(\App\Models\User $startedBy) {
         if(!$this->isStarted()) {
-            /*
-            vd("RENTED: " . count($this->itemsRented));
-            vd("AVAILABLE: " . count($this->itemsAvailable));
-            */
-
+            $this->inventurObject->set('user', $startedBy);
             $this->inventurObject->set('startDate', 'NOW()');
             return $this->inventurObject->save();
         }

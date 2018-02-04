@@ -7,6 +7,7 @@ abstract class Model implements \JsonSerializable {
 
     protected $id;
     protected $deleted;
+    protected $user;
 
     static private $instances = array();
 
@@ -86,7 +87,7 @@ abstract class Model implements \JsonSerializable {
                     if(!$value->isCreated()) {
                         $value->save();
                     }
-                    $properties_update["{$name}_id"] = $value->get('id');
+                    $properties_update["{$name}_id"] = $value->getId();
                     unset($properties_update[$name]);
                 }
             }
@@ -117,7 +118,6 @@ abstract class Model implements \JsonSerializable {
         else {
             $this->trigger('create');
 
-            $properties_update['user_id'] = 1;
             $properties_update['createDate'] = 'NOW()';
             $properties_update['deleted'] = '0';
 
