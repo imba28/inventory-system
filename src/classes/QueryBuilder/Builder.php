@@ -80,7 +80,6 @@ class Builder {
         return $this;
     }
 
-
     public function orderBy($column, $type = 'DESC') {
         $col = !in_array($column, array("RAND()")) && !$column instanceof Raw ? $this->sanitizeColumnName($column) : $column;
         $this->order[] = $col . " " . strtoupper($type);
@@ -120,9 +119,11 @@ class Builder {
         return $this;
     }
 
-    public function join($table, $key, $operator = null, $value = null, $type = 'LEFT') {
+    public function join($table, $column, $operator = null, $joinedColumn = null, $type = 'LEFT') {
          $joinObject = new QueryJoin($table, $this, $type);
-         $joinObject->on($key, $operator, $value);
+         if($operator != null) {
+             $joinObject->on($column, $operator, $joinedColumn);
+         }
 
          $this->joins[] = $joinObject;
          return $joinObject;
@@ -356,7 +357,7 @@ class Builder {
                 $join_statement[] = $join->getStatement();
             }
 
-            $selection .= ", {$join_selection}";
+            $selection .= ', ' . implode($join_selection, ', ');
         }
 
         $join_statement = implode($join_statement, ' ');
@@ -503,7 +504,7 @@ class Builder {
         return new Raw($column);
     }
 
-    private static function getTableName($table) {
+    public static function getTableName($table) {
         if(is_null(self::$tablePrefix)) return $table;
         return self::$tablePrefix . "_{$table}";
     }

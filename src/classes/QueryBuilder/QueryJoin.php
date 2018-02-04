@@ -2,7 +2,7 @@
 namespace App\QueryBuilder;
 
 class QueryJoin {
-    use App\Traits\get_set;
+    use \App\Traits\GetSet;
 
     protected $table;
     protected $table_on_join;
@@ -19,8 +19,8 @@ class QueryJoin {
         return $this;
     }
 
-    public function on($key, $operator, $value) {
-        $this->on[] = array($this->table_on_join->sanitizeColumnName($key), $operator, $this->sanitizeColumnName($value));
+    public function on($joinedColumn, $operator, $ownColumn) {
+        $this->on[] = array($this->table_on_join->sanitizeColumnName($joinedColumn), $operator, $this->sanitizeColumnName($ownColumn));
 
         return $this;
     }
@@ -39,9 +39,9 @@ class QueryJoin {
     }
 
     public function getStatement() {
-        $table_name = db_table_name($this->table);
+        $table_name = Builder::getTableName($this->table);
 
-        $statement = " ". strtoupper($this->type) . " JOIN $table_name ON ";
+        $statement = " ". strtoupper($this->type) . " JOIN `{$table_name}` ON ";
         foreach($this->on as $on) {
             $statement .= join(' ', $on);
         }
@@ -63,11 +63,11 @@ class QueryJoin {
 
     public final function sanitizeColumnName($column) {
         $sanitized_column = $column == "*" ? $column : $this->sanitize($column);
-        return $this->sanitize(db_table_name($this->table)) . "." . $sanitized_column;
+        return $this->sanitize(Builder::getTableName($this->table)) . "." . $sanitized_column;
     }
 
     public final function sanitize($value) {
-        return QueryBuilder::SANITIZER . $value . QueryBuilder::SANITIZER;
+        return Builder::SANITIZER . $value . Builder::SANITIZER;
     }
 }
 ?>
