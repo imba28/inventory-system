@@ -476,8 +476,8 @@ class ProductController extends ApplicationController {
                     array('invNr', 'LIKE', "%{$search_string}%")
                 );
 
-                $products = \App\Models\Product::findByFilter($filter, 8);
-                $products = array_filter($products, function($p) {
+                $products = \App\Models\Product::findByFilter($filter);
+                $products = array_filter($products->toArray(), function($p) {
                     return $p->isAvailable();
                 });
 

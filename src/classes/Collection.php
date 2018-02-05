@@ -39,6 +39,9 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         $this->items[] = $model;
     }
 
+    public function toArray() {
+        return $this->items;
+    }
 
     /* ITERATOR METHODS */
     public function current() {
