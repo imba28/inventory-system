@@ -332,36 +332,34 @@ class ProductController extends ApplicationController {
             $action = \App\Models\Action::findByFilter(array(
                 array('returnDate' , 'IS', 'NULL'),
                 array('product_id', '=', $this->product->getId())
-            ));
+            ), 1);
 
-            if(count($action) == 1) {
-                $action = current($action);
-            }
-            elseif(count($action) == 0) {
+            if(count($action) == 0) {
                 \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
             }
-            else {
+            elseif(count($action) > 1) {
                 \App\Debugger::log("Es gibt mehrere aktive Aktionen für das Produkt {$this->product->getId()}! DAS SOLLTE NICHT PASSIEREN!", 'fatal');
-                \App\System::getInstance()->addMessage('error', 'Fehler beim Zurückgeben!');
+                \App\System::getInstance()->addMessage('error', 'Das Produkt wurde mehrfach verliehen? Administrator kontaktieren.');
             }
-
-            if($this->request->issetParam('submit')) {
-                if($this->product->isAvailable()) {
-                    \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
-                }
-                else {
-                    if($this->request->issetParam('returnDate')) {
-                        $date = \DateTime::createFromFormat('d.m.Y', $this->request->getParam('returnDate'));
-                        if($date !== false) {
-                            $action->returnProduct($date->format('Y-m-d H:i:s'));
-                        }
-                        else {
-                            $action->returnProduct();
-                        }
+            else {
+                if($this->request->issetParam('submit')) {
+                    if($this->product->isAvailable()) {
+                        \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
                     }
-                    else $action->returnProduct();
+                    else {
+                        if($this->request->issetParam('returnDate')) {
+                            $date = \DateTime::createFromFormat('d.m.Y', $this->request->getParam('returnDate'));
+                            if($date !== false) {
+                                $action->returnProduct($date->format('Y-m-d H:i:s'));
+                            }
+                            else {
+                                $action->returnProduct();
+                            }
+                        }
+                        else $action->returnProduct();
 
-                    \App\System::getInstance()->addMessage('success', "{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
+                        \App\System::getInstance()->addMessage('success', "{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
+                    }
                 }
             }
         }

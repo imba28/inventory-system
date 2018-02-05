@@ -96,11 +96,11 @@ class Inventur {
         $inventurProduct;
 
         try {
-            $inventurProduct = current(\App\Models\inventurProduct::findByFilter(array(
+            $inventurProduct = \App\Models\inventurProduct::findByFilter(array(
                 array('product', '=', $product),
                 'AND',
                 array('inventur', '=', $this->inventurObject)
-            )));
+            ), 1);
 
             if($inventurProduct->isInStock()) {
                 throw new \App\QueryBuilder\NothingChangedException("already scanned!");
@@ -143,11 +143,11 @@ class Inventur {
         $inventurProduct;
 
         try {
-            $inventurProduct = current(\App\Models\inventurProduct::findByFilter(array(
+            $inventurProduct = \App\Models\inventurProduct::findByFilter(array(
                 array('product', '=', $product),
                 'AND',
                 array('inventur', '=', $this->inventurObject)
-            )));
+            ),1);
 
             if($inventurProduct->isInStock()) {
                 throw new \App\QueryBuilder\NothingChangedException("already scanned!");
