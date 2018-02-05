@@ -31,8 +31,7 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
 
     public function first($n = 1) {
         if($n > 1) return array_slice($this->items, 0, $n);
-
-        return $this->items[$n - 1];
+        return isset($this->items[$n - 1]) ? $this->items[$n - 1] : null;
     }
 
     public function append(\App\Model $model) {
