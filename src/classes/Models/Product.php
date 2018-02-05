@@ -19,7 +19,7 @@ class Product extends \App\Model {
                 ), false, array('id' => 'ASC'));
             }
             catch( \App\Exceptions\NothingFoundException $e) {
-                $this->images = array();
+                $this->images = new \App\Collection();
             }
         }
     }
@@ -29,7 +29,7 @@ class Product extends \App\Model {
             if($image->get('title') == 'frontimage') return $image;
         }
 
-        if(!empty($this->images)) return $this->images[0];
+        if(!$this->images->isEmpty()) return $this->images->first();
 
         return new ProductImage(array(
             'src' => 'http://via.placeholder.com/200x200',
@@ -37,7 +37,7 @@ class Product extends \App\Model {
         ));
     }
     public function addImage(ProductImage $image) {
-        $this->images[] = $image;
+        $this->images->append($image);
     }
     public function getImages() {
         return $this->images;

@@ -15,9 +15,9 @@ class Inventur {
 
     public function __construct() {
         try {
-            $this->inventurObject = current(Models\Inventur::grabByFilter(array(
+            $this->inventurObject = Models\Inventur::grabByFilter(array(
                 'finishDate', 'IS', 'NULL'
-            ), 1));
+            ), 1);
         }
         catch(\App\Exceptions\NothingFoundException $e) {
             $this->inventurObject = Models\Inventur::new();
@@ -83,9 +83,9 @@ class Inventur {
 
     public static function getLastInventur() {
         try {
-            return current(Models\Inventur::grabByFilter(array(
+            return Models\Inventur::grabByFilter(array(
                 'finishDate', 'IS NOT', 'NULL'
-            ), 1, array('id' => 'DESC')));
+            ), 1, array('id' => 'DESC'));
         }
         catch(\App\Exceptions\NothingFoundException $e) {
             return null;
@@ -212,10 +212,10 @@ class Inventur {
 
     private function getInventurAction(Models\Product $product) {
         try {
-            $action = current(Models\InventurProduct::grabByFilter(array(
+            $action = Models\InventurProduct::grabByFilter(array(
                 array('product', '=', $product),
                 array('inventur', '=', $this->inventurObject)
-            )));
+            ), 1);
         }
         catch(\App\Exceptions\NothingFoundException $e) {
             $action = Models\InventurProduct::new();

@@ -221,40 +221,39 @@ abstract class Model implements \JsonSerializable {
         return new $self_class($options);
     }
 
-    public static function grabByFilter(array $filters, $limit = false, $order = array('id' => 'DESC')): array {
+    public static function grabByFilter(array $filters, $limit = false, $order = array('id' => 'DESC')) {
         list($options, $self_class) = self::getOptions($filters, true, $limit, $order);
 
-        $objs = array();
-        foreach($options as $o) {
-            if(isset($instances) && in_array($o['id'], array_keys($instances))) {
-                $obs[] = array_find($instances, function($item) use($o) {
-                    return $item->getId() == $o['id'];
-                });
-            }
-            else $objs[] = new $self_class($o);
+        if($limit === false || $limit !== 1) {
+            return new Collection(self::getModelFromOption($options));
         }
-
-        return $objs;
+        else {
+            return current(self::getModelFromOption($options));
+        }
     }
 
-    public static function grabAll(): array {
+    public static function grabAll(): \Traversable {
         list($options, $self_class) = self::getOptions(array(), true);
 
-        $objs = array();
-        $instances = isset(self::$instances[get_called_class()]) ? self::$instances[get_called_class()] : array();
+        return new Collection(self::getModelFromOption($options));
+    }
 
-        foreach($options as $o) {
-            if(isset($instances) && in_array($o['id'], array_keys($instances))) {
-                $obs[] = array_find($instances, function($item) use($o) {
-                    return $item->getId() == $o['id'];
-                });
+    private static function getModelFromOption($arg) {
+        if(!is_array($arg)) $arg = array($arg);
+        if(!isset(self::$instances[get_called_class()])) self::$instances[get_called_class()] = array();
+
+        $models = array();
+        $self_class = get_called_class();
+
+        foreach($arg as $option) {
+            if(!isset(self::$instances[$self_class][$option['id']])) {
+                self::$instances[$self_class][$option['id']] = new $self_class($option);;
             }
-            else {
-                $objs[] = new $self_class($o);
-            }
+
+            $models[] = self::$instances[$self_class][$option['id']];
         }
 
-        return $objs;
+        return $models;
     }
 
     public static function new(): \App\Model {
