@@ -105,7 +105,7 @@ abstract class Model implements \JsonSerializable {
             }
         }
 
-        list($table_name, $self_class) = self::getTableName();
+        $table_name = self::getTableName();
 
         $query = new QueryBuilder\Builder($table_name);
 
@@ -149,7 +149,7 @@ abstract class Model implements \JsonSerializable {
 
     // Static methods.
     public static function getQuery(array $filters, $limit = false): \App\QueryBuilder\Builder {
-        list($table_name, $self_class) = self::getTableName();
+        $table_name = self::getTableName();
 
         $query = new \App\QueryBuilder\Builder($table_name);
         $query->where('deleted', '=', '0')->orderBy('id', 'DESC');
@@ -172,7 +172,8 @@ abstract class Model implements \JsonSerializable {
     }
 
     public static function getOptions($filters = array(), $all = false, $limit = false, $order = array('id' => 'DESC')) {
-        list($table_name, $self_class) = self::getTableName();
+        $table_name = self::getTableName();
+        $self_class = get_called_class();
 
         $query = new \App\QueryBuilder\Builder($table_name);
         $query->where('deleted', '=', '0');
@@ -204,17 +205,18 @@ abstract class Model implements \JsonSerializable {
 
         if(!empty($res)) {
             $options = $all ? $res : current($res);
-            return array($options, $self_class);
+            return $options;
         }
         throw new \App\Exceptions\NothingFoundException("No entries found for {$self_class}!");
     }
 
     public static function find($value, $column = 'id'): \App\Model {
-        if($column == 'id' && isset(self::$instances[get_called_class()][$value])) {
-            return self::$instances[get_called_class()][$value];
+        $self_class = get_called_class();
+        if($column == 'id' && isset(self::$instances[$self_class][$value])) {
+            return self::$instances[$self_class][$value];
         }
 
-        list($options, $self_class) = self::getOptions(array(
+        $options = self::getOptions(array(
             array($column, '=', $value)
         ));
 
@@ -222,7 +224,7 @@ abstract class Model implements \JsonSerializable {
     }
 
     public static function findByFilter(array $filters, $limit = false, $order = array('id' => 'DESC')) {
-        list($options, $self_class) = self::getOptions($filters, true, $limit, $order);
+        $options = self::getOptions($filters, true, $limit, $order);
 
         if($limit === false || $limit !== 1) {
             return new Collection(self::getModelFromOption($options));
@@ -233,7 +235,7 @@ abstract class Model implements \JsonSerializable {
     }
 
     public static function all(): \Traversable {
-        list($options, $self_class) = self::getOptions(array(), true);
+        $options = self::getOptions(array(), true);
 
         return new Collection(self::getModelFromOption($options));
     }
@@ -279,9 +281,9 @@ abstract class Model implements \JsonSerializable {
     protected static function getTableName() {
         $self_class = get_called_class();
         if($self_class === false) throw new \UnexpectedValueException('Oh shit.');
-
         $self_class = strtolower($self_class);
-        return array(preg_replace('/(.+)\\\/', '', $self_class).'s', $self_class);
+
+        return preg_replace('/(.+)\\\/', '', $self_class).'s';
     }
 }
 ?>
