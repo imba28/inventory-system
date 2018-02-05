@@ -27,17 +27,21 @@ class CustomerController extends ApplicationController {
     }
 
     public function show(array $params) {
-        $rentalHistory = array();
+        $this->respondTo(function($wants) {
+            $wants->html(function() {
+                try {
+                    $rentalHistory = \App\Models\Action::findByFilter(array(
+                        array('customer', '=', $this->customer)
+                    ), 10, array('returnDate' => 'ASC'));
+                }
+                catch(\App\Exceptions\NothingFoundException $e) {
+                    $rentalHistory = array();
+                }
 
-        try {
-            $rentalHistory = \App\Models\Action::findByFilter(array(
-                array('customer', '=', $this->customer)
-            ), 10, array('returnDate' => 'ASC'));
-        }
-        catch(\App\Exceptions\NothingFoundException $e) { }
-
-        $this->view->assign('rentHistory', $rentalHistory);
-        $this->view->setTemplate('customer');
+                $this->view->assign('rentHistory', $rentalHistory);
+                $this->view->setTemplate('customer');
+            });
+        });
     }
 
     public function update() {

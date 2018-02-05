@@ -82,7 +82,29 @@ abstract class BasicController {
         }
     }
 
+    protected function respondTo(\Closure $formats) {
+        $responseFormats = new \App\Format(); // kapselt verschiedene Closures, die je nach response Type Werte in der View setzen.
+        /* example usage: */
+        /*
+        $this->respondTo(function($wants) {
+            $wants->html(function() {
+                $this->view->assign('rentHistory', $rentalHistory);
+                $this->view->setTemplate('customer');
+            });
+
+            $wants->json(function() {
+                $this->view->assign('url', $url);
+            });
+        });
+        */
+        $formats($responseFormats);
+        $responseFormats->execute($this->responseType);
+    }
+
+    protected function redirectToRoute($route) {
+        \App\Router::getInstance()->route($route);
+    }
+
     abstract public function error($status);
 }
-
 ?>
