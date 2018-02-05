@@ -9,6 +9,8 @@ abstract class BasicController {
     protected $responseType;
     protected $beforeActions;
 
+    private $formats = array();
+
     public function __construct($responseType = 'html', $layout = 'default') {
         $this->layout = $layout;
         $this->responseType = $responseType;
@@ -18,7 +20,9 @@ abstract class BasicController {
 
         $this->beforeActions = array();
 
-        $this->view->assign('request', $this->request);
+        $this->format('html', function() {
+            $this->view->assign('request', $this->request);
+        });
     }
 
     protected function renderContent() {
@@ -41,10 +45,24 @@ abstract class BasicController {
 
     public function handle($method, $args) {
         $this->callBeforeActions($method, $args);
+        $this->callFormats();
         $this->$method($args);
 
         $this->renderContent();
         exit();
+    }
+
+    private function callFormats() {
+        if(isset($this->formats[$this->responseType])) {
+            foreach ($this->formats as $f) {
+                $f();
+            }
+        }
+    }
+
+    protected function format($responseType, \Closure $f) {
+        if(!isset($this->formats[$responseType])) $this->formats[$responseType] = array();
+        $this->formats[$responseType] = $f;
     }
 
     private function callBeforeActions($method, $args) {

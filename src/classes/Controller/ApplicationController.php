@@ -7,8 +7,10 @@ abstract class ApplicationController extends \App\BasicController {
     public function __construct($responseType = 'html', $layout = 'default') {
         parent::__construct($responseType, $layout);
 
-        $this->view->assign('currentUser', $this->getCurrentUser());
-        $this->view->assign('isUserSignedIn', $this->isUserSignedIn());
+        $this->format('html', function() {
+            $this->view->assign('currentUser', $this->getCurrentUser());
+            $this->view->assign('isUserSignedIn', $this->isUserSignedIn());
+        });
 
         if($this->isUserSignedIn()) {
             \App\Menu::getInstance()->set('items', array(

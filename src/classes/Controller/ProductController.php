@@ -38,10 +38,10 @@ class ProductController extends ApplicationController {
                 }
             }
             else {
-                if(isset($params['response_type']) && $params['response_type'] === 'json') {
-                    $this->renderJson($this->product);
+                if($this->responseType === 'html') $this->display($this->product);
+                else {
+                    $this->renderContent();
                 }
-                $this->display($this->product);
             }
         }
     }
@@ -163,12 +163,7 @@ class ProductController extends ApplicationController {
 
     public function displayCategories($params) {
         $categories = $this->getCategories();
-        if(isset($params['response_type']) && $params['response_type'] === 'json') {
-            $this->renderJson($categories);
-        }
-        else {
-            $this->redirectToRoute('/products');
-        }
+        $this->view->assign('categories', $categories);
     }
 
     public function displayCategory($params) {
@@ -395,7 +390,7 @@ class ProductController extends ApplicationController {
         if($this->request->issetParam('submit')) {
             $this->product = \App\Models\Product::new();
             $this->product->set('user', $this->getCurrentUser());
-            
+
             $params = $this->request->getParams();
 
             if(empty($this->request->getParam('name')) || empty($this->request->getParam('invNr'))) {
@@ -515,10 +510,6 @@ class ProductController extends ApplicationController {
     }
 
     private function displayProducts($params) {
-        if(@$params['response_type'] === 'json') {
-            $this->renderJson(\App\Models\Product::grabAll());
-        }
-
         $currentPage = isset($params['page']) ? intval($params['page']) : 1;
         $itemsPerPage = 8;
 

@@ -22,18 +22,11 @@ class CustomerController extends ApplicationController {
 
     public function index($params = array()) {
         $customers = \App\Models\Customer::grabAll();
-        if(@$params['response_type'] === 'json') {
-            $this->renderJson($customers);
-        }
         $this->view->assign('customers', $customers);
         $this->view->setTemplate('customers');
     }
 
     public function show(array $params) {
-        if(@$params['response_type'] === 'json') {
-            $this->renderJson($this->customer);
-        }
-
         $rentalHistory = array();
 
         try {
