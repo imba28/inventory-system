@@ -528,7 +528,6 @@ class ProductController extends ApplicationController {
         }
 
         $this->view->assign('categories', $this->getCategories());
-
         $this->view->assign('products', $products);
 
         $this->view->setTemplate('products');

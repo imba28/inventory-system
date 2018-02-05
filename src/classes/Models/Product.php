@@ -12,8 +12,6 @@ class Product extends \App\Model {
     public function __construct($options = array()) {
         parent::__construct($options);
         self::hasMany('ProductImage', 'images');
-
-        vd($this);
     }
 
     public function getFrontImage() {
