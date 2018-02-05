@@ -86,6 +86,10 @@ abstract class Model implements \JsonSerializable {
                 elseif(is_null($value) || (empty($value) && $value != 0)) {
                     $properties_update[$name] = null;
                 }
+                elseif($value === "NOW()") {
+                    $date = new \DateTime();
+                    $this->set($name, $date->format('Y-m-d H:i:s'));
+                }
                 elseif($value instanceof \App\Model) {
                     if(!$value->isCreated()) {
                         $value->save();
