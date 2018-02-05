@@ -12,15 +12,15 @@ class Product extends \App\Model {
     public function __construct($options = array()) {
         parent::__construct($options);
 
+        $this->images = new \App\Collection();
+
         if($this->isCreated()) {
             try {
                 $this->images = ProductImage::findByFilter(array(
                     array('product', '=', $this)
                 ), false, array('id' => 'ASC'));
             }
-            catch( \App\Exceptions\NothingFoundException $e) {
-                $this->images = new \App\Collection();
-            }
+            catch( \App\Exceptions\NothingFoundException $e) {}
         }
     }
 
@@ -36,6 +36,7 @@ class Product extends \App\Model {
             'title' => 'frontimage'
         ));
     }
+
     public function addImage(ProductImage $image) {
         $this->images->append($image);
     }
