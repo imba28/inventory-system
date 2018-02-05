@@ -22,6 +22,11 @@ class FormatTest extends TestCase {
         $this->format->yaml(function() {});
     }
 
+    public function testInvalidArgument() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->format->html("hello there");
+    }
+
     public function testClosureExecution() {
         $this->format->html(function() {
             return 'html';

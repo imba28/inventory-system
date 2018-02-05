@@ -10,7 +10,8 @@ class Format {
 
     public function __call($formatType, array $arguments) {
         if(isset($this->formatClosures[$formatType])) {
-            $this->formatClosures[$formatType] = $arguments[0];
+            if(count($arguments[0]) > 0 && $arguments[0] instanceof \Closure) $this->formatClosures[$formatType] = $arguments[0];
+            else throw new \InvalidArgumentException('Argument 2 must be a closure, ' . gettype($arguments[0]) . ' given!');
         }
         else throw new Exceptions\InvalidOperationException("Method `{$formatType}` does not exist!");
     }
