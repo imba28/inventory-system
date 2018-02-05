@@ -22,19 +22,9 @@ abstract class BasicController {
     }
 
     protected function renderContent() {
-        $this->response->append($this->getLayoutComponent('head'));
         $this->response->append($this->view->render());
-        $this->response->append($this->getLayoutComponent('footer'));
+        $this->response->addHeader('Content-Type', $this->view->getContentType());
         $this->response->flush();
-    }
-
-    protected function bufferContent($path) {
-        ob_start();
-        include($path);
-        $content = ob_get_contents();
-        ob_end_clean();
-
-        return $content;
     }
 
     protected function beforeAction($method, $methodToCall) {
@@ -49,25 +39,11 @@ abstract class BasicController {
         $this->beforeActions[$method][] = $methodToCall;
     }
 
-    protected function getLayoutComponent($type = 'head') {
-        if(file_exists(ABS_PATH."/src/layouts/{$this->layout}-{$type}.php")) {
-            return $this->bufferContent(ABS_PATH."/src/layouts/{$this->layout}-{$type}.php");
-        }
-        throw new \InvalidArgumentException("Layout {$this->layout}-{$type}` does not exists!`");
-    }
-
     public function handle($method, $args) {
         $this->callBeforeActions($method, $args);
         $this->$method($args);
 
         $this->renderContent();
-        exit();
-    }
-
-    protected function renderJson($obj) {
-        $this->response->append(json_encode($obj));
-        $this->response->addHeader('Content-Type', 'application/json');
-        $this->response->flush();
         exit();
     }
 

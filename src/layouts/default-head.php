@@ -30,11 +30,12 @@
               <ul class="navbar-nav mr-auto">
                   <?= \App\Menu::getItems() ?>
               </ul>
+
               <div class="login display-flex text-light mr-2">
-                  <?php if($this->isUserSignedIn()): ?>
+                  <?php if($isUserSignedIn): ?>
                     <div class="dropdown">
                       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Hallo <?= $this->getCurrentUser()->get('name') ?>!
+                        Hallo <?= $currentUser->get('name') ?>!
                       </button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <!--<a class="dropdown-item" href="#">Action</a>

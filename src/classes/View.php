@@ -2,7 +2,7 @@
 namespace App;
 
 class View {
-    private $data = array();
+    protected $data = array();
     private $template;
 
     public function assign($key, $value) {
@@ -13,7 +13,9 @@ class View {
         $this->template = strtolower($template);
     }
 
-    public function render() {
+    public function render($layout = 'default') {
+        $html = $this->getLayoutComponent($layout, 'head');
+
         $template_file = "{$this->template}.html.twig";
         if(file_exists(ABS_PATH."/src/views/" . $template_file)) {
             $loader = new \Twig_Loader_Filesystem(ABS_PATH."/src/views/");
@@ -36,7 +38,10 @@ class View {
             $twig->addExtension(new \Twig_Extension_Debug());
 
 
-            return $twig->render($template_file, $this->data);
+            $html .= $twig->render($template_file, $this->data);
+            $html .= $this->getLayoutComponent($layout, 'footer');
+
+            return $html;
             /*extract($this->data);
 
             ob_start();
@@ -47,6 +52,28 @@ class View {
             return $content;*/
         }
         throw new \Exception("Template `{$this->template}` not found!");
+    }
+
+    public function getContentType() {
+        return 'text/html';
+    }
+
+    private function getLayoutComponent($layout, $type = 'head') {
+        if(file_exists(ABS_PATH."/src/layouts/{$layout}-{$type}.php")) {
+            return $this->bufferContent(ABS_PATH."/src/layouts/{$layout}-{$type}.php");
+        }
+        throw new \InvalidArgumentException("Layout {$layout}-{$type}` does not exists!`");
+    }
+
+    private function bufferContent($path) {
+        extract($this->data);
+
+        ob_start();
+        include($path);
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        return $content;
     }
 }
 ?>
