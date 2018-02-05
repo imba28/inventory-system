@@ -37,19 +37,10 @@ class View {
 
             $twig->addExtension(new \Twig_Extension_Debug());
 
-
             $html .= $twig->render($template_file, $this->data);
             $html .= $this->getLayoutComponent($layout, 'footer');
 
             return $html;
-            /*extract($this->data);
-
-            ob_start();
-            include($template_path);
-            $content = ob_get_contents();
-            ob_end_clean();
-
-            return $content;*/
         }
         throw new \Exception("Template `{$this->template}` not found!");
     }
