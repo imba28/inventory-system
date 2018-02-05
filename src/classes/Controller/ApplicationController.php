@@ -7,7 +7,7 @@ abstract class ApplicationController extends \App\BasicController {
     public function __construct($responseType = 'html', $layout = 'default') {
         parent::__construct($responseType, $layout);
 
-        $this->format('html', function() {
+        $this->ifFormat('html', function() {
             $this->view->assign('currentUser', $this->getCurrentUser());
             $this->view->assign('isUserSignedIn', $this->isUserSignedIn());
         });
@@ -44,10 +44,6 @@ abstract class ApplicationController extends \App\BasicController {
 
     protected function isUserSignedIn() {
         return !is_null($this->getCurrentUser());
-    }
-
-    protected function redirectToRoute($route) {
-        \App\Router::getInstance()->route($route);
     }
 
     protected function authenticateUser() {

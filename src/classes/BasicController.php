@@ -20,7 +20,7 @@ abstract class BasicController {
 
         $this->beforeActions = array();
 
-        $this->format('html', function() {
+        $this->ifFormat('html', function() {
             $this->view->assign('request', $this->request);
         });
     }
@@ -60,7 +60,7 @@ abstract class BasicController {
         }
     }
 
-    protected function format($responseType, \Closure $f) {
+    protected function ifFormat($responseType, \Closure $f) {
         if(!isset($this->formats[$responseType])) $this->formats[$responseType] = array();
         $this->formats[$responseType] = $f;
     }
