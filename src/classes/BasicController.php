@@ -44,8 +44,8 @@ abstract class BasicController {
     }
 
     public function handle($method, $args) {
-        $this->callBeforeActions($method, $args);
         $this->callFormats();
+        $this->callBeforeActions($method, $args);
         $this->$method($args);
 
         $this->renderContent();
