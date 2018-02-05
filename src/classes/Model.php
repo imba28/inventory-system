@@ -19,7 +19,7 @@ abstract class Model implements \JsonSerializable {
                     if(class_exists($class_name)) {
                         $key = $m[1];
                         try {
-                            $value = $class_name::grab($value);
+                            $value = $class_name::find($value);
                         }
                         catch(\App\Exceptions\NothingFoundException $e) {
                             \App\Debugger::log("{$class_name} with id {$value} not found!", 'warning');
@@ -209,7 +209,7 @@ abstract class Model implements \JsonSerializable {
         throw new \App\Exceptions\NothingFoundException("No entries found for {$self_class}!");
     }
 
-    public static function grab($value, $column = 'id'): \App\Model {
+    public static function find($value, $column = 'id'): \App\Model {
         if($column == 'id' && isset(self::$instances[get_called_class()][$value])) {
             return self::$instances[get_called_class()][$value];
         }
@@ -221,7 +221,7 @@ abstract class Model implements \JsonSerializable {
         return new $self_class($options);
     }
 
-    public static function grabByFilter(array $filters, $limit = false, $order = array('id' => 'DESC')) {
+    public static function findByFilter(array $filters, $limit = false, $order = array('id' => 'DESC')) {
         list($options, $self_class) = self::getOptions($filters, true, $limit, $order);
 
         if($limit === false || $limit !== 1) {
@@ -232,7 +232,7 @@ abstract class Model implements \JsonSerializable {
         }
     }
 
-    public static function grabAll(): \Traversable {
+    public static function all(): \Traversable {
         list($options, $self_class) = self::getOptions(array(), true);
 
         return new Collection(self::getModelFromOption($options));
@@ -265,7 +265,7 @@ abstract class Model implements \JsonSerializable {
 
     public static function delete(int $id) {
         try {
-            $obj = self::grab($id);
+            $obj = self::find($id);
             $obj->trigger('delete');
             $obj->set('deleted', 1);
 

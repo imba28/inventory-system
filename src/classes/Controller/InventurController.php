@@ -6,7 +6,7 @@ class InventurController extends ApplicationController {
 
     public function __construct($responseType = 'html', $layout = 'default') {
         parent::__construct($responseType, $layout);
-        
+
         $this->authenticateUser();
         $this->inventur = new \App\Inventur();
     }
@@ -40,7 +40,7 @@ class InventurController extends ApplicationController {
     }
 
     public function list() {
-        $inventurList = \App\Models\Inventur::grabAll();
+        $inventurList = \App\Models\Inventur::all();
 
         $this->view->assign('inventurList', $inventurList);
         $this->view->setTemplate('inventur-list');
@@ -77,12 +77,12 @@ class InventurController extends ApplicationController {
     public function show($params) {
         if(isset($params['id'])) {
             try {
-                $inventur = \App\Models\Inventur::grab($params['id']);
+                $inventur = \App\Models\Inventur::find($params['id']);
                 $missingProducts = array();
                 $scannedProducts = array();
 
                 try {
-                    $missingProducts = \App\Models\InventurProduct::grabByFilter(array(
+                    $missingProducts = \App\Models\InventurProduct::findByFilter(array(
                         array('inventur', '=', $inventur),
                         'AND',
                         array('missing', '=', 1)
@@ -91,7 +91,7 @@ class InventurController extends ApplicationController {
                 catch(\App\Exceptions\NothingFoundException $e) {}
 
                 try {
-                    $scannedProducts = \App\Models\InventurProduct::grabByFilter(array(
+                    $scannedProducts = \App\Models\InventurProduct::findByFilter(array(
                         array('inventur', '=', $inventur),
                         'AND',
                         array('in_stock', '=', 1)
@@ -114,7 +114,7 @@ class InventurController extends ApplicationController {
 
     private function scanProduct($invNr) {
         try {
-            $product = \App\Models\Product::grab($invNr, 'invNr');
+            $product = \App\Models\Product::find($invNr, 'invNr');
 
             try {
                 if($this->inventur->registerProduct($product)) {
@@ -140,7 +140,7 @@ class InventurController extends ApplicationController {
 
     private function missingProduct($invNr) {
         try {
-            $product = \App\Models\Product::grab($invNr, 'invNr');
+            $product = \App\Models\Product::find($invNr, 'invNr');
 
             try {
                 if($this->inventur->missingProduct($product)) {

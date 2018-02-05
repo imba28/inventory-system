@@ -14,7 +14,7 @@ class Product extends \App\Model {
 
         if($this->isCreated()) {
             try {
-                $this->images = ProductImage::grabByFilter(array(
+                $this->images = ProductImage::findByFilter(array(
                     array('product', '=', $this)
                 ), false, array('id' => 'ASC'));
             }
@@ -63,7 +63,7 @@ class Product extends \App\Model {
 
     public function isAvailable() {
         try {
-            $action = \App\Models\Action::grabByFilter(array(
+            $action = \App\Models\Action::findByFilter(array(
                 array('product_id', '=', $this->id),
                 array('returnDate', 'IS', 'NULL')
             ));

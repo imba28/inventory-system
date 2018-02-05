@@ -18,7 +18,7 @@ class SessionController extends ApplicationController {
         $this->loginForm();
 
         try {
-            $user = \App\Models\User::grab($this->request->get('username'), 'username');
+            $user = \App\Models\User::find($this->request->get('username'), 'username');
 
             if(password_verify($this->request->get('password'), $user->get('password'))) {
                 $_SESSION['user_id'] = $user->getId();

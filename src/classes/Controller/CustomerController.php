@@ -11,7 +11,7 @@ class CustomerController extends ApplicationController {
 
         $this->beforeAction(array('show', 'update', 'delete', 'edit'), function($params) {
             try {
-                $this->customer = \App\Models\Customer::grab($params['id']);
+                $this->customer = \App\Models\Customer::find($params['id']);
                 $this->view->assign('customer', $this->customer);
             }
             catch(\App\Exceptions\NothingFoundException $e) {
@@ -21,7 +21,7 @@ class CustomerController extends ApplicationController {
     }
 
     public function index($params = array()) {
-        $customers = \App\Models\Customer::grabAll();
+        $customers = \App\Models\Customer::all();
         $this->view->assign('customers', $customers);
         $this->view->setTemplate('customers');
     }
@@ -30,7 +30,7 @@ class CustomerController extends ApplicationController {
         $rentalHistory = array();
 
         try {
-            $rentalHistory = \App\Models\Action::grabByFilter(array(
+            $rentalHistory = \App\Models\Action::findByFilter(array(
                 array('customer', '=', $this->customer)
             ), 10, array('returnDate' => 'ASC'));
         }

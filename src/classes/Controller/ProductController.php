@@ -7,7 +7,7 @@ class ProductController extends ApplicationController {
 
         $this->beforeAction('product', function($params) {
             try {
-                $this->product = \App\Models\Product::grab($params['id']);
+                $this->product = \App\Models\Product::find($params['id']);
             }
             catch(\App\Exceptions\NothingFoundException $e) {
                 $this->product = null;
@@ -81,7 +81,7 @@ class ProductController extends ApplicationController {
                 array('invNr', 'LIKE', "%{$search_string}%")
             );
 
-            $products = \App\Models\Product::grabByFilter($filter, (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
+            $products = \App\Models\Product::findByFilter($filter, (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
             $query = \App\Models\Product::getQuery($filter);
 
@@ -119,7 +119,7 @@ class ProductController extends ApplicationController {
         }
         else {
             $this->displayProducts($params);
-            /*$this->view->assign('products', \App\Models\Product::grabAll());
+            /*$this->view->assign('products', \App\Models\Product::all());
             $this->view->setTemplate('products');*/
         }
     }
@@ -127,7 +127,7 @@ class ProductController extends ApplicationController {
     public function home() {
         if($this->isUserSignedIn()) {
             try {
-                $this->view->assign('actions', \App\Models\Action::grabByFilter(array(
+                $this->view->assign('actions', \App\Models\Action::findByFilter(array(
                     array('returnDate', 'IS', 'NULL')
                 )));
             }
@@ -146,7 +146,7 @@ class ProductController extends ApplicationController {
             foreach($query->get() as $p_info) {
                 try {
                     $products[] = array(
-                        'product' => \App\Models\Product::grab($p_info['product_id']),
+                        'product' => \App\Models\Product::find($p_info['product_id']),
                         'frequency' => $p_info['count']
                     );
                 }
@@ -171,7 +171,7 @@ class ProductController extends ApplicationController {
         $itemsPerPage = 8;
 
         try {
-            $products = \App\Models\Product::grabByFilter(array(
+            $products = \App\Models\Product::findByFilter(array(
                 'type', '=', $params['category']
             ), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
@@ -281,7 +281,7 @@ class ProductController extends ApplicationController {
         $this->authenticateUser();
 
         if(!$this->product->isAvailable()) {
-            $action = current(\App\Models\Action::grabByFilter(array(
+            $action = current(\App\Models\Action::findByFilter(array(
                 array('product_id', '=', $this->product->getId()),
                 array('returnDate', 'IS', 'NULL')
             )));
@@ -292,7 +292,7 @@ class ProductController extends ApplicationController {
         else {
             if($this->request->issetParam('submit')) {
                 try {
-                    $customer = \App\Models\Customer::grab($this->request->getParam('internal_id'), 'internal_id');
+                    $customer = \App\Models\Customer::find($this->request->getParam('internal_id'), 'internal_id');
                 }
                 catch(\App\Exceptions\NothingFoundException $e) {
                     $customer = \App\Models\Customer::new();
@@ -329,7 +329,7 @@ class ProductController extends ApplicationController {
         $this->authenticateUser();
 
         try {
-            $action = \App\Models\Action::grabByFilter(array(
+            $action = \App\Models\Action::findByFilter(array(
                 array('returnDate' , 'IS', 'NULL'),
                 array('product_id', '=', $this->product->getId())
             ));
@@ -374,7 +374,7 @@ class ProductController extends ApplicationController {
 
     private function display() {
         try {
-            $this->view->assign('rentHistory', \App\Models\Action::grabByFilter(array('product', '=', $this->product), 10));
+            $this->view->assign('rentHistory', \App\Models\Action::findByFilter(array('product', '=', $this->product), 10));
         }
         catch(\App\Exceptions\NothingFoundException $e) {
             $this->view->assign('rentHistory', array());
@@ -476,7 +476,7 @@ class ProductController extends ApplicationController {
                     array('invNr', 'LIKE', "%{$search_string}%")
                 );
 
-                $products = \App\Models\Product::grabByFilter($filter, 8);
+                $products = \App\Models\Product::findByFilter($filter, 8);
                 $products = array_filter($products, function($p) {
                     return $p->isAvailable();
                 });
@@ -514,7 +514,7 @@ class ProductController extends ApplicationController {
         $itemsPerPage = 8;
 
         try {
-            $products = \App\Models\Product::grabByFilter(array(), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
+            $products = \App\Models\Product::findByFilter(array(), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
             $query = \App\Models\Product::getQuery(array());
             $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage, '/products');
@@ -530,6 +530,7 @@ class ProductController extends ApplicationController {
         $this->view->assign('categories', $this->getCategories());
 
         $this->view->assign('products', $products);
+
         $this->view->setTemplate('products');
     }
 

@@ -30,7 +30,7 @@ abstract class ApplicationController extends \App\BasicController {
         if(isset($_SESSION['user_id'])) {
             if(is_null($this->currentUser)) {
                 try {
-                    $this->currentUser = \App\Models\User::grab($_SESSION['user_id']);
+                    $this->currentUser = \App\Models\User::find($_SESSION['user_id']);
                 }
                 catch(\App\Exceptions\NothingFoundException $e) {
                     return null;

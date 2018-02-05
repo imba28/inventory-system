@@ -15,7 +15,7 @@ class Inventur {
 
     public function __construct() {
         try {
-            $this->inventurObject = Models\Inventur::grabByFilter(array(
+            $this->inventurObject = Models\Inventur::findByFilter(array(
                 'finishDate', 'IS', 'NULL'
             ), 1);
         }
@@ -83,7 +83,7 @@ class Inventur {
 
     public static function getLastInventur() {
         try {
-            return Models\Inventur::grabByFilter(array(
+            return Models\Inventur::findByFilter(array(
                 'finishDate', 'IS NOT', 'NULL'
             ), 1, array('id' => 'DESC'));
         }
@@ -96,7 +96,7 @@ class Inventur {
         $inventurProduct;
 
         try {
-            $inventurProduct = current(\App\Models\inventurProduct::grabByFilter(array(
+            $inventurProduct = current(\App\Models\inventurProduct::findByFilter(array(
                 array('product', '=', $product),
                 'AND',
                 array('inventur', '=', $this->inventurObject)
@@ -143,7 +143,7 @@ class Inventur {
         $inventurProduct;
 
         try {
-            $inventurProduct = current(\App\Models\inventurProduct::grabByFilter(array(
+            $inventurProduct = current(\App\Models\inventurProduct::findByFilter(array(
                 array('product', '=', $product),
                 'AND',
                 array('inventur', '=', $this->inventurObject)
@@ -187,7 +187,7 @@ class Inventur {
     }
 
     private function loadInventurActions() {
-        foreach(Models\Product::grabAll() as $product) {
+        foreach(Models\Product::all() as $product) {
             if($product->isAvailable()) {
                 $this->itemsAvailable[] = $product;
             }
@@ -212,7 +212,7 @@ class Inventur {
 
     private function getInventurAction(Models\Product $product) {
         try {
-            $action = Models\InventurProduct::grabByFilter(array(
+            $action = Models\InventurProduct::findByFilter(array(
                 array('product', '=', $product),
                 array('inventur', '=', $this->inventurObject)
             ), 1);
