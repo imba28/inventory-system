@@ -14,10 +14,7 @@ trait GetSetData {
     }
 
     public function get($property) {
-        if(property_exists($this, $property)) {
-            return $this->data[$property];
-        }
-        return null;
+        return $this->data[$property];
     }
 }
 ?>

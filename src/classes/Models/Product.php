@@ -11,21 +11,13 @@ class Product extends \App\Model {
 
     public function __construct($options = array()) {
         parent::__construct($options);
+        self::hasMany('ProductImage', 'images');
 
-        $this->images = new \App\Collection();
-
-        if($this->isCreated()) {
-            try {
-                $this->images = ProductImage::findByFilter(array(
-                    array('product', '=', $this)
-                ), false, array('id' => 'ASC'));
-            }
-            catch( \App\Exceptions\NothingFoundException $e) {}
-        }
+        vd($this);
     }
 
     public function getFrontImage() {
-        foreach($this->images as $image) {
+        foreach($this->images as $key => $image) {
             if($image->get('title') == 'frontimage') return $image;
         }
 

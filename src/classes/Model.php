@@ -10,6 +10,7 @@ abstract class Model implements \JsonSerializable {
     protected $user;
 
     static private $instances = array();
+    static private $relationRules = array();
 
     public function __construct($options = array()) {
         foreach($options as $key => $value) {
@@ -278,12 +279,48 @@ abstract class Model implements \JsonSerializable {
         }
     }
 
+    public function __get($property) { // z.B product->images => undefined => __get('images') => load image collection and set property => return Collection
+        $self_class = get_called_class();
+        if(isset(self::$relationRules[$self_class][$property])) {
+            try {
+                $this->{$property} = self::$relationRules[$self_class][$property]($this->getId());
+            }
+            catch( \App\Exceptions\NothingFoundException $e) {
+                $this->{$property} = new Collection();
+            }
+
+            return $this->{$property};
+        }
+
+        throw new \InvalidOperationException('Oh shit.');
+    }
+
     protected static function getTableName() {
         $self_class = get_called_class();
         if($self_class === false) throw new \UnexpectedValueException('Oh shit.');
         $self_class = strtolower($self_class);
 
         return preg_replace('/(.+)\\\/', '', $self_class).'s';
+    }
+
+    protected static function hasMany($modelName, $alias = null) { // 1:n relation, other model must have the foreign key
+        if(is_null($alias)) $alias = $modelName;
+        $self_class = get_called_class();
+
+        if(!isset(self::$relationRules[$self_class])) {
+            self::$relationRules[$self_class] = array();
+        }
+
+        self::$relationRules[$self_class][$alias] = function($id) use($modelName) {
+            $fullModelName = "\\App\\Models\\{$modelName}";
+
+            if(class_exists($fullModelName)) {
+                $foreignColumn = rtrim(self::getTableName(), 's') . '_id';
+                return $fullModelName::findByFilter(array($foreignColumn, '=', $id), false, array('id' => 'ASC'));
+            }
+
+            throw new \InvalidArgumentException("Model {$fullModelName} does not exist!");
+        };
     }
 }
 ?>
