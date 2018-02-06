@@ -1,14 +1,17 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-class CollectionTest extends TestCase {
+class CollectionTest extends TestCase
+{
     protected $collection;
 
-    protected function setUp() {
+    protected function setUp()
+    {
         $this->collection = new \App\Collection();
     }
 
-    public function testCount() {
+    public function testCount()
+    {
         $this->assertEquals($this->collection->count(), 0);
 
         $this->collection = new \App\Collection(array('a', 'b', 'c'));
@@ -17,13 +20,15 @@ class CollectionTest extends TestCase {
         $this->assertCount(3, $this->collection);
     }
 
-    public function testIsEmpty() {
+    public function testIsEmpty()
+    {
         $this->assertTrue($this->collection->isEmpty());
         $this->collection->append(new TestModel());
         $this->assertFalse($this->collection->isEmpty());
     }
 
-    public function testFind() {
+    public function testFind()
+    {
         $model_1 = new TestModel(array('id' => 1));
         $model_2 = new TestModel(array('id' => 2));
         $model_3 = new TestModel(array('id' => 3));
@@ -38,7 +43,8 @@ class CollectionTest extends TestCase {
         $this->assertEquals($this->collection->find(3), $model_3);
     }
 
-    public function testFirst() {
+    public function testFirst()
+    {
         $model_1 = new TestModel(array('id' => 1));
         $model_2 = new TestModel(array('id' => 2));
         $model_3 = new TestModel(array('id' => 3));
@@ -58,7 +64,8 @@ class CollectionTest extends TestCase {
         $this->assertEquals($this->collection->first(100), [$model_1, $model_2, $model_3]);
     }
 
-    public function testAppend() {
+    public function testAppend()
+    {
         $model_1 = new TestModel(array('id' => 1));
         $model_2 = new TestModel(array('id' => 2));
         $model_3 = new TestModel(array('id' => 3));
@@ -70,7 +77,8 @@ class CollectionTest extends TestCase {
         $this->assertEquals($this->collection->count(), 3);
     }
 
-    public function testToArray() {
+    public function testToArray()
+    {
         $model_1 = new TestModel(array('id' => 1));
         $model_2 = new TestModel(array('id' => 2));
         $model_3 = new TestModel(array('id' => 3));
@@ -85,7 +93,7 @@ class CollectionTest extends TestCase {
     }
 }
 
-class TestModel extends \App\Model {
+class TestModel extends \App\Model
+{
 
 }
-?>

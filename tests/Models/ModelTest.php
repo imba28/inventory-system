@@ -1,8 +1,10 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-class ModelTest extends TestCase {
-    public function testModelCreation() {
+class ModelTest extends TestCase
+{
+    public function testModelCreation()
+    {
         $this->assertInstanceOf(
             \App\Models\Product::class,
             \App\Models\Product::new()
@@ -15,7 +17,8 @@ class ModelTest extends TestCase {
         $this->assertTrue($customer->isCreated());
     }
 
-    public function testIfModelCanSetProperties() {
+    public function testIfModelCanSetProperties()
+    {
         $customer = new \App\Models\Customer($this->existingModelProvider());
 
         $this->assertFalse($customer->set('notExistingProperty', 'test'));
@@ -25,7 +28,8 @@ class ModelTest extends TestCase {
         $this->assertEquals('Test Customer modified', $customer->get('name'));
     }
 
-    public function testExceptionIfNothingChanged() {
+    public function testExceptionIfNothingChanged()
+    {
         $customer = new \App\Models\Customer($this->existingModelProvider());
 
         $this->expectException(\App\QueryBuilder\NothingChangedException::class);
@@ -33,7 +37,8 @@ class ModelTest extends TestCase {
     }
 
 
-    private function existingModelProvider() {
+    private function existingModelProvider()
+    {
         return array(
             'id' => 1,
             'name' => 'Test Customer',
@@ -41,4 +46,3 @@ class ModelTest extends TestCase {
         );
     }
 }
-?>
