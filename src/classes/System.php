@@ -1,7 +1,8 @@
 <?php
 namespace App;
 
-final class System {
+final class System
+{
     use Traits\Singleton;
 
     private $status = array(
@@ -11,19 +12,22 @@ final class System {
         'info' => array()
     );
 
-    public function addMessage($type, $msg) {
+    public function addMessage($type, $msg)
+    {
         $statusTypes = array_keys($this->status);
 
-        if(in_array($type, $statusTypes)) {
-            if(!in_array($msg, $this->status[$type])) {
+        if (in_array($type, $statusTypes)) {
+            if (!in_array($msg, $this->status[$type])) {
                 $this->status[$type][] = $msg;
             }
+        } else {
+            throw new \InvalidArgumentException('Unknown type!');
         }
-        else throw new \InvalidArgumentException('Unknown type!');
     }
 
-    private function getTitle($type) {
-        switch($type) {
+    private function getTitle($type)
+    {
+        switch ($type) {
             case 'danger':
                 return 'Fehler';
             case 'success':
@@ -37,12 +41,15 @@ final class System {
         }
     }
 
-    private function renderMessages($type, array $data) {
+    private function renderMessages($type, array $data)
+    {
         $html = '';
 
-        if($type == 'error') $type = 'danger';
+        if ($type == 'error') {
+            $type = 'danger';
+        }
 
-        for($i = 0; $i < count($data); $i++) {
+        for ($i = 0; $i < count($data); $i++) {
             $msg = $data[$i];
             $html .= "
             <div class='alert alert-{$type} alert-dismissible fade show' role='alert'>
@@ -56,15 +63,15 @@ final class System {
         return $html;
     }
 
-    public static function getStatus($type = 'all') {
+    public static function getStatus($type = 'all')
+    {
         $html = '';
         $instance = self::getInstance();
 
-        foreach($instance->status as $type => $data) {
+        foreach ($instance->status as $type => $data) {
             $html .= $instance->renderMessages($type, $data);
         }
 
         return $html;
     }
 }
-?>

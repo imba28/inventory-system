@@ -1,8 +1,10 @@
 <?php
 namespace App;
 
-class ViewFactory {
-    public static function build($responseType) {
+class ViewFactory
+{
+    public static function build($responseType)
+    {
         switch ($responseType) {
             case 'html':
             default:
@@ -14,4 +16,3 @@ class ViewFactory {
         }
     }
 }
-?>

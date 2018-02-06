@@ -1,28 +1,37 @@
 <?php
 namespace App;
 
-class ViewXML extends View {
-    public function render($layout = null) {
+class ViewXML extends View
+{
+    public function render($layout = null)
+    {
         return $this->generateValidXml($this->data);
     }
 
-    public function getContentType() {
+    public function getContentType()
+    {
         return 'application/xml';
     }
 
 
-    private function generateValidXml($arg) {
+    private function generateValidXml($arg)
+    {
         $arg = json_decode(json_encode($arg)); // naja :D
-        if(is_array($arg)) return self::generateValidXmlFromArray($arg);
-        else return self::generateValidXmlFromObj($arg);
+        if (is_array($arg)) {
+            return self::generateValidXmlFromArray($arg);
+        } else {
+            return self::generateValidXmlFromObj($arg);
+        }
     }
     // functions adopted from http://www.sean-barton.co.uk/2009/03/turning-an-array-or-object-into-xml-using-php/
-    private function generateValidXmlFromObj(\stdClass $obj, $node_block='nodes', $node_name='node') {
+    private function generateValidXmlFromObj(\stdClass $obj, $node_block = 'nodes', $node_name = 'node')
+    {
         $arr = get_object_vars($obj);
         return self::generateValidXmlFromArray($arr, $node_block, $node_name);
     }
 
-    private function generateValidXmlFromArray($array, $node_block='nodes', $node_name='node') {
+    private function generateValidXmlFromArray($array, $node_block = 'nodes', $node_name = 'node')
+    {
         $xml = '<?xml version="1.0" encoding="UTF-8" ?>';
 
         $xml .= '<' . $node_block . '>';
@@ -32,11 +41,12 @@ class ViewXML extends View {
         return $xml;
     }
 
-    private static function generateXmlFromArray($array, $node_name) {
+    private static function generateXmlFromArray($array, $node_name)
+    {
         $xml = '';
 
         if (is_array($array) || is_object($array)) {
-            foreach ($array as $key=>$value) {
+            foreach ($array as $key => $value) {
                 if (is_numeric($key)) {
                     $key = $node_name;
                 }
@@ -50,4 +60,3 @@ class ViewXML extends View {
         return $xml;
     }
 }
-?>

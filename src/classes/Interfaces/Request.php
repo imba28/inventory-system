@@ -1,7 +1,8 @@
 <?php
 namespace App\Interfaces;
 
-interface Request {
+interface Request
+{
     public function issetParam($param);
     public function getParam($param);
     public function getParams();
@@ -10,4 +11,3 @@ interface Request {
     public function issetFile($name);
     public function getFile($name);
 }
-?>

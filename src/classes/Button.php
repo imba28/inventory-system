@@ -1,11 +1,11 @@
 <?php
 namespace App;
 
-class Button {
+class Button
+{
     use Traits\GetSet;
 
     protected $href;
     protected $style;
     protected $text;
 }
-?>

@@ -1,6 +1,7 @@
 <?php
 namespace App\QueryBuilder;
 
-class NothingChangedException extends QueryBuilderException {
+class NothingChangedException extends QueryBuilderException
+{
 
 }

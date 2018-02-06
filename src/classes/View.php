@@ -1,31 +1,34 @@
 <?php
 namespace App;
 
-class View {
+class View
+{
     protected $data = array();
     private $template;
 
-    public function assign($key, $value) {
+    public function assign($key, $value)
+    {
         $this->data[$key] = $value;
     }
 
-    public function setTemplate($template) {
+    public function setTemplate($template)
+    {
         $this->template = strtolower($template);
     }
 
-    public function render($layout = 'default') {
+    public function render($layout = 'default')
+    {
         $html = $this->getLayoutComponent($layout, 'head');
 
         $template_file = "{$this->template}.html.twig";
-        if(file_exists(ABS_PATH."/src/views/" . $template_file)) {
+        if (file_exists(ABS_PATH."/src/views/" . $template_file)) {
             $loader = new \Twig_Loader_Filesystem(ABS_PATH."/src/views/");
 
             $twigOptions = array();
 
-            if(Configuration::get('env') === 'dev') {
+            if (Configuration::get('env') === 'dev') {
                 $twigOptions['debug'] = true;
-            }
-            else {
+            } else {
                 $twigOptions['cache'] = ABS_PATH . '/cache/twig';
             }
 
@@ -45,18 +48,21 @@ class View {
         throw new \Exception("Template `{$this->template}` not found!");
     }
 
-    public function getContentType() {
+    public function getContentType()
+    {
         return 'text/html';
     }
 
-    private function getLayoutComponent($layout, $type = 'head') {
-        if(file_exists(ABS_PATH."/src/layouts/{$layout}-{$type}.php")) {
+    private function getLayoutComponent($layout, $type = 'head')
+    {
+        if (file_exists(ABS_PATH."/src/layouts/{$layout}-{$type}.php")) {
             return $this->bufferContent(ABS_PATH."/src/layouts/{$layout}-{$type}.php");
         }
         throw new \InvalidArgumentException("Layout {$layout}-{$type}` does not exists!`");
     }
 
-    private function bufferContent($path) {
+    private function bufferContent($path)
+    {
         extract($this->data);
 
         ob_start();
@@ -67,4 +73,3 @@ class View {
         return $content;
     }
 }
-?>

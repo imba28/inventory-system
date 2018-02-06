@@ -1,7 +1,8 @@
 <?php
 namespace App\QueryBuilder;
 
-class Builder {
+class Builder
+{
     protected $table;
 
     const SANITIZER = "`";
@@ -24,130 +25,152 @@ class Builder {
 
     protected static $sql_keywords = array("NOW()", "COUNT(*)", "AUTO_INCREMENT", "CURRENT_DATE", "CURRENT_USER", "DEFAULT", "CURRENT_TIMESTAMP()", "CURTIME()", "CURDATE()", "DAYNAME()", "DAYOFMONTH()", "DAYOFWEEK()", "DAYOFYEAR()");
 
-    public function __construct($table, $debug = false) {
+    public function __construct($table, $debug = false)
+    {
         $this->table = $table;
         $this->debug = $debug;
 
         $this->selection = array("*");
     }
 
-    public function setLogging($bool) {
+    public function setLogging($bool)
+    {
         $this->logging = $bool;
     }
 
-    public function where($arg1, $operator = 'AND', $arg2 = null) {
-        if(is_array($arg1) && $arg2 == null) {
-            foreach($arg1 as $arg) {
-                if(!is_array($arg) || count($arg) != 3) throw new \InvalidArgumentException('Invalid nested where arguments! Expected argument to be array of length 3, got '. gettype($arg) .' of length '.count($arg).'!');
+    public function where($arg1, $operator = 'AND', $arg2 = null)
+    {
+        if (is_array($arg1) && $arg2 == null) {
+            foreach ($arg1 as $arg) {
+                if (!is_array($arg) || count($arg) != 3) {
+                    throw new \InvalidArgumentException('Invalid nested where arguments! Expected argument to be array of length 3, got '. gettype($arg) .' of length '.count($arg).'!');
+                }
 
                 $this->where($arg[0], $arg[1], $arg[2]);
             }
             return;
         }
 
-        if(is_null($arg2)) {
+        if (is_null($arg2)) {
             $arg2 = $operator;
             $operator = '=';
         }
         try {
             $this->where[] = new QueryWhere(array($arg1, $operator, $arg2));
-        }
-        catch(Exception $e) {
+        } catch (Exception $e) {
             //echo "Fehler: {$e->getMessage()}";
             return false;
         }
         return $this;
     }
 
-    public function next($id, $select_columns = null, $column = 'id') {
-        if($select_columns != null) $this->select($select_columns);
+    public function next($id, $select_columns = null, $column = 'id')
+    {
+        if ($select_columns != null) {
+            $this->select($select_columns);
+        }
         $this->where($column, ">", $id)->orderBy($column, "ASC")->limit(1);
 
         return $this;
     }
 
-    public function count() {
+    public function count()
+    {
         $this->selection = array(self::alias('COUNT(*)', 'count'));
         $result = $this->get();
 
         return $result[0]["count"];
     }
 
-    public function prev($id, $select_columns = null, $column = 'id') {
-        if($select_columns != null) $this->select($select_columns);
+    public function prev($id, $select_columns = null, $column = 'id')
+    {
+        if ($select_columns != null) {
+            $this->select($select_columns);
+        }
         $this->where($column, "<", $id)->orderBy($column, "DESC")->limit(1);
 
         return $this;
     }
 
-    public function orderBy($column, $type = 'DESC') {
+    public function orderBy($column, $type = 'DESC')
+    {
         $col = !in_array($column, array("RAND()")) && !$column instanceof Raw ? $this->sanitizeColumnName($column) : $column;
         $this->order[] = $col . " " . strtoupper($type);
 
         return $this;
     }
 
-    public function groupBy($arg) {
-        if(is_array($arg)) {
-            foreach($arg as $a) {
+    public function groupBy($arg)
+    {
+        if (is_array($arg)) {
+            foreach ($arg as $a) {
                 $this->group[] = $this->sanitizeColumnName($a);
             }
+        } else {
+            $this->group[] = $this->sanitizeColumnName($arg);
         }
-        else $this->group[] = $this->sanitizeColumnName($arg);
 
         return $this;
     }
 
-    public function limit($count) {
+    public function limit($count)
+    {
         $this->limit[] = $count;
 
         return $this;
     }
 
-    public function select($columns) {
-        if($this->selection[0] == "*") $this->selection = array();
+    public function select($columns)
+    {
+        if ($this->selection[0] == "*") {
+            $this->selection = array();
+        }
 
-        if(is_array($columns)) {
+        if (is_array($columns)) {
             /*foreach($columns as &$column) {
                 $column = $this->sanitizeColumnName($column);
             }*/
 
             $this->selection = array_merge($this->selection, $columns);
-        }
-        else{
-            if(!in_array($columns, $this->selection)) $this->selection[] = $columns;
+        } else {
+            if (!in_array($columns, $this->selection)) {
+                $this->selection[] = $columns;
+            }
         }
 
         return $this;
     }
 
-    public function join($table, $column, $operator = null, $joinedColumn = null, $type = 'LEFT') {
+    public function join($table, $column, $operator = null, $joinedColumn = null, $type = 'LEFT')
+    {
          $joinObject = new QueryJoin($table, $this, $type);
-         if($operator != null) {
-             $joinObject->on($column, $operator, $joinedColumn);
-         }
+        if ($operator != null) {
+            $joinObject->on($column, $operator, $joinedColumn);
+        }
 
          $this->joins[] = $joinObject;
          return $joinObject;
     }
 
-    public function getSelectStatement() {
+    public function getSelectStatement()
+    {
         $tmp = $this->selection;
         $sql_keywords = self::$sql_keywords;
 
-        foreach($tmp as $idx => $select) {
-            if($select instanceof \App\QueryBuilder\QueryAlias) {
+        foreach ($tmp as $idx => $select) {
+            if ($select instanceof \App\QueryBuilder\QueryAlias) {
                 $column = $select->get('name');
-            }
-            else {
+            } else {
                 $column = $select;
             }
 
-            if(!$column instanceof Raw && !in_array($column, $sql_keywords)) {
+            if (!$column instanceof Raw && !in_array($column, $sql_keywords)) {
                 $column = $this->sanitizeColumnName($column);
             }
 
-            if($select instanceof \App\QueryBuilder\QueryAlias) $column .= ' as '. $select->get("alias");
+            if ($select instanceof \App\QueryBuilder\QueryAlias) {
+                $column .= ' as '. $select->get("alias");
+            }
 
             $tmp[$idx] = $column;
         }
@@ -170,11 +193,12 @@ class Builder {
         return join(", ", $tmp);
     }
 
-    public function get() {
+    public function get()
+    {
         $sql = $this->getSQL();
         $args = $this->getCriteriaBindings();
 
-        if($this->debug) {
+        if ($this->debug) {
             vd($sql);
             vd($args);
         }
@@ -182,28 +206,30 @@ class Builder {
         return $this->query($sql, $args);
     }
 
-    public function result() {
+    public function result()
+    {
         return isset($this->result) ? $this->result : null;
     }
 
-    public function setTable($table) {
+    public function setTable($table)
+    {
         $this->table = $table;
         $this->reset();
 
         return $this;
     }
 
-    public function reset($prop = null) {
-        if(is_null($prop)) {
+    public function reset($prop = null)
+    {
+        if (is_null($prop)) {
             $this->joins = array();
             $this->where = array();
             $this->selection = array("*");
             $this->order = array();
             $this->group = array();
             $this->limit = array();
-        }
-        else {
-            if(in_array($prop, array('limit', 'selection', 'where', 'order', 'joins', 'group'))) {
+        } else {
+            if (in_array($prop, array('limit', 'selection', 'where', 'order', 'joins', 'group'))) {
                 $this->$prop = array();
             }
         }
@@ -211,7 +237,8 @@ class Builder {
         return $this;
     }
 
-    protected function query($sql, $bindings = array()) {
+    protected function query($sql, $bindings = array())
+    {
         try {
             $query = new Query($sql, $this->logging);
             $query->execute($bindings);
@@ -221,8 +248,7 @@ class Builder {
             //$this->reset();
 
             return $this->result;
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->result = null;
             $this->last_exception = $e;
         }
@@ -230,17 +256,21 @@ class Builder {
         return false;
     }
 
-    public function describe() {
+    public function describe()
+    {
         return $this->query("SHOW FULL COLUMNS FROM ". self::getTableName($this->table));
     }
-    public function lastInsertId() {
+    public function lastInsertId()
+    {
         return $this->lastInsertID;
     }
-    public function getError() {
+    public function getError()
+    {
         return !isset($this->last_exception) ? null : self::getErrorMessage($this->last_exception);
     }
 
-    public function find($id, $column = null) {
+    public function find($id, $column = null)
+    {
         $column = is_null($column) ? "ID" : $column;
 
         $this->where[] = new QueryWhere(array($column, "=", $id));
@@ -248,7 +278,8 @@ class Builder {
         return $this->get();
     }
 
-    public function update(array $data) {
+    public function update(array $data)
+    {
         list($statement, $bindings) = $this->getUpdateStatement($data);
         $criteria = $this->getCriteriaString();
         $where_bindings = $this->getCriteriaBindings();
@@ -266,20 +297,22 @@ class Builder {
 
         $sql = join(" ", $sql_arr);
 
-        if($this->debug) {
+        if ($this->debug) {
             vd($sql);
             vd($bindings);
         }
         return $this->query($sql, $bindings);
     }
 
-    public function delete() {
+    public function delete()
+    {
         return $this->update(array(
             "deleted" => "1"
         ));
     }
 
-    public function insertIgnore(array $data) {
+    public function insertIgnore(array $data)
+    {
         list($statement, $bindings) = $this->getInsertStatement($data);
 
         $sql_arr = array(
@@ -296,7 +329,8 @@ class Builder {
     }
 
 
-    public function insert(array $data) {
+    public function insert(array $data)
+    {
         list($statement, $bindings) = $this->getInsertStatement($data);
 
         $sql_arr = array(
@@ -307,7 +341,7 @@ class Builder {
 
         $sql = join(" ", $sql_arr);
 
-        if($this->debug) {
+        if ($this->debug) {
             vd($sql);
             vd($bindings);
         }
@@ -315,13 +349,14 @@ class Builder {
         return $this->query($sql, $bindings) !== false;
     }
 
-    private function getCriteriaString() {
+    private function getCriteriaString()
+    {
         $criteria = "";
         $table_name = self::getTableName($this->table);
 
-        if(count($this->where) > 0) {
+        if (count($this->where) > 0) {
             $criteria = " WHERE ";
-            foreach($this->where as $clause) {
+            foreach ($this->where as $clause) {
                 $criteria .= $clause->getCondition($table_name) . " AND ";
             }
             $criteria = rtrim($criteria, " AND ");
@@ -330,16 +365,24 @@ class Builder {
         return $criteria;
     }
 
-    private function getCriteriaBindings() {
+    private function getCriteriaBindings()
+    {
         $bindings = array();
         $table_name = self::getTableName($this->table);
 
-        if(count($this->where) > 0) {
-            foreach($this->where as $clause) {
+        if (count($this->where) > 0) {
+            foreach ($this->where as $clause) {
                 $val = $clause->getValue();
-                if($val !== false) {
-                    if(is_array($val)) foreach($val as $v) if(!is_null($v)) $bindings[] = $v;
-                    else $bindings[] = $val;
+                if ($val !== false) {
+                    if (is_array($val)) {
+                        foreach ($val as $v) {
+                            if (!is_null($v)) {
+                                                        $bindings[] = $v;
+                            } else {
+                                $bindings[] = $val;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -347,16 +390,17 @@ class Builder {
         return  $bindings;
     }
 
-    public function getSQL() {
+    public function getSQL()
+    {
         $table_name = self::getTableName($this->table);
         $selection = $this->getSelectStatement();
 
         $join_statement = array();
 
-        if(!empty($this->joins)) {
+        if (!empty($this->joins)) {
             $join_selection = array();
 
-            foreach($this->joins as $join) {
+            foreach ($this->joins as $join) {
                 $join_selection[] = $join->getSelectStatement();
                 $join_statement[] = $join->getStatement();
             }
@@ -369,7 +413,7 @@ class Builder {
         $sql = "SELECT $selection FROM " . $this->sanitize($table_name);
         $sql .= $join_statement;
 
-        if(count($this->where) > 0) {
+        if (count($this->where) > 0) {
             /*
             $sql .= " WHERE ";
             foreach($this->where as $clause) {
@@ -387,36 +431,38 @@ class Builder {
             $sql .= $this->getCriteriaString();
         }
 
-        if(count($this->group) > 0) {
+        if (count($this->group) > 0) {
             $sql .= " GROUP BY ". join($this->group, ", ");
         }
 
-        if(count($this->order) > 0) {
+        if (count($this->order) > 0) {
             $sql .= " ORDER BY ". join($this->order, ", ");
         }
 
-        if(count($this->limit) > 0) {
+        if (count($this->limit) > 0) {
             $sql .= " LIMIT ". join($this->limit, ", ");
         }
 
         return $sql;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->getSQL();
     }
 
-    private function getInsertStatement($data) {
+    private function getInsertStatement($data)
+    {
         $insert = array();
         $values = array();
         $bindings = array();
 
-        foreach($data as $key => $value) {
-            if(in_array($value, self::$sql_keywords)) $values[] = $value;
-            elseif(is_null($value) || strlen($value) == 0) {
+        foreach ($data as $key => $value) {
+            if (in_array($value, self::$sql_keywords)) {
+                $values[] = $value;
+            } elseif (is_null($value) || strlen($value) == 0) {
                 $values[] = "NULL";
-            }
-            else {
+            } else {
                 $bindings[] = $value;
                 $values[] = "?";
             }
@@ -429,16 +475,17 @@ class Builder {
         return array($statement, $bindings);
     }
 
-    private function getUpdateStatement($data) {
+    private function getUpdateStatement($data)
+    {
         $values = array();
         $statement = "";
 
-        foreach($data as $key => $value) {
-            if(is_null($value) || (empty($value) && $value !== 0)) {
+        foreach ($data as $key => $value) {
+            if (is_null($value) || (empty($value) && $value !== 0)) {
                 $statement.= $this->sanitizeColumnName($key) . " = NULL, ";
-            }
-            elseif(in_array($value, self::$sql_keywords)) $statement.= $this->sanitizeColumnName($key) . " = $value, ";
-            else {
+            } elseif (in_array($value, self::$sql_keywords)) {
+                $statement.= $this->sanitizeColumnName($key) . " = $value, ";
+            } else {
                 $statement .= $this->sanitizeColumnName($key) . " = ?, ";
                 $values[] = $value;
             }
@@ -458,33 +505,37 @@ class Builder {
         return "hallo";
     }*/
 
-    public final function sanitizeColumnName($column) {
+    final public function sanitizeColumnName($column)
+    {
         $sanitized_column = $column == "*" ? $column : $this->sanitize($column);
         return $this->sanitize(self::getTableName($this->table)) . "." . $sanitized_column;
     }
 
-    public final function sanitize($value) {
+    final public function sanitize($value)
+    {
         return self::SANITIZER . $value . self::SANITIZER;
     }
 
-    private static function getErrorMessage($e) { // TODO
+    private static function getErrorMessage($e)
+    {
+ // TODO
         $error_message = "Es ist ein Fehler bei der Verarbeitung aufgetreten!";
         $error_value = null;
         $error_column = null;
         $error_code = -1;
 
-        if(preg_match("/: ([0-9]+) /", $e->getMessage(), $matches)) {
+        if (preg_match("/: ([0-9]+) /", $e->getMessage(), $matches)) {
             $error_code = $matches[1];
-            switch($error_code) {
+            switch ($error_code) {
                 case 1062: // Duplicate Index
-                    if(preg_match("/entry '(.[^']+)'/", $e->getMessage(), $m)) {
+                    if (preg_match("/entry '(.[^']+)'/", $e->getMessage(), $m)) {
                         $error_message = "Es gibt bereits einen Eintrag mit dem Wert <i>{$m[1]}</i>!";
                         $error_value = $m[1];
                     }
                     break;
 
                 case 1048: // Column must not be null
-                    if(preg_match("/Column '(.[^']+)'/", $e->getMessage(), $m)) {
+                    if (preg_match("/Column '(.[^']+)'/", $e->getMessage(), $m)) {
                         $error_message = "Dieser Wert darf nicht leer sein!";
                         $error_column = $m[1];
                     }
@@ -495,7 +546,8 @@ class Builder {
         return array($error_code, $error_message, $error_value, $error_column);
     }
 
-    public static function alias($field, $alias) {
+    public static function alias($field, $alias)
+    {
         return new QueryAlias($field, $alias);
     }
 
@@ -504,17 +556,21 @@ class Builder {
         return $query;
     }*/
 
-    public static function raw($column) {
+    public static function raw($column)
+    {
         return new Raw($column);
     }
 
-    public static function getTableName($table) {
-        if(is_null(self::$tablePrefix)) return $table;
+    public static function getTableName($table)
+    {
+        if (is_null(self::$tablePrefix)) {
+            return $table;
+        }
         return self::$tablePrefix . "_{$table}";
     }
 
-    public static function setTablePrefix($prefix) {
+    public static function setTablePrefix($prefix)
+    {
         self::$tablePrefix = $prefix;
     }
 }
-?>

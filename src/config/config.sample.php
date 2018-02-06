@@ -9,4 +9,3 @@
 \App\Configuration::set('DB_USER', 'root');
 \App\Configuration::set('DB_PWD', '');
 \App\Configuration::set('DB_PREFIX', 'v');
-?>

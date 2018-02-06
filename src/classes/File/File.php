@@ -1,7 +1,8 @@
 <?php
 namespace App\File;
 
-class File {
+class File
+{
     public static $max_file_size = 1875; // 15kb
 
     protected $file_info;
@@ -13,18 +14,22 @@ class File {
 
     private $isValid = false;
 
-    public function __construct($file_info) {
+    public function __construct($file_info)
+    {
         $this->file_info = $file_info;
 
         $file_parts = explode(".", $this->file_info["name"]);
-        $this->file_name = sha1($file_parts[0] . time() . rand(0,10));
+        $this->file_name = sha1($file_parts[0] . time() . rand(0, 10));
     }
 
-    public function isValid() {
+    public function isValid()
+    {
         try {
             $tmp_file = $this->file_info['tmp_name'];
 
-            if(!isset($this->file_info['error']) || is_array($this->file_info['error'])) throw new \RuntimeException('Ungültige Bildparameter!');
+            if (!isset($this->file_info['error']) || is_array($this->file_info['error'])) {
+                throw new \RuntimeException('Ungültige Bildparameter!');
+            }
 
             switch ($this->file_info['error']) {
                 case UPLOAD_ERR_OK:
@@ -38,11 +43,11 @@ class File {
                     throw new \RuntimeException('Unbekannter Fehler während des Uploads!');
             }
 
-            if($this->file_info['error'] > 0) {
+            if ($this->file_info['error'] > 0) {
                 throw new \RuntimeException("Datei ist beschädigt, da während des Upload ein Fehler aufgetreten ist!");
             }
 
-            if($this->file_info['size'] > 83886080) { // 10MB
+            if ($this->file_info['size'] > 83886080) { // 10MB
                 throw new \RuntimeException('Datei ist zu groß!');
             }
 
@@ -54,7 +59,7 @@ class File {
                 $allowed_mime_types,
                 true
             );
-            if($mimetype_idx === false) {
+            if ($mimetype_idx === false) {
                 throw new \RuntimeException("`{$finfo->file($this->file_info['tmp_name'])}` ist kein erlaubtes Dateiformat!");
             }
 
@@ -64,28 +69,35 @@ class File {
 
             $this->isValid = true;
             return true;
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->error = $e;
             return false;
         }
     }
 
-    public function getSource() {
+    public function getSource()
+    {
         return $this->file_info["tmp_name"];
     }
-    public function getDestination() {
+    public function getDestination()
+    {
         return $this->file_name. "." . $this->file_ext;
     }
 
-    public function getError() {
-        if(isset($this->error)) return $this->error;
+    public function getError()
+    {
+        if (isset($this->error)) {
+            return $this->error;
+        }
         return null;
     }
 
-    public function save($directory = '') {
-        if($this->isValid || $this->isValid()) {
-            if(preg_match('/^.+(\.\.)/', $directory)) return false;
+    public function save($directory = '')
+    {
+        if ($this->isValid || $this->isValid()) {
+            if (preg_match('/^.+(\.\.)/', $directory)) {
+                return false;
+            }
 
             $dir = ABS_PATH . '/public/files/' . ltrim(trim($directory), '/') . '/';
             return move_uploaded_file($this->file_info['tmp_name'], $dir . $this->getDestination());
@@ -93,35 +105,41 @@ class File {
         return false;
     }
 
-    public function getInfo($key) {
-        if(isset($this->file_info[$key])) return $this->file_info[$key];
+    public function getInfo($key)
+    {
+        if (isset($this->file_info[$key])) {
+            return $this->file_info[$key];
+        }
         return "";
     }
 
-    public static function delete($source) {
-        if(file_exists(ABS_PATH . $source)) {
+    public static function delete($source)
+    {
+        if (file_exists(ABS_PATH . $source)) {
             try {
-                if(preg_match("/\/([\w\s]+\/)+/", $source, $matches)) {
+                if (preg_match("/\/([\w\s]+\/)+/", $source, $matches)) {
                     $dest = str_replace($matches[0], "/tmp/", $source);
                     $batch = new Batch();
                     $batch->add(new MoveFile(Registry::getConfig()->get("FTP_ABS_PATH") . $source, Registry::getConfig()->get("FTP_ABS_PATH") . $dest));
                     $batch->execute();
                     return true;
                 }
-            }
-            catch(Exception $e) {
+            } catch (Exception $e) {
                 Debugger::log("Fehler beim Löschen des Bildes `$source`. Meldung: " . $e->getMessage(), 'Fehler');
             }
+        } else {
+            Debugger::log("Fehler beim Löschen des Bildes `$source`. Meldung: Bild nicht gefunden.", 'Fehler');
         }
-        else Debugger::log("Fehler beim Löschen des Bildes `$source`. Meldung: Bild nicht gefunden.", 'Fehler');
         return false;
     }
 
-    public static function get($file_info) {
+    public static function get($file_info)
+    {
         return new File($file_info);
     }
 
-    public static function getAllowedMimes() {
+    public static function getAllowedMimes()
+    {
         $mime_types = array(
             'image/jpeg',
             'image/png',
@@ -131,7 +149,7 @@ class File {
     }
 }
 
-class NoFileSentException extends \Exception {
+class NoFileSentException extends \Exception
+{
 
 }
-?>

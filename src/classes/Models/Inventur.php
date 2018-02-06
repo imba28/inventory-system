@@ -1,16 +1,19 @@
 <?php
 namespace App\Models;
 
-class Inventur extends \App\Model {
+class Inventur extends \App\Model
+{
     protected $startDate;
     protected $finishDate;
     protected $user;
 
-    public function isStarted() {
+    public function isStarted()
+    {
         return !is_null($this->startDate);
     }
 
-    public function isFinished() {
+    public function isFinished()
+    {
         return !is_null($this->finishDate);
     }
 }

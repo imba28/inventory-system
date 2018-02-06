@@ -1,7 +1,7 @@
 <?php
 namespace App\Interfaces;
 
-interface Controller {
+interface Controller
+{
     public function error($status);
 }
-?>

@@ -1,88 +1,110 @@
 <?php
 namespace App;
 
-class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countable {
+class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countable
+{
     protected $items;
     private $position;
 
-    public function __construct($items = array()) {
+    public function __construct($items = array())
+    {
         $this->position = 0;
         $this->items = $items;
     }
 
-    public function count() {
+    public function count()
+    {
         return count($this->items);
     }
 
-    public function create() {
+    public function create()
+    {
         throw new \BadMethodCallException('not implemented yet');
     }
 
-    function isEmpty() {
+    function isEmpty()
+    {
         return count($this->items) == 0;
     }
 
-    function find($id) {
-        foreach($this->items as $item) {
-            if($item->getId() === $id) return $item;
+    function find($id)
+    {
+        foreach ($this->items as $item) {
+            if ($item->getId() === $id) {
+                return $item;
+            }
         }
         return null;
     }
 
-    public function first($n = 1) {
-        if($n > 1) return array_slice($this->items, 0, $n);
+    public function first($n = 1)
+    {
+        if ($n > 1) {
+            return array_slice($this->items, 0, $n);
+        }
         return isset($this->items[$n - 1]) ? $this->items[$n - 1] : null;
     }
 
-    public function append(\App\Model $model) {
+    public function append(\App\Model $model)
+    {
         $this->items[] = $model;
     }
 
-    public function toArray() {
+    public function toArray()
+    {
         return $this->items;
     }
 
     /* ITERATOR METHODS */
-    public function current() {
+    public function current()
+    {
         return $this->items[$this->position];
     }
 
-    public function key() {
+    public function key()
+    {
         return $this->position;
     }
 
-    public function next() {
+    public function next()
+    {
         return ++$this->position;
     }
 
-    public function rewind() {
+    public function rewind()
+    {
         $this->position = 0;
     }
 
-    public function valid() {
+    public function valid()
+    {
         return isset($this->items[$this->position]);
     }
 
     /* ARRAY ACCESS METHODS */
-    public function offsetExists($offset) {
+    public function offsetExists($offset)
+    {
         return isset($this->items[$offset]);
     }
 
-    public function offsetGet($offset) {
+    public function offsetGet($offset)
+    {
         return $this->items[$offset];
     }
 
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         $this->items[$offset] = $value;
     }
 
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         array_splice($this->items, $offset, 1);
     }
 
     /* Json serializable  */
-    public function jsonSerialize() {
+    public function jsonSerialize()
+    {
         return $this->items;
     }
 }
-?>

@@ -1,5 +1,7 @@
 <?php
 namespace App\Exceptions;
 
-class InvalidOperationException extends \Exception { }
-?>
+class InvalidOperationException extends \Exception
+{
+
+}

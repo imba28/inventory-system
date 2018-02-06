@@ -1,7 +1,8 @@
 <?php
 namespace App\File;
 
-class Image extends File {
+class Image extends File
+{
     public static $max_file_size = 1048576; // 10MB
 
     protected static $image_types = array (
@@ -15,7 +16,8 @@ class Image extends File {
         return $this->file_name. "." .self::$image_types[exif_imagetype($this->getSource())];
     }*/
 
-    public static function getAllowedMimes() {
+    public static function getAllowedMimes()
+    {
         return array(
             'image/jpeg',
             'image/png',
@@ -23,5 +25,6 @@ class Image extends File {
         );
     }
 }
-class InvalidImageExecption extends \Exception {}
-?>
+class InvalidImageExecption extends \Exception
+{
+}

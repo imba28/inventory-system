@@ -1,7 +1,7 @@
 <?php
 namespace App\Exceptions;
 
-class NothingFoundException extends \Exception {
+class NothingFoundException extends \Exception
+{
 
 }
-?>

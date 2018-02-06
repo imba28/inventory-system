@@ -1,38 +1,39 @@
 <?php
 namespace App\Controller;
 
-abstract class ApplicationController extends \App\BasicController {
+abstract class ApplicationController extends \App\BasicController
+{
     private $currentUser;
 
-    public function __construct($responseType = 'html', $layout = 'default') {
+    public function __construct($responseType = 'html', $layout = 'default')
+    {
         parent::__construct($responseType, $layout);
 
-        $this->ifFormat('html', function() {
+        $this->ifFormat('html', function () {
             $this->view->assign('currentUser', $this->getCurrentUser());
             $this->view->assign('isUserSignedIn', $this->isUserSignedIn());
         });
 
-        if($this->isUserSignedIn()) {
+        if ($this->isUserSignedIn()) {
             \App\Menu::getInstance()->set('items', array(
                 'Produkte' => 'products',
                 'Kunden' => 'customers',
                 'Inventur' => 'inventur'
             ));
-        }
-        else {
+        } else {
             \App\Menu::getInstance()->set('items', array(
                 'Produkte' => 'products'
             ));
         }
     }
 
-    protected function getCurrentUser() {
-        if(isset($_SESSION['user_id'])) {
-            if(is_null($this->currentUser)) {
+    protected function getCurrentUser()
+    {
+        if (isset($_SESSION['user_id'])) {
+            if (is_null($this->currentUser)) {
                 try {
                     $this->currentUser = \App\Models\User::find($_SESSION['user_id']);
-                }
-                catch(\App\Exceptions\NothingFoundException $e) {
+                } catch (\App\Exceptions\NothingFoundException $e) {
                     return null;
                 }
             }
@@ -42,14 +43,15 @@ abstract class ApplicationController extends \App\BasicController {
         return null;
     }
 
-    protected function isUserSignedIn() {
+    protected function isUserSignedIn()
+    {
         return !is_null($this->getCurrentUser());
     }
 
-    protected function authenticateUser() {
-        if(!$this->isUserSignedIn()) {
+    protected function authenticateUser()
+    {
+        if (!$this->isUserSignedIn()) {
             $this->response->redirect('/');
         }
     }
 }
-?>

@@ -1,15 +1,17 @@
 <?php
 namespace App\Models;
 
-class User extends \App\Model {
+class User extends \App\Model
+{
     protected $name;
     protected $username;
     protected $password;
 
-    public function __construct($options = array()) {
+    public function __construct($options = array())
+    {
         parent::__construct($options);
 
-        $this->on('save', function($e) {
+        $this->on('save', function ($e) {
             $user = $e->getContext();
 
             $password = self::getHashedString($user->get('password'));
@@ -18,19 +20,21 @@ class User extends \App\Model {
         });
     }
 
-    public static function getHashedString($string): string {
+    public static function getHashedString($string): string
+    {
         return password_hash($string, PASSWORD_BCRYPT);
     }
 
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         $json = array();
 
-        foreach(array(
+        foreach (array(
             'id' => $this->id,
             'name' => $this->name,
             'username' => $this->username
         ) as $key => $value) {
-            if($this->data[$key] instanceof \App\Model) {
+            if ($this->data[$key] instanceof \App\Model) {
                 $value = $value->jsonSerialize();
             }
 
@@ -40,4 +44,3 @@ class User extends \App\Model {
         return $json;
     }
 }
-?>

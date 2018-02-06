@@ -1,5 +1,7 @@
 <?php
 namespace App\Exceptions;
 
-class InventurNotFinishedException extends \Exception { }
-?>
+class InventurNotFinishedException extends \Exception
+{
+
+}

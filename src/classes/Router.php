@@ -1,7 +1,8 @@
 <?php
 namespace App;
 
-class Router {
+class Router
+{
     use \App\Traits\Singleton;
 
     private static $routeCount = 0;
@@ -14,9 +15,10 @@ class Router {
         'DELETE' => array()
     );
 
-    public function addRoute($request_method, $path, $handler) {
-        if(is_array($path)) {
-            foreach($path as $p) {
+    public function addRoute($request_method, $path, $handler)
+    {
+        if (is_array($path)) {
+            foreach ($path as $p) {
                 $this->addRoute($request_method, $p, $handler);
             }
             return;
@@ -24,7 +26,7 @@ class Router {
 
         $request_method = strtoupper($request_method);
 
-        if(in_array($request_method, array_keys($this->routes))) {
+        if (in_array($request_method, array_keys($this->routes))) {
             $routeOptions = array(
                 'regex' => array(),
                 'params' => array(),
@@ -32,20 +34,17 @@ class Router {
             );
 
             $parts = explode('/', $path);
-            foreach($parts as $part) {
-                if(isset($part[0]) && $part[0] === ':') { // dynamic part
-                    if($part[1] === '_') { // _ ist zeichen für Zahl
-                        $routeOptions['regex'][] = '([0-9]+)'; 
+            foreach ($parts as $part) {
+                if (isset($part[0]) && $part[0] === ':') { // dynamic part
+                    if ($part[1] === '_') { // _ ist zeichen für Zahl
+                        $routeOptions['regex'][] = '([0-9]+)';
                         $routeOptions['params'][] = substr($part, 2);
-                    }
-                    else {
+                    } else {
                         $routeOptions['regex'][] = '([\p{N}\p{L}\s\-,]+)'; // matches any unicode character, whitespace, minus and comma.
                         $routeOptions['params'][] = substr($part, 1);
                     }
-
-                }
-                else { // static part
-                    if($part === '*') {
+                } else { // static part
+                    if ($part === '*') {
                         $routeOptions['params'][] = $part;
                         $part = '(.+)';
                     }
@@ -56,15 +55,16 @@ class Router {
             $routeOptions['regex'] = '/^' . implode('\/', $routeOptions['regex']) . '$/ui';
 
             $this->routes[$request_method][self::$routeCount++] = $routeOptions;
+        } else {
+            throw new \InvalidArgumentException("{$request_method} is not a valid http request type!");
         }
-        else throw new \InvalidArgumentException("{$request_method} is not a valid http request type!");
     }
 
-    public function handle($handle, $params = array(), $response_type = 'html') {
-        if($handle instanceof \Closure) {
+    public function handle($handle, $params = array(), $response_type = 'html')
+    {
+        if ($handle instanceof \Closure) {
             return $handle($params);
-        }
-        elseif(is_string($handle)) {
+        } elseif (is_string($handle)) {
             $split = explode('#', $handle);
 
             $controller_class = "\App\Controller\\{$split[0]}";
@@ -72,29 +72,33 @@ class Router {
 
             $controller = new $controller_class($response_type);
 
-            if(is_callable(array($controller, $controller_action), true)) {
+            if (is_callable(array($controller, $controller_action), true)) {
                 $controller->handle($controller_action, $params);
-            }
-            else {
+            } else {
                 $controller->error(501, "{$controller_class} does not provide {$controller_action}()!");
             }
+        } else {
+            throw new \InvalidArgumentException('invalid handle!');
         }
-        else throw new \InvalidArgumentException('invalid handle!');
     }
 
-    public function route($request_uri = null, $request_method = null) {
-        if(is_null($request_uri)) $request_uri = urldecode($_SERVER['REQUEST_URI']);
-        if(is_null($request_method)) $request_method = $_SERVER['REQUEST_METHOD'];
+    public function route($request_uri = null, $request_method = null)
+    {
+        if (is_null($request_uri)) {
+            $request_uri = urldecode($_SERVER['REQUEST_URI']);
+        }
+        if (is_null($request_method)) {
+            $request_method = $_SERVER['REQUEST_METHOD'];
+        }
 
         $uri = ltrim(parse_url($request_uri, PHP_URL_PATH), '/');
         $params = parse_url($request_uri, PHP_URL_QUERY);
 
         $uri = preg_replace('/^\/api\/(v[0-9]+)\//', '', $uri);
-        if(isset($this->routes[$request_method][$uri])) {
+        if (isset($this->routes[$request_method][$uri])) {
             $handler = $this->routes[$request_method][$uri];
             return $this->handle($handler);
-        }
-        else {
+        } else {
             $routes = $this->routes[$request_method] + $this->routes['ALL'];
             ksort($routes);
 
@@ -104,20 +108,21 @@ class Router {
         }
     }
 
-    private function findHandler(array $routes, $request_uri) {
+    private function findHandler(array $routes, $request_uri)
+    {
         $params = array();
         $response_type = 'html';
 
-        if(preg_match('/.(json|html|xml)$/', $request_uri, $matches)) {
+        if (preg_match('/.(json|html|xml)$/', $request_uri, $matches)) {
             $response_type = $matches[1];
             $request_uri = str_replace($matches[0], '', $request_uri);
         }
 
-        foreach($routes as $path => $routeOptions) {
-            if(preg_match($routeOptions['regex'], $request_uri, $matches)) {
+        foreach ($routes as $path => $routeOptions) {
+            if (preg_match($routeOptions['regex'], $request_uri, $matches)) {
                 array_shift($matches); // remove first capture group match
 
-                foreach($matches as $idx => $part) {
+                foreach ($matches as $idx => $part) {
                     $params[$routeOptions['params'][$idx]] = $part;
                 }
 
@@ -128,4 +133,3 @@ class Router {
         return false;
     }
 }
-?>

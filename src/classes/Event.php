@@ -1,33 +1,39 @@
 <?php
 namespace App;
 
-class Event {
+class Event
+{
     protected $eventName;
     protected $eventContext;
     protected $eventInfo;
     protected $canceled = false;
 
-    public function __construct($eventName, $eventContext = null, $eventInfo = null) {
+    public function __construct($eventName, $eventContext = null, $eventInfo = null)
+    {
         $this->eventName = $eventName;
         $this->eventContext = $eventContext;
         $this->eventInfo = $eventInfo;
     }
 
-    public function getContext() {
+    public function getContext()
+    {
         return $this->eventContext;
     }
-    public function getInfo() {
+    public function getInfo()
+    {
         return $this->eventInfo;
     }
-    public function setInfo(array $a) {
+    public function setInfo(array $a)
+    {
         $this->eventInfo = $a;
     }
 
-    public function isCanceled() {
+    public function isCanceled()
+    {
         return $this->canceled;
     }
-    public function cancel() {
+    public function cancel()
+    {
         $this->canceled = true;
     }
 }
-?>

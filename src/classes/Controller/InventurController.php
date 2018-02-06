@@ -1,81 +1,79 @@
 <?php
 namespace App\Controller;
 
-class InventurController extends ApplicationController {
+class InventurController extends ApplicationController
+{
     protected $inventur;
 
-    public function __construct($responseType = 'html', $layout = 'default') {
+    public function __construct($responseType = 'html', $layout = 'default')
+    {
         parent::__construct($responseType, $layout);
 
         $this->authenticateUser();
         $this->inventur = new \App\Inventur();
     }
 
-    public function main($params) {
+    public function main($params)
+    {
         $this->view->assign('lastInventur', \App\Inventur::getLastInventur());
         $this->view->assign('inventur', $this->inventur);
 
-        if(isset($params['action'])) {
-            if($this->inventur->isStarted()) {
-                if($params['action'] == 'registered') {
+        if (isset($params['action'])) {
+            if ($this->inventur->isStarted()) {
+                if ($params['action'] == 'registered') {
                     $this->view->assign('products', $this->inventur->getRegisteredItems());
                     $this->view->assign('inventurActions', $this->inventur->getInventurActions());
                     $this->view->setTemplate('inventur-registered');
-                }
-                elseif($params['action'] == 'missing') {
+                } elseif ($params['action'] == 'missing') {
                     $this->view->assign('products', $this->inventur->getMissingItems());
                     $this->view->setTemplate('inventur-missing');
-                }
-                else {
+                } else {
                     $this->error(404, 'Seite nicht gefunden!');
                 }
-            }
-            else {
+            } else {
                 $this->response->redirect('/inventur');
             }
-        }
-        else {
+        } else {
             $this->view->setTemplate('inventur');
         }
     }
 
-    public function list() {
+    public function list()
+    {
         $inventurList = \App\Models\Inventur::all();
 
         $this->view->assign('inventurList', $inventurList);
         $this->view->setTemplate('inventur-list');
     }
 
-    public function actionInventur() {
-        if($this->request->issetParam('action')) {
-            if($this->request->getParam('action') == 'start') {
-                if(!$this->inventur->isStarted()) {
+    public function actionInventur()
+    {
+        if ($this->request->issetParam('action')) {
+            if ($this->request->getParam('action') == 'start') {
+                if (!$this->inventur->isStarted()) {
                     $this->startInventur();
-                }
-                else {
+                } else {
                     $this->response->redirect('/inventur');
                 }
-            }
-            elseif($this->request->getParam('action') == 'end') {
-                if($this->inventur->isStarted()) {
+            } elseif ($this->request->getParam('action') == 'end') {
+                if ($this->inventur->isStarted()) {
                     $this->endInventur();
-                }
-                else {
+                } else {
                     $this->response->redirect('/inventur');
                 }
-            }
-            elseif($this->request->getParam('action') == 'scan_product') {
+            } elseif ($this->request->getParam('action') == 'scan_product') {
                 $this->scanProduct($this->request->getParam('invNr'));
-            }
-            elseif($this->request->getParam('action') == 'missing_product') {
+            } elseif ($this->request->getParam('action') == 'missing_product') {
                 $this->missingProduct($this->request->getParam('invNr'));
+            } else {
+                throw new \App\Exceptions\InvalidOperationException('not a valid action!');
             }
-            else throw new \App\Exceptions\InvalidOperationException('not a valid action!');
         }
     }
 
-    public function show($params) {
-        if(isset($params['id'])) {
+    public function show($params)
+    {
+        if (isset($params['id'])) {
             try {
                 $inventur = \App\Models\Inventur::find($params['id']);
                 $missingProducts = array();
@@ -87,8 +85,8 @@ class InventurController extends ApplicationController {
                         'AND',
                         array('missing', '=', 1)
                     ));
+                } catch (\App\Exceptions\NothingFoundException $e) {
                 }
-                catch(\App\Exceptions\NothingFoundException $e) {}
 
                 try {
                     $scannedProducts = \App\Models\InventurProduct::findByFilter(array(
@@ -96,8 +94,8 @@ class InventurController extends ApplicationController {
                         'AND',
                         array('in_stock', '=', 1)
                     ));
+                } catch (\App\Exceptions\NothingFoundException $e) {
                 }
-                catch(\App\Exceptions\NothingFoundException $e) {}
 
                 $this->view->assign('inventur', $inventur);
                 $this->view->assign('missingProducts', $missingProducts);
@@ -105,30 +103,28 @@ class InventurController extends ApplicationController {
                 $this->view->setTemplate('inventur-detail');
 
                 return;
+            } catch (\App\Exceptions\NothingFoundException $e) {
             }
-            catch(\App\Exceptions\NothingFoundException $e) {}
         }
 
         $this->error(404, 'Inventur wurde nicht gefunden!');
     }
 
-    private function scanProduct($invNr) {
+    private function scanProduct($invNr)
+    {
         try {
             $product = \App\Models\Product::find($invNr, 'invNr');
 
             try {
-                if($this->inventur->registerProduct($product)) {
+                if ($this->inventur->registerProduct($product)) {
                     \App\System::getInstance()->addMessage('success', "Inventarnummer <em>{$invNr}</em> wurde erfasst!");
-                }
-                else {
+                } else {
                     \App\System::getInstance()->addMessage('error', "Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
                 }
-            }
-            catch(\App\QueryBuilder\NothingChangedException $e) {
+            } catch (\App\QueryBuilder\NothingChangedException $e) {
                 \App\System::getInstance()->addMessage('info', "Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
-        }
-        catch(\App\Exceptions\NothingFoundException $e) {
+        } catch (\App\Exceptions\NothingFoundException $e) {
             \App\System::getInstance()->addMessage('error', "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden. Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?");
         }
 
@@ -138,23 +134,21 @@ class InventurController extends ApplicationController {
         $this->view->setTemplate('inventur');
     }
 
-    private function missingProduct($invNr) {
+    private function missingProduct($invNr)
+    {
         try {
             $product = \App\Models\Product::find($invNr, 'invNr');
 
             try {
-                if($this->inventur->missingProduct($product)) {
+                if ($this->inventur->missingProduct($product)) {
                     \App\System::getInstance()->addMessage('success', "Inventarnummer <em>{$invNr}</em> wurde als fehlend markiert!");
-                }
-                else {
+                } else {
                     \App\System::getInstance()->addMessage('error', "Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
                 }
-            }
-            catch(\App\QueryBuilder\NothingChangedException $e) {
+            } catch (\App\QueryBuilder\NothingChangedException $e) {
                 \App\System::getInstance()->addMessage('info', "Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
-        }
-        catch(\App\Exceptions\NothingFoundException $e) {
+        } catch (\App\Exceptions\NothingFoundException $e) {
             \App\System::getInstance()->addMessage('error', "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden. Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?");
         }
 
@@ -164,11 +158,11 @@ class InventurController extends ApplicationController {
         $this->view->setTemplate('inventur');
     }
 
-    private function startInventur() {
-        if($this->inventur->isStarted()) {
+    private function startInventur()
+    {
+        if ($this->inventur->isStarted()) {
             \App\System::getInstance()->addMessage('error', 'Inventur wurde bereits gestartet!');
-        }
-        else {
+        } else {
             $this->inventur->start($this->getCurrentUser());
             \App\System::getInstance()->addMessage('success', 'Inventur wurde erfolgreich gestartet!');
             $this->redirectToRoute('/inventur', 'GET');
@@ -180,15 +174,14 @@ class InventurController extends ApplicationController {
         $this->view->setTemplate('inventur');
     }
 
-    private function endInventur() {
+    private function endInventur()
+    {
         try {
             $this->inventur->end();
             \App\System::getInstance()->addMessage('success', 'Inventur wurde erfolgreich beendet!');
-        }
-        catch(\App\Exceptions\InventurNotFinishedException $e) {
+        } catch (\App\Exceptions\InventurNotFinishedException $e) {
             \App\System::getInstance()->addMessage('error', $e->getMessage());
-        }
-        catch(\App\Exceptions\InvalidOperationException $e) {
+        } catch (\App\Exceptions\InvalidOperationException $e) {
             \App\System::getInstance()->addMessage('error', $e->getMessage());
         }
 
@@ -198,12 +191,14 @@ class InventurController extends ApplicationController {
         $this->view->setTemplate('inventur');
     }
 
-    public function error($status, $message = null) {
+    public function error($status, $message = null)
+    {
         $this->response->setStatus($status);
         $this->view->assign('errorCode', $status);
-        if(!is_null($message)) $this->view->assign('errorMessage', $message);
+        if (!is_null($message)) {
+            $this->view->assign('errorMessage', $message);
+        }
 
         $this->view->setTemplate('error');
     }
 }
-?>
