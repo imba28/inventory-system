@@ -97,12 +97,9 @@ abstract class Model implements \JsonSerializable
             }
         }
 
-        $table_name = self::getTableName();
-
-        $query = new QueryBuilder\Builder($table_name);
+        $query = new QueryBuilder\Builder(self::getTableName());
 
         if ($this->isCreated()) {
-            //$properties['stamp'] = 'NOW()'; // set last update date
             $res = $query->where('id', '=', $this->id)->update($properties_update);
 
             if ($res === false) {
@@ -130,30 +127,33 @@ abstract class Model implements \JsonSerializable
     }
 
     private function getChangedProperties() {
-        $properties_update = $this->data;
+        if (!$this->isCreated()) {
+            return $this->data;
+        }
 
-        foreach ($properties_update as $name => $value) {
+        $properties_update = array();
+
+        foreach ($this->data as $name => $value) {
             if (@$this->$name != $value) { // has changed
-                if ($name == 'id') {
-                    unset($properties_update[$name]);
-                } elseif (is_null($value) || (empty($value) && $value != 0)) {
-                    $properties_update[$name] = null;
-                } elseif ($value === "NOW()") {
-                    $date = new \DateTime();
-                    $this->set($name, $date->format('Y-m-d H:i:s'));
-                } elseif ($value instanceof \App\Model) {
+                if($value instanceof \App\Model) {
                     if (!$value->isCreated()) {
                         $value->save();
                     }
-                    $properties_update["{$name}_id"] = $value->getId();
-                    unset($properties_update[$name]);
+                    $name = "{$name}_id";
+                    $value = $value->getId();
                 }
-            } else {
-                if ($this->isCreated()) {
-                    unset($properties_update[$name]);
+                elseif (is_null($value) || (empty($value) && $value != 0)) {
+                    $value = null;
+                } elseif ($value === "NOW()") {
+                    $date = new \DateTime();
+                    $this->set($name, $date->format('Y-m-d H:i:s'));
                 }
+
+                $properties_update[$name] = $value;
             }
         }
+
+        return $properties_update;
     }
 
     /*
