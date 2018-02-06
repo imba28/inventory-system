@@ -83,32 +83,9 @@ abstract class Model implements \JsonSerializable
         $this->trigger('save');
 
         //$properties = get_object_vars($this);
-        $properties_update = $this->data;
+        $properties_update = $this->getChangedProperties();
         if (!is_null($head_column) && !is_null($head_id)) {
             $properties_update[$head_column] = $head_id;
-        }
-
-        foreach ($properties_update as $name => $value) {
-            if (@$this->$name != $value) { // has changed
-                if ($name == 'id') {
-                    unset($properties_update[$name]);
-                } elseif (is_null($value) || (empty($value) && $value != 0)) {
-                    $properties_update[$name] = null;
-                } elseif ($value === "NOW()") {
-                    $date = new \DateTime();
-                    $this->set($name, $date->format('Y-m-d H:i:s'));
-                } elseif ($value instanceof \App\Model) {
-                    if (!$value->isCreated()) {
-                        $value->save();
-                    }
-                    $properties_update["{$name}_id"] = $value->getId();
-                    unset($properties_update[$name]);
-                }
-            } else {
-                if ($this->isCreated()) {
-                    unset($properties_update[$name]);
-                }
-            }
         }
 
         if (count($properties_update) == 0) {
@@ -150,6 +127,33 @@ abstract class Model implements \JsonSerializable
         }
 
         return true;
+    }
+
+    private function getChangedProperties() {
+        $properties_update = $this->data;
+
+        foreach ($properties_update as $name => $value) {
+            if (@$this->$name != $value) { // has changed
+                if ($name == 'id') {
+                    unset($properties_update[$name]);
+                } elseif (is_null($value) || (empty($value) && $value != 0)) {
+                    $properties_update[$name] = null;
+                } elseif ($value === "NOW()") {
+                    $date = new \DateTime();
+                    $this->set($name, $date->format('Y-m-d H:i:s'));
+                } elseif ($value instanceof \App\Model) {
+                    if (!$value->isCreated()) {
+                        $value->save();
+                    }
+                    $properties_update["{$name}_id"] = $value->getId();
+                    unset($properties_update[$name]);
+                }
+            } else {
+                if ($this->isCreated()) {
+                    unset($properties_update[$name]);
+                }
+            }
+        }
     }
 
     /*
