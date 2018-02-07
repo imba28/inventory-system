@@ -56,7 +56,7 @@ class Builder
             $operator = '=';
         }
         try {
-            $this->where[] = new QueryWhere(array($arg1, $operator, $arg2));
+            $this->where[] = new QueryWhere($arg1, $operator, $arg2, self::getTableName($this->table));
         } catch (Exception $e) {
             //echo "Fehler: {$e->getMessage()}";
             return false;
@@ -273,7 +273,7 @@ class Builder
     {
         $column = is_null($column) ? "ID" : $column;
 
-        $this->where[] = new QueryWhere(array($column, "=", $id));
+        $this->where[] = new QueryWhere($column, "=", $id, self::getTableName($this->table));
 
         return $this->get();
     }
@@ -357,7 +357,7 @@ class Builder
         if (count($this->where) > 0) {
             $criteria = " WHERE ";
             foreach ($this->where as $clause) {
-                $criteria .= $clause->getCondition($table_name) . " AND ";
+                $criteria .= $clause->getClause($table_name) . " AND ";
             }
             $criteria = rtrim($criteria, " AND ");
         }
@@ -372,12 +372,12 @@ class Builder
 
         if (count($this->where) > 0) {
             foreach ($this->where as $clause) {
-                $val = $clause->getValue();
+                $val = $clause->getBindings();
                 if ($val !== false) {
                     if (is_array($val)) {
                         foreach ($val as $v) {
                             if (!is_null($v)) {
-                                                        $bindings[] = $v;
+                                $bindings[] = $v;
                             } else {
                                 $bindings[] = $val;
                             }
