@@ -123,6 +123,10 @@ abstract class Model implements \JsonSerializable
             self::$instances[get_called_class()][$this->getId()] = $this;
         }
 
+        array_walk($properties_update, function ($value, $key) {
+            $this->{$key} = $value;
+        });
+
         return true;
     }
 
@@ -142,7 +146,8 @@ abstract class Model implements \JsonSerializable
                     $value = null;
                 } elseif ($value === "NOW()") {
                     $date = new \DateTime();
-                    $this->set($name, $date->format('Y-m-d H:i:s'));
+                    $value = $date->format('Y-m-d H:i:s');
+                    $this->data[$name] = $value;
                 }
 
                 $properties_update[$name] = $value;
