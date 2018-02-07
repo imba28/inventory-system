@@ -178,40 +178,9 @@ abstract class Model implements \JsonSerializable
             $query->limit($limit);
         }
 
-        if (is_array($filters)) {
-            if (count($filters) == 3) {
-                $query->where($filters[0], $filters[1], $filters[2]);
-            } else {
-                foreach ($filters as $filter) {
-                    if (count($filter) != 3) {
-                        continue;
-                    }
-                    $query->where($filter[0], $filter[1], $filter[2]);
-                }
-            }
-        }
-
-        return $query;
-    }
-
-    public static function getModelData($filters = array(), $limit = false, $order = array('id' => 'DESC'))
-    {
-        $query = new \App\QueryBuilder\Builder(self::getTableName());
-        $query->where('deleted', '=', '0');
-
-        foreach ($order as $column => $order) {
-            $query->orderBy($column, $order);
-        }
-
-        if ($limit !== false) {
-            $query->limit($limit);
-        }
-
-        if (is_array($filters)) {
-            if (count($filters) == 3 && is_string($filters[1])) {
-                $filters = array($filters);
-            }
-
+        if (count($filters) == 3) {
+            $query->where($filters[0], $filters[1], $filters[2]);
+        } else {
             foreach ($filters as $filter) {
                 if (count($filter) != 3) {
                     continue;
@@ -220,11 +189,38 @@ abstract class Model implements \JsonSerializable
             }
         }
 
+        return $query;
+    }
+
+    public static function getModelData(array $filters, $limit = false, $order = array('id' => 'DESC'))
+    {
+        $query = new \App\QueryBuilder\Builder(self::getTableName());
+        $query->where('deleted', '=', '0');
+
+        if ($limit !== false) {
+            $query->limit($limit);
+        }
+
+        foreach ($order as $column => $order) {
+            $query->orderBy($column, $order);
+        }
+
+        if (count($filters) == 3 && is_string($filters[1])) {
+            $filters = array($filters);
+        }
+
+        foreach ($filters as $filter) {
+            if (count($filter) == 3) {
+                $query->where($filter[0], $filter[1], $filter[2]);
+            }
+        }
+
         $res = $query->get();
         if (!empty($res)) {
             return $limit == 1 ? current($res) : $res;
+        } else {
+            throw new \App\Exceptions\NothingFoundException('No entries found for '. get_called_class() . '!');
         }
-        throw new \App\Exceptions\NothingFoundException('No entries found for '. get_called_class() . '!');
     }
 
     public static function find($value, $column = 'id'): \App\Model
