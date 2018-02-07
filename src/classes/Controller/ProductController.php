@@ -83,9 +83,7 @@ class ProductController extends ApplicationController
 
             $products = \App\Models\Product::findByFilter($filter, (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
-            $query = \App\Models\Product::getQuery($filter);
-
-            $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage, '/products/search');
+            $paginator = new \App\Paginator(\App\Models\Product::getQuery($filter)->count(), $currentPage, $itemsPerPage, '/products/search');
 
             $this->view->assign('paginator', $paginator);
             $this->view->assign('totals', $paginator->getTotals());
@@ -173,8 +171,7 @@ class ProductController extends ApplicationController
                 'type', '=', $params['category']
             ), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
-            $query = \App\Models\Product::getQuery(array('type', '=', $params['category']));
-            $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage, '/products/category/' . urlencode($params['category']));
+            $paginator = new \App\Paginator(\App\Models\Product::getQuery(array('type', '=', $params['category']))->count(), $currentPage, $itemsPerPage, '/products/category/' . urlencode($params['category']));
             $this->view->assign('paginator', $paginator);
             $this->view->assign('totals', $paginator->getTotals());
         } catch (\App\Exceptions\NothingFoundException $e) {
@@ -497,8 +494,7 @@ class ProductController extends ApplicationController
         try {
             $products = \App\Models\Product::findByFilter(array(), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
-            $query = \App\Models\Product::getQuery(array());
-            $paginator = new \App\Paginator($query, $currentPage, $itemsPerPage, '/products');
+            $paginator = new \App\Paginator(\App\Models\Product::getQuery(array())->count(), $currentPage, $itemsPerPage, '/products');
             $this->view->assign('paginator', $paginator);
             $this->view->assign('totals', $paginator->getTotals());
         } catch (\App\Exceptions\NothingFoundException $e) {
