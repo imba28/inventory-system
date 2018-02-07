@@ -78,13 +78,12 @@ class QueryWhere
         $bindings = array();
 
         if ($this->key instanceof QueryWhere) {
-            $bindings += $this->key->getBindings();
+            $bindings = array_merge($bindings, $this->key->getBindings());
         }
+        
         if ($this->value instanceof QueryWhere) {
-            $bindings += $this->value->getBindings();
-        }
-
-        if (!is_null($this->value) && $this->value !== "NULL") {
+            $bindings = array_merge($bindings, $this->value->getBindings());
+        } elseif (!is_null($this->value) && $this->value !== "NULL") {
             $bindings[] = $this->value;
         }
 

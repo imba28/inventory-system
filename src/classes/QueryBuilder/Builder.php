@@ -389,22 +389,11 @@ class Builder
 
         if (count($this->where) > 0) {
             foreach ($this->where as $clause) {
-                $val = $clause->getBindings();
-                if ($val !== false) {
-                    if (is_array($val)) {
-                        foreach ($val as $v) {
-                            if (!is_null($v)) {
-                                $bindings[] = $v;
-                            } else {
-                                $bindings[] = $val;
-                            }
-                        }
-                    }
-                }
+                $bindings = array_merge($bindings, $clause->getBindings());
             }
         }
 
-        return  $bindings;
+        return $bindings;
     }
 
     public function getSQL()
