@@ -113,9 +113,9 @@ abstract class BasicController
         $responseFormats->execute($this->responseType);
     }
 
-    protected function redirectToRoute($route)
+    protected function redirectToRoute($route, $request_method)
     {
-        \App\Router::getInstance()->route($route);
+        \App\Router::getInstance()->route($route, $request_method);
     }
 
     abstract public function error($status);
