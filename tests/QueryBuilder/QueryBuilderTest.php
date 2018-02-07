@@ -156,6 +156,14 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals($this->query->getSql(), 'SELECT SUM(price) as total FROM `test`');
     }
 
+    public function testFullSQL() {
+        $this->query->where('name', '=', 'Wick')->where('firstname', '=', 'John');
+        $this->assertEquals(
+            $this->query->getFullSQL(),
+            'SELECT `test`.* FROM `test` WHERE (`test`.`name` = \'Wick\') AND (`test`.`firstname` = \'John\')'
+        );
+    }
+
     public function testSetTablePrefix()
     {
         $this->query::setTablePrefix('pre');
@@ -164,4 +172,5 @@ class QueryBuilderTest extends TestCase
         $this->query->select('name')->where('id', '=', 1);
         $this->assertEquals($this->query->getSql(), 'SELECT `pre_test`.`name` FROM `pre_test` WHERE (`pre_test`.`id` = ?)');
     }
+
 }

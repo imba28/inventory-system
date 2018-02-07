@@ -193,6 +193,21 @@ class Builder
         return join(", ", $tmp);
     }
 
+    public function getFullSQL()
+    {
+        $sql = $this->getSQL();
+        $bindings = $this->getCriteriaBindings();
+
+        foreach ($bindings as $b) {
+            if (is_string($b)) {
+                $b = "'{$b}'";
+            }
+            $sql = preg_replace('/\?/', $b, $sql, 1);
+        }
+
+        return $sql;
+    }
+
     public function get()
     {
         $sql = $this->getSQL();
