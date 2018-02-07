@@ -40,7 +40,8 @@ class Router
                         $routeOptions['regex'][] = '([0-9]+)';
                         $routeOptions['params'][] = substr($part, 2);
                     } else {
-                        $routeOptions['regex'][] = '([\p{N}\p{L}\s\-,]+)'; // matches any unicode character, whitespace, minus and comma.
+                        // matches any unicode character, whitespace, minus and comma.
+                        $routeOptions['regex'][] = '([\p{N}\p{L}\s\-,]+)';
                         $routeOptions['params'][] = substr($part, 1);
                     }
                 } else { // static part

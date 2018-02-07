@@ -22,12 +22,12 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         throw new \BadMethodCallException('not implemented yet');
     }
 
-    function isEmpty()
+    public function isEmpty()
     {
         return count($this->items) == 0;
     }
 
-    function find($id)
+    public function find($id)
     {
         foreach ($this->items as $item) {
             if ($item->getId() === $id) {

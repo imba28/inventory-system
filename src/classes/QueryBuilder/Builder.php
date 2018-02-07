@@ -368,18 +368,17 @@ class Builder
 
     private function getCriteriaString()
     {
-        $criteria = "";
         $table_name = self::getTableName($this->table);
 
         if (count($this->where) > 0) {
-            $criteria = " WHERE ";
+            $clauses = array();
             foreach ($this->where as $clause) {
-                $criteria .= $clause->getClause($table_name) . " AND ";
+                $clauses[] = $clause->getClause($table_name);
             }
-            $criteria = rtrim($criteria, " AND ");
+            return ' WHERE ' . implode($clauses, ' AND ');
         }
 
-        return $criteria;
+        return '';
     }
 
     private function getCriteriaBindings()
@@ -420,20 +419,6 @@ class Builder
         $sql .= $join_statement;
 
         if (count($this->where) > 0) {
-            /*
-            $sql .= " WHERE ";
-            foreach($this->where as $clause) {
-                $sql.= $clause->getCondition($table_name) . " AND";
-                $val = $clause->getValue();
-                if($val !== false) {
-                   // vd($val);
-                    if(is_array($val)) {
-                        foreach($val as $v) if(!is_null($v)) $args[] = $v;
-                    }
-                    else $args[] = $val;
-                }
-            }
-            $sql = rtrim($sql, " AND");*/
             $sql .= $this->getCriteriaString();
         }
 

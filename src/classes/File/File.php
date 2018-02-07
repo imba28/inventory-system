@@ -25,8 +25,6 @@ class File
     public function isValid()
     {
         try {
-            $tmp_file = $this->file_info['tmp_name'];
-
             if (!isset($this->file_info['error']) || is_array($this->file_info['error'])) {
                 throw new \RuntimeException('Ungültige Bildparameter!');
             }
@@ -120,12 +118,20 @@ class File
                 if (preg_match("/\/([\w\s]+\/)+/", $source, $matches)) {
                     $dest = str_replace($matches[0], "/tmp/", $source);
                     $batch = new Batch();
-                    $batch->add(new MoveFile(Registry::getConfig()->get("FTP_ABS_PATH") . $source, Registry::getConfig()->get("FTP_ABS_PATH") . $dest));
+                    $batch->add(
+                        new MoveFile(
+                            Registry::getConfig()->get("FTP_ABS_PATH") . $source,
+                            Registry::getConfig()->get("FTP_ABS_PATH") . $dest
+                        )
+                    );
                     $batch->execute();
                     return true;
                 }
             } catch (Exception $e) {
-                Debugger::log("Fehler beim Löschen des Bildes `$source`. Meldung: " . $e->getMessage(), 'Fehler');
+                Debugger::log(
+                    "Fehler beim Löschen des Bildes `$source`. Meldung: " . $e->getMessage(),
+                    'Fehler'
+                );
             }
         } else {
             Debugger::log("Fehler beim Löschen des Bildes `$source`. Meldung: Bild nicht gefunden.", 'Fehler');
@@ -147,9 +153,4 @@ class File
         );
         return $mime_types;
     }
-}
-
-class NoFileSentException extends \Exception
-{
-
 }

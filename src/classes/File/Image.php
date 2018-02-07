@@ -25,6 +25,3 @@ class Image extends File
         );
     }
 }
-class InvalidImageExecption extends \Exception
-{
-}
