@@ -94,18 +94,12 @@ class Router
         $uri = ltrim(parse_url($request_uri, PHP_URL_PATH), '/');
         $params = parse_url($request_uri, PHP_URL_QUERY);
 
-        $uri = preg_replace('/^\/api\/(v[0-9]+)\//', '', $uri);
-        if (isset($this->routes[$request_method][$uri])) {
-            $handler = $this->routes[$request_method][$uri];
-            return $this->handle($handler);
-        } else {
-            $routes = $this->routes[$request_method] + $this->routes['ALL'];
-            ksort($routes);
+        $routes = $this->routes[$request_method] + $this->routes['ALL'];
+        ksort($routes);
 
-            $this->findHandler($routes, $request_uri);
+        $this->findHandler($routes, $request_uri);
 
-            throw new \ErrorException("Route `{$uri}`not defined!");
-        }
+        throw new \ErrorException("Route `{$uri}`not defined!");
     }
 
     private function findHandler(array $routes, $request_uri)
