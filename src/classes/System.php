@@ -27,18 +27,14 @@ final class System
 
     private function getTitle($type)
     {
-        switch ($type) {
-            case 'danger':
-                return 'Fehler';
-            case 'success':
-                return 'Erfolg';
-            case 'warning':
-                return 'Warnung';
-            case 'info':
-                return 'Info';
-            default:
-                return null;
-        }
+        $titles = array(
+            'danger' => 'Fehler',
+            'success' => 'Erfolg',
+            'warning' => 'Warnung',
+            'info' => 'Info'
+        );
+
+        return $titles[$type];
     }
 
     private function renderMessages($type, array $data)
