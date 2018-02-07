@@ -126,11 +126,8 @@ abstract class Model implements \JsonSerializable
         return true;
     }
 
-    private function getChangedProperties() {
-        if (!$this->isCreated()) {
-            return $this->data;
-        }
-
+    private function getChangedProperties()
+    {
         $properties_update = array();
 
         foreach ($this->data as $name => $value) {
