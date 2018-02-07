@@ -155,7 +155,7 @@ abstract class Model implements \JsonSerializable
     /*
     Doof, weil das nur mit primitiven Datentypen funktioniert....
     public function refresh() {
-        list($options) = self::getOptions($this->id);
+        list($options) = self::getModelData($this->id);
         foreach($options as $key => $value) {
             $this->$key = $value;
         }
@@ -189,46 +189,37 @@ abstract class Model implements \JsonSerializable
         return $query;
     }
 
-    public static function getOptions($filters = array(), $all = false, $limit = false, $order = array('id' => 'DESC'))
+    public static function getModelData($filters = array(), $limit = false, $order = array('id' => 'DESC'))
     {
-        $table_name = self::getTableName();
-        $self_class = get_called_class();
-
-        $query = new \App\QueryBuilder\Builder($table_name);
+        $query = new \App\QueryBuilder\Builder(self::getTableName());
         $query->where('deleted', '=', '0');
 
         foreach ($order as $column => $order) {
             $query->orderBy($column, $order);
         }
 
-        if ($limit == false) {
-            if (!$all) {
-                $query->limit(1);
-            }
-        } else {
+        if ($limit !== false) {
             $query->limit($limit);
         }
 
         if (is_array($filters)) {
             if (count($filters) == 3 && is_string($filters[1])) {
-                $query->where($filters[0], $filters[1], $filters[2]);
-            } else {
-                foreach ($filters as $filter) {
-                    if (count($filter) != 3) {
-                        continue;
-                    }
-                    $query->where($filter[0], $filter[1], $filter[2]);
+                $filters = array($filters);
+            }
+
+            foreach ($filters as $filter) {
+                if (count($filter) != 3) {
+                    continue;
                 }
+                $query->where($filter[0], $filter[1], $filter[2]);
             }
         }
 
         $res = $query->get();
-
         if (!empty($res)) {
-            $options = $all ? $res : current($res);
-            return $options;
+            return $limit == 1 ? current($res) : $res;
         }
-        throw new \App\Exceptions\NothingFoundException("No entries found for {$self_class}!");
+        throw new \App\Exceptions\NothingFoundException('No entries found for '. get_called_class() . '!');
     }
 
     public static function find($value, $column = 'id'): \App\Model
@@ -238,53 +229,55 @@ abstract class Model implements \JsonSerializable
             return self::$instances[$self_class][$value];
         }
 
-        $options = self::getOptions(array(
+        $options = self::getModelData(array(
             array($column, '=', $value)
-        ));
+        ), 1);
 
         return new $self_class($options);
     }
 
     public static function findByFilter(array $filters, $limit = false, $order = array('id' => 'DESC'))
     {
-        $options = self::getOptions($filters, true, $limit, $order);
+        $data = self::getModelData($filters, $limit, $order);
 
         if ($limit === false || $limit !== 1) {
-            return new Collection(self::getModelFromOption($options));
+            $collection = new Collection();
+
+            foreach ($data as $option) {
+                $collection->append(self::getModelFromOption($option));
+            }
+
+            return $collection;
         } else {
-            return current(self::getModelFromOption($options));
+            return self::getModelFromOption($data);
         }
     }
 
     public static function all(): \Traversable
     {
-        $options = self::getOptions(array(), true);
+        $options = self::getModelData(array());
+        $collection = new Collection();
 
-        return new Collection(self::getModelFromOption($options));
+        foreach ($options as $option) {
+            $collection->append(self::getModelFromOption($option));
+        }
+
+        return $collection;
     }
 
-    private static function getModelFromOption($arg)
+    private static function getModelFromOption(array $data)
     {
-        if (!is_array($arg)) {
-            $arg = array($arg);
-        }
         if (!isset(self::$instances[get_called_class()])) {
             self::$instances[get_called_class()] = array();
         }
 
-        $models = array();
         $self_class = get_called_class();
 
-        foreach ($arg as $option) {
-            if (!isset(self::$instances[$self_class][$option['id']])) {
-                self::$instances[$self_class][$option['id']] = new $self_class($option);
-                ;
-            }
-
-            $models[] = self::$instances[$self_class][$option['id']];
+        if (!isset(self::$instances[$self_class][$data['id']])) {
+            self::$instances[$self_class][$data['id']] = new $self_class($data);
         }
 
-        return $models;
+        return self::$instances[$self_class][$data['id']];
     }
 
     public static function new(): \App\Model
