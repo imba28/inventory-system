@@ -132,14 +132,13 @@ abstract class Model implements \JsonSerializable
 
         foreach ($this->data as $name => $value) {
             if (@$this->$name != $value) { // has changed
-                if($value instanceof \App\Model) {
+                if ($value instanceof \App\Model) {
                     if (!$value->isCreated()) {
                         $value->save();
                     }
                     $name = "{$name}_id";
                     $value = $value->getId();
-                }
-                elseif (is_null($value) || (empty($value) && $value != 0)) {
+                } elseif (is_null($value) || (empty($value) && $value != 0)) {
                     $value = null;
                 } elseif ($value === "NOW()") {
                     $date = new \DateTime();

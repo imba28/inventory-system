@@ -275,10 +275,12 @@ class Builder
     {
         return $this->query("SHOW FULL COLUMNS FROM ". self::getTableName($this->table));
     }
+
     public function lastInsertId()
     {
         return $this->lastInsertID;
     }
+
     public function getError()
     {
         return !isset($this->last_exception) ? null : self::getErrorMessage($this->last_exception);
