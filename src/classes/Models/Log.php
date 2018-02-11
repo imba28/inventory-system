@@ -5,7 +5,7 @@ class Log extends \App\Model
 {
     protected $attributes = ['message', 'type'];
 
-    public function save($head_column = null, $head_id = null, $exception = false)
+    public function save($exception = false)
     {
         $properties = $this->state;
 

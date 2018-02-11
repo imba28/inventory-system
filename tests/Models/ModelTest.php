@@ -33,7 +33,7 @@ class ModelTest extends TestCase
         $customer = new \App\Models\Customer($this->existingModelProvider());
 
         $this->expectException(\App\QueryBuilder\NothingChangedException::class);
-        $customer->save(null, null, true);
+        $customer->save(true);
     }
 
 

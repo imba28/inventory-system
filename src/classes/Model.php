@@ -71,15 +71,11 @@ abstract class Model implements \JsonSerializable
         return self::delete($this->getId());
     }
 
-    public function save($head_column = null, $head_id = null, $exception = false)
+    public function save($exception = false)
     {
         $this->trigger('save');
 
-        //$properties = get_object_vars($this);
         $properties_update = $this->getChangedProperties();
-        if (!is_null($head_column) && !is_null($head_id)) {
-            $properties_update[$head_column] = $head_id;
-        }
 
         if (count($properties_update) == 0) {
             if ($this->isCreated()) {
