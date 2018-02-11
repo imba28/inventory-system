@@ -36,6 +36,28 @@ class ModelTest extends TestCase
         $customer->save(true);
     }
 
+    public function testGetChangedProperties()
+    {
+        $stub = $this->getMockBuilder(\App\QueryBuilder\Builder::class)
+            ->setConstructorArgs(['customers'])
+            ->setMethods(['update', 'insert'])
+            ->getMock();
+
+        $stub->method('insert')->willReturn(true);
+        $stub->method('update')->willReturn(true);
+
+        $customer = new \App\Models\Customer($this->existingModelProvider());
+        $customer->setQueryBuilder($stub);
+
+        $this->assertEmpty($customer->getChangedProperties());
+        $this->assertTrue($customer->set('name', 'Changed'));
+        $this->assertNotEmpty($customer->getChangedProperties());
+        $this->assertEquals($customer->getChangedProperties(), array('name' => 'Changed'));
+
+        $customer->save();
+        $this->assertEmpty($customer->getChangedProperties());
+    }
+
 
     private function existingModelProvider()
     {
