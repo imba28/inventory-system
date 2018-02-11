@@ -383,7 +383,7 @@ abstract class Model implements \JsonSerializable
         if (!empty($res)) {
             return $limit == 1 ? current($res) : $res;
         } else {
-            throw new \App\Exceptions\NothingFoundException('No entries found for '. get_called_class() . '!' . json_encode($filters));
+            throw new \App\Exceptions\NothingFoundException('No entries found for '. get_called_class() . '!');
         }
     }
 }
