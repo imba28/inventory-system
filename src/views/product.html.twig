@@ -65,24 +65,20 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <form method="post" action="/product/{{ product.getId() }}/delete">
-                            <div class="btn-group p-3" role="group" aria-label="Basic example">
-                                {% if isUserSignedIn %}
-                                    {% if available %}
-                                        <a href="/product/{{ product.getId() }}/rent" class="btn btn-success">Ausleihen</a>
-                                    {% else %}
-                                        <a href="/product/{{ product.getId() }}/return" class="btn btn-success">Zurückgeben</a>
-                                    {% endif %}
-                                    <a href="/product/{{ product.getId() }}/edit" class="btn btn-primary">Bearbeiten</a>
-                                    <button type="submit" class="btn btn-danger">Löschen</button>
+                        <div class="btn-group p-3" role="group" aria-label="Basic example">
+                            {% if isUserSignedIn %}
+                                {% if available %}
+                                    <a href="/product/{{ product.getId() }}/rent" class="btn btn-success">Ausleihen</a>
                                 {% else %}
-                                    {% if available %}
-                                        <a href="/product/{{ product.getId() }}/request" class="btn btn-primary">Produkt leihen</a>
-                                    {% endif %}
+                                    <a href="/product/{{ product.getId() }}/return" class="btn btn-success">Zurückgeben</a>
                                 {% endif %}
-                            </div>
-                        </form>
-
+                                <a href="/product/{{ product.getId() }}/edit" class="btn btn-primary">Bearbeiten</a>
+                            {% else %}
+                                {% if available %}
+                                    <a href="/product/{{ product.getId() }}/request" class="btn btn-primary">Produkt leihen</a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 <div class="col col-sm-6 col-lg-8">

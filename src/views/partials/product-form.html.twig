@@ -1,77 +1,81 @@
 {% macro render(product, title, button_text, back_link) %}
-<h1>Produkte
-    {{ title ? ('&#187; ' ~ title)|raw : '' }}
-</h1>
-<a href="{{ back_link ? back_link : '/products' }}">Zurück</a>
-<hr>
-<!-- /.col-lg-3 -->
-<div class="row">
-    <form class="ml-4 col-md-6" method="post" id="product-form" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input id="name" type="text" class="form-control" placeholder="Produktname eingeben" name="name" value="{{ product.get('name') }}">
+    <h1>Produkte
+        {{ title ? ('&#187; ' ~ title)|raw : '' }}
+    </h1>
+    <a href="{{ back_link ? back_link : '/products' }}">Zurück</a>
+    <hr>
+    <!-- /.col-lg-3 -->
+    <div class="row">
+        <form method="post" id="product-form" enctype="multipart/form-data" class="ml-4 col-md-6">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input id="name" type="text" class="form-control" placeholder="Produktname eingeben" name="name" value="{{ product.get('name') }}">
+            </div>
+            <div class="form-group">
+                <label for="invnr">Inventarnummer</label>
+                <input id="invnr" type="text" class="form-control" placeholder="Inventarnummer eingeben" name="invNr" value="{{ product.get('invNr') }}">
+            </div>
+            <div class="form-group">
+                <label for="type">Type</label>
+                <input id="type" type="text" class="form-control" placeholder="Type" name="type" value="{{ product.get('type') }}" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="desc">Beschreibung</label>
+                <textarea id="desc" class="form-control textarea" name="description" placeholder="Beschreibung eingeben">{{ product.get('description') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="note">Anmerkung</label>
+                <textarea id="note" class="form-control textarea" name="note" placeholder="Anmerkung eingeben">{{ product.get('note') }}</textarea>
+            </div>
+            <div class="form-group">
+                <h5>Produktbilder</h5>
+                <ul class="productimages row">
+                    {% if product %}
+                        {% for image in product.getImages() %}
+                            <li class="col col-md-3">
+                                <button type="button" class="btn btn-danger btn-sm">x</button>
+                                <img src="{{ image.get('src') }}" alt="{{ image.get('title') }}" class="d-block w-100">
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+                <input type="file" name="add-productImage[]" multiple="multiple">
+            </div>
+            <hr/>
+            <button type="submit" name="submit" class="btn btn-primary">{{ button_text ? button_text : 'Speichern' }}</button>
+        </form>
+        {% if product.isCreated() %}
+            <form method="post" action="/product/{{ product.getId() }}/delete" class="pl-4">
+                <h5>Produkt löschen</h5>
+                <button type="submit" class="btn btn-danger">Löschen</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="invnr">Inventarnummer</label>
-            <input id="invnr" type="text" class="form-control" placeholder="Inventarnummer eingeben" name="invNr" value="{{ product.get('invNr') }}">
-        </div>
-        <div class="form-group">
-            <label for="type">Type</label>
-            <input id="type" type="text" class="form-control" placeholder="Type" name="type" value="{{ product.get('type') }}" autocomplete="off">
-        </div>
-        <div class="form-group">
-            <label for="desc">Beschreibung</label>
-            <textarea id="desc" class="form-control textarea" name="description" placeholder="Beschreibung eingeben">{{ product.get('description') }}</textarea>
-        </div>
-        <div class="form-group">
-            <label for="note">Anmerkung</label>
-            <textarea id="note" class="form-control textarea" name="note" placeholder="Anmerkung eingeben">{{ product.get('note') }}</textarea>
-        </div>
-        <div class="form-group">
-            <ul class="productimages row">
-                {% if product %}
-                    {% for image in product.getImages() %}
-                        <li class="col col-md-3">
-                            <button type="button" class="btn btn-danger btn-sm">x</button>
-                            <img src="{{ image.get('src') }}" alt="{{ image.get('title') }}" class="d-block w-100">
-                            <p>
-                                {{ image.get('title') }}
-                            </p>
-                        </li>
-                    {% endfor %}
-                {% endif %}
-            </ul>
-            <input type="file" name="add-productImage[]" multiple="multiple">
-        </div>
-        <button type="submit" name="submit" class="btn btn-primary">{{ button_text ? button_text : 'Speichern' }}</button>
-    </form>
+    {% endif %}
     <script src="/src/js/auto-complete.min.js"></script>
     <script>
-    $(document).ready(function() {
-        $.getJSON('/products/category.json', {}, function(data) {
-            data = data
-            .filter(function(item) {
-                return item.name !== null;
-            })
-            .map(function(item) {
-                return item.name;
-            });
+        $(document).ready(function() {
+            $.getJSON('/products/category.json', {}, function(data) {
+                data = data.filter(function(item) {
+                    return item.name !== null;
+                }).map(function(item) {
+                    return item.name;
+                });
 
-            new autoComplete({
-                selector: '#type',
-                minChars: 0,
-                source: function(term, suggest){
-                    term = term.toLowerCase();
-                    var matches = [];
-                    for (i = 0; i < data.length; i++) {
-                        if (data[i].toLowerCase().indexOf(term) > -1) matches.push(data[i]);
+                new autoComplete({
+                    selector: '#type',
+                    minChars: 0,
+                    source: function(term, suggest) {
+                        term = term.toLowerCase();
+                        var matches = [];
+                        for (i = 0; i < data.length; i++) {
+                            if (data[i].toLowerCase().indexOf(term) > -1)
+                                matches.push(data[i]);
+                            }
+
+                        suggest(matches);
                     }
-
-                    suggest(matches);
-                }
+                });
             });
         });
-    });
     </script>
-</div>
 {% endmacro %}

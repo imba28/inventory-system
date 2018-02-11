@@ -70,3 +70,22 @@ body, html {
 .autocomplete-suggestion.selected {
     background: #f0f0f0;
 }
+
+.productimages {
+  padding: 0;
+  margin: 0;
+  margin-bottom: 1em;
+}
+
+.productimages li {
+  list-style: none;
+  position: relative;
+  padding: 0;
+}
+
+.productimages li button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-radius: 0 0 0 3px;
+}
