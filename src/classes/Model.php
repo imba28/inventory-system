@@ -226,7 +226,7 @@ abstract class Model implements \JsonSerializable
 
     public static function findByFilter(array $filters, $limit = false, $order = array('id' => 'DESC'))
     {
-        if ($limit === false || $limit !== 1) {
+        if ($limit !== 1) {
             $collection = new Collection();
 
             try {

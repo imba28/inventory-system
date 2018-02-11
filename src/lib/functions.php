@@ -201,7 +201,9 @@ function fileext_to_mime($filename)
 
 function tryParseDate($string)
 {
-    if (preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/", $string)) { // YYYY-MM-DD
+    if(strtoupper($string) === 'NOW' || strtolower($string)  === 'NOW()') {
+        $date = new DateTime('now');
+    } elseif (preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/", $string)) { // YYYY-MM-DD
         $date = DateTime::createFromFormat("Y-m-d", $string);
     } elseif (preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/", $string)) { // YYYY-MM-DD HH:ii:ss
         $date = DateTime::createFromFormat("Y-m-d H:i:s", $string);

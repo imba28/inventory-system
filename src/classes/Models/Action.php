@@ -5,16 +5,13 @@ class Action extends \App\Model
 {
     protected $attributes = ['product', 'customer', 'rentDate', 'returnDate', 'expectedReturnDate'];
 
-    protected function int()
+    protected function init()
     {
-        // convert datetime fields to Y-m-d H:i:s
         $this->on('set', function ($e) {
-            $property = ($e->getInfo())['property'];
+            $property = $e->getInfo()['property'];
             $value = $e->getInfo()['value'];
-            if ($property === 'returnDate' || $property === 'expectedReturnDate') {
-                if ($value === 'NOW()') {
-                    return;
-                }
+
+            if (in_array($property, ['returnDate', 'expectedReturnDate'])) {
                 $date = tryParseDate($value);
                 if (!is_null($date)) {
                     $this->data[$property] = $date->format('Y-m-d H:i:s');
