@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use App\QueryBuilder\Builder;
+
 abstract class Model implements \JsonSerializable
 {
     use Traits\Events;
@@ -12,6 +14,8 @@ abstract class Model implements \JsonSerializable
 
     private $foreignKey;
     private $relations = [];
+
+    private $builder;
 
     static private $instances = array();
 
@@ -86,13 +90,11 @@ abstract class Model implements \JsonSerializable
             }
         }
 
-        $query = new QueryBuilder\Builder(self::getTableName());
-
         if ($this->isCreated()) {
-            $res = $query->where('id', '=', $this->getId())->update($properties_update);
+            $res = $this->builder->where('id', '=', $this->getId())->update($properties_update);
 
             if ($res === false) {
-                throw new \App\QueryBuilder\QueryBuilderException("could not update data", $query->getError());
+                throw new \App\QueryBuilder\QueryBuilderException("could not update data", $this->builder->getError());
             }
         } else {
             $this->trigger('create');
@@ -100,13 +102,13 @@ abstract class Model implements \JsonSerializable
             $properties_update['createDate'] = 'NOW()';
             $properties_update['deleted'] = '0';
 
-            $res = $query->insert($properties_update);
+            $res = $this->builder->insert($properties_update);
 
             if ($res === false) {
-                throw new \App\QueryBuilder\QueryBuilderException("could not insert data", $query->getError());
+                throw new \App\QueryBuilder\QueryBuilderException("could not insert data", $this->builder->getError());
             }
 
-            $this->set('id', $query->lastInsertId());
+            $this->set('id', $this->builder->lastInsertId());
 
             self::$instances[get_called_class()][$this->getId()] = $this;
         }
@@ -150,6 +152,11 @@ abstract class Model implements \JsonSerializable
         return null;
     }
 
+    public function setQueryBuilder(Builder $builder)
+    {
+        $this->builder = $builder;
+    }
+
     public function jsonSerialize(): array
     {
         $json = array();
@@ -178,7 +185,7 @@ abstract class Model implements \JsonSerializable
         return $this->foreignKey;
     }
 
-    private function getChangedProperties(): array
+    public function getChangedProperties(): array
     {
         $properties_update = array();
 
@@ -317,7 +324,10 @@ abstract class Model implements \JsonSerializable
         $self_class = get_called_class();
 
         if (!isset(self::$instances[$self_class][$data['id']])) {
-            self::$instances[$self_class][$data['id']] = new $self_class($data);
+            $model = new $self_class($data);
+            $model->setQueryBuilder(new QueryBuilder\Builder(self::getTableName()));
+
+            self::$instances[$self_class][$data['id']] = $model;
         }
 
         return self::$instances[$self_class][$data['id']];
