@@ -322,7 +322,7 @@ abstract class Model implements \JsonSerializable
         return self::$instances[$self_class][$data['id']];
     }
 
-    protected static function getTableName()
+    public static function getTableName()
     {
         $self_class = get_called_class();
         if ($self_class === false) {
@@ -331,6 +331,11 @@ abstract class Model implements \JsonSerializable
         $self_class = strtolower($self_class);
 
         return preg_replace('/(.+)\\\/', '', $self_class).'s';
+    }
+
+    public static function getModelName()
+    {
+        return rtrim(self::getTableName(), 's');
     }
 
     public static function getQuery(array $filters, $limit = false): \App\QueryBuilder\Builder

@@ -64,8 +64,8 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         }
 
         foreach ($this->items as $item) {
-            $image->set($this->parent->getForeignKey(), $parent->getId());
-            $image->save();
+            $item->set($this->parent::getModelName(), $this->parent);
+            $item->save();
         }
     }
 
