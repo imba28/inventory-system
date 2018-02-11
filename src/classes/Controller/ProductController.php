@@ -469,25 +469,39 @@ class ProductController extends ApplicationController
 
     private function displayProducts($params)
     {
-        $currentPage = isset($params['page']) ? intval($params['page']) : 1;
-        $itemsPerPage = 8;
-
-        try {
-            $products = \App\Models\Product::findByFilter(array(), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
-
-            $paginator = new \App\Paginator(\App\Models\Product::getQuery(array())->count(), $currentPage, $itemsPerPage, '/products');
-            $this->view->assign('paginator', $paginator);
-            $this->view->assign('totals', $paginator->getTotals());
-        } catch (\App\Exceptions\NothingFoundException $e) {
-            $products = array();
-            $this->view->assign('totals', 0);
-            \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
-        }
-
-        $this->view->assign('categories', $this->getCategories());
-        $this->view->assign('products', $products);
-
         $this->view->setTemplate('products');
+
+        $this->respondTo(function ($wants) use ($params) {
+            $wants->html(function () use ($params) {
+                $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+                $itemsPerPage = 8;
+
+                try {
+                    $products = \App\Models\Product::findByFilter(
+                        array(),
+                        (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
+                    );
+                    $paginator = new \App\Paginator(
+                        \App\Models\Product::getQuery(array())->count(),
+                        $currentPage,
+                        $itemsPerPage,
+                        '/products'
+                    );
+
+                    $this->view->assign('products', $products);
+                    $this->view->assign('categories', $this->getCategories());
+                    $this->view->assign('totals', $paginator->getTotals());
+                    $this->view->assign('paginator', $paginator);
+                } catch (\App\Exceptions\NothingFoundException $e) {
+                    $this->view->assign('totals', 0);
+                    \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
+                }
+            });
+
+            $wants->json(function () {
+                $this->view->assign('products', \App\Models\Product::all());
+            });
+        });
     }
 
     private function getCategories()
