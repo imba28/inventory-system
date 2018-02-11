@@ -43,7 +43,10 @@ class Builder
         if (is_array($arg1) && $arg2 == null) {
             foreach ($arg1 as $arg) {
                 if (!is_array($arg) || count($arg) != 3) {
-                    throw new \InvalidArgumentException('Invalid nested where arguments! Expected argument to be array of length 3, got '. gettype($arg) .' of length '.count($arg).'!');
+                    throw new \InvalidArgumentException(
+                        'Invalid nested where arguments!
+                        Expected argument to be array of length 3, got '. gettype($arg) .' of length '.count($arg).'!'
+                    );
                 }
 
                 $this->where($arg[0], $arg[1], $arg[2]);
@@ -94,7 +97,12 @@ class Builder
 
     public function orderBy($column, $type = 'DESC')
     {
-        $col = !in_array($column, array("RAND()")) && !$column instanceof Raw ? $this->sanitizeColumnName($column) : $column;
+        if (!in_array($column, array("RAND()")) && !$column instanceof Raw) {
+            $col = $this->sanitizeColumnName($column);
+        } else {
+            $col =  $column;
+        }
+        
         $this->order[] = $col . " " . strtoupper($type);
 
         return $this;

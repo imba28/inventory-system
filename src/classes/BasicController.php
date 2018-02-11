@@ -95,9 +95,11 @@ abstract class BasicController
 
     protected function respondTo(\Closure $formats)
     {
-        $responseFormats = new \App\Format(); // kapselt verschiedene Closures, die je nach response Type Werte in der View setzen.
-        /* example usage: */
+        $responseFormats = new \App\Format();
         /*
+        kapselt verschiedene Closures, die je nach response Type Werte in der View setzen.
+        example usage:
+
         $this->respondTo(function($wants) {
             $wants->html(function() {
                 $this->view->assign('rentHistory', $rentalHistory);

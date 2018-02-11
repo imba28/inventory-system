@@ -125,7 +125,10 @@ class InventurController extends ApplicationController
                 \App\System::info("Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
         } catch (\App\Exceptions\NothingFoundException $e) {
-            \App\System::error("Inventarnummer <em>{$invNr}</em> wurde nicht gefunden. Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?");
+            \App\System::error(
+                "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden.
+                Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?"
+            );
         }
 
         $this->view->assign('inventur', $this->inventur);
@@ -149,7 +152,10 @@ class InventurController extends ApplicationController
                 \App\System::info("Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
         } catch (\App\Exceptions\NothingFoundException $e) {
-            \App\System::error("Inventarnummer <em>{$invNr}</em> wurde nicht gefunden. Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?");
+            \App\System::error(
+                "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden.
+                Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?"
+            );
         }
 
         $this->view->assign('inventur', $this->inventur);

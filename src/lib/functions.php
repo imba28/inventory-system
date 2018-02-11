@@ -51,7 +51,8 @@ function generateCallTrace()
     $result = array();
 
     for ($i = 0; $i < $length; $i++) {
-        $result[] = ($i + 1)  . ')' . substr($trace[$i], strpos($trace[$i], ' ')); // replace '#someNum' with '$i)', set the right ordering
+        $result[] = ($i + 1)  . ')' . substr($trace[$i], strpos($trace[$i], ' '));
+        // replace '#someNum' with '$i)', set the right ordering
     }
 
     return "\t" . implode("\n\t", $result);

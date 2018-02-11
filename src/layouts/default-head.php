@@ -32,7 +32,9 @@
               </ul>
 
               <div class="login display-flex text-light mr-2">
-                  <?php if ($isUserSignedIn) : ?>
+                    <?php
+                    if ($isUserSignedIn) :
+                    ?>
                     <div class="dropdown">
                       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Hallo <?= $currentUser->get('name') ?>!
@@ -46,9 +48,13 @@
                         </form>
                       </div>
                     </div>
-                  <?php else : ?>
+                    <?php
+                    else :
+                    ?>
                   <a class="btn btn-primary my-2 mr-2 my-sm-0" href="/login">Login</a>
-                    <?php endif; ?>
+                    <?php
+                    endif;
+                    ?>
               </div>
               <form class="form-inline mt-2 mt-md-0" method="post" action="/products/search">
                   <input class="form-control mr-sm-2" type="text" placeholder="Produkte suchen" aria-label="Suchen" name="search_string">

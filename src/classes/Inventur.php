@@ -47,7 +47,9 @@ class Inventur
                 $this->inventurObject->set('finishDate', 'NOW()');
                 return $this->inventurObject->save();
             } else {
-                throw new \App\Exceptions\InventurNotFinishedException(count($this->itemsMissing). " Produkte wurden noch nicht erfasst!");
+                throw new \App\Exceptions\InventurNotFinishedException(
+                    count($this->itemsMissing). " Produkte wurden noch nicht erfasst!"
+                );
             }
         } else {
             throw new \App\Exceptions\InvalidOperationException("Inventur wurde noch nicht gestartet!");

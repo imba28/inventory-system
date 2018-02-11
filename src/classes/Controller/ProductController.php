@@ -79,9 +79,17 @@ class ProductController extends ApplicationController
                 array('invNr', 'LIKE', "%{$search_string}%")
             );
 
-            $products = \App\Models\Product::findByFilter($filter, (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
+            $products = \App\Models\Product::findByFilter(
+                $filter,
+                (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
+            );
 
-            $paginator = new \App\Paginator(\App\Models\Product::getQuery($filter)->count(), $currentPage, $itemsPerPage, '/products/search');
+            $paginator = new \App\Paginator(
+                \App\Models\Product::getQuery($filter)->count(),
+                $currentPage,
+                $itemsPerPage,
+                '/products/search'
+            );
 
             $this->view->assign('paginator', $paginator);
             $this->view->assign('totals', $paginator->getTotals());
@@ -169,7 +177,16 @@ class ProductController extends ApplicationController
                 'type', '=', $params['category']
             ), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
-            $paginator = new \App\Paginator(\App\Models\Product::getQuery(array('type', '=', $params['category']))->count(), $currentPage, $itemsPerPage, '/products/category/' . urlencode($params['category']));
+            $paginator = new \App\Paginator(
+                \App\Models\Product::getQuery(
+                    array('type', '=', $params['category'])
+                )
+                ->count(),
+                $currentPage,
+                $itemsPerPage,
+                '/products/category/' . urlencode($params['category'])
+            );
+
             $this->view->assign('paginator', $paginator);
             $this->view->assign('totals', $paginator->getTotals());
         } catch (\App\Exceptions\NothingFoundException $e) {
@@ -285,10 +302,18 @@ class ProductController extends ApplicationController
 
                     $customer->save();
 
-                    \App\System::info("Ein neuer Kunde <a href='/customer/{$customer->getId()}/edit'> {$customer->get('internal_id')}</a> wurde angelegt.");
+                    \App\System::info(
+                        "Ein neuer Kunde
+                        <a href='/customer/{$customer->getId()}/edit'>
+                            {$customer->get('internal_id')}
+                        </a>
+                        wurde angelegt."
+                    );
                 }
 
-                $expectedReturnDate = !empty($this->request->getParam('expectedReturnDate')) ? $this->request->getParam('expectedReturnDate') : null;
+                $expectedReturnDate = !empty($this->request->getParam('expectedReturnDate')) ?
+                    $this->request->getParam('expectedReturnDate') :
+                    null;
 
                 $action = \App\Models\Action::new();
                 $action->set('product', $this->product);
@@ -406,9 +431,17 @@ class ProductController extends ApplicationController
                     }
 
                     if ($this->product->save()) {
-                        \App\System::success($this->product->get('name'). ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>');
+                        \App\System::success(
+                            $this->product->get('name'). ' wurde erstellt!
+                            <a href="/product/'. $this->product->getId() .'">
+                                zum Produkt
+                            </a>'
+                        );
                     } else {
-                        \App\System::success($this->product->get('name'). ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>');
+                        \App\System::success(
+                            $this->product->get('name').
+                            ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>'
+                        );
                     }
                 } catch (\App\QueryBuilder\QueryBuilderException $e) {
                     list($error_code, $error_message, $error_value, $error_column) = $e->getData();

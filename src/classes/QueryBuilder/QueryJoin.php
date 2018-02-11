@@ -23,7 +23,11 @@ class QueryJoin
 
     public function on($joinedColumn, $operator, $ownColumn)
     {
-        $this->on[] = array($this->table_on_join->sanitizeColumnName($joinedColumn), $operator, $this->sanitizeColumnName($ownColumn));
+        $this->on[] = array(
+            $this->table_on_join->sanitizeColumnName($joinedColumn),
+            $operator,
+            $this->sanitizeColumnName($ownColumn)
+        );
 
         return $this;
     }

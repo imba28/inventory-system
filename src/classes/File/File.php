@@ -58,7 +58,9 @@ class File
                 true
             );
             if ($mimetype_idx === false) {
-                throw new \RuntimeException("`{$finfo->file($this->file_info['tmp_name'])}` ist kein erlaubtes Dateiformat!");
+                throw new \RuntimeException(
+                    "`{$finfo->file($this->file_info['tmp_name'])}` ist kein erlaubtes Dateiformat!"
+                );
             }
 
             $mime_type = $allowed_mime_types[$mimetype_idx];

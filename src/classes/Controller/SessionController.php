@@ -42,7 +42,15 @@ class SessionController extends ApplicationController
         $_SESSION = array();
 
         $params = session_get_cookie_params();
-        setcookie(session_name(), '', 0, $params['path'], $params['domain'], $params['secure'], isset($params['httponly']));
+        setcookie(
+            session_name(),
+            '',
+            0,
+            $params['path'],
+            $params['domain'],
+            $params['secure'],
+            isset($params['httponly'])
+        );
 
         \App\System::info('Erfolgreich ausgeloggt!');
         $this->redirectToRoute('/');

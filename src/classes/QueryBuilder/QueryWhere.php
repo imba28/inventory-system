@@ -80,7 +80,7 @@ class QueryWhere
         if ($this->key instanceof QueryWhere) {
             $bindings = array_merge($bindings, $this->key->getBindings());
         }
-        
+
         if ($this->value instanceof QueryWhere) {
             $bindings = array_merge($bindings, $this->value->getBindings());
         } elseif (!is_null($this->value) && $this->value !== "NULL") {
@@ -92,6 +92,13 @@ class QueryWhere
 
     final private function sanitize($value)
     {
-        return Builder::SANITIZER . $this->table . Builder::SANITIZER . "." . Builder::SANITIZER . $value . Builder::SANITIZER;
+        return
+        Builder::SANITIZER .
+        $this->table .
+        Builder::SANITIZER .
+        "." .
+        Builder::SANITIZER .
+        $value .
+        Builder::SANITIZER;
     }
 }

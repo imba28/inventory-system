@@ -55,7 +55,12 @@ class CustomerController extends ApplicationController
         } else {
             try {
                 $this->customer->save();
-                \App\System::success("<a href='/customer/{$this->customer->getId()}'>{$this->customer->get('name')}</a> wurde gespeichert!");
+                \App\System::success(
+                    "<a href='/customer/{$this->customer->getId()}'>
+                        {$this->customer->get('name')}
+                    </a>
+                    wurde gespeichert!"
+                );
             } catch (\App\QueryBuilder\QueryBuilderException $e) {
                 list($error_code, $error_message, $error_value, $error_column) = $e->getData();
 

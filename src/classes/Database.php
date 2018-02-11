@@ -9,7 +9,13 @@ class Database
 
     public function __construct()
     {
-        $dsn = 'mysql:host='. \App\Configuration::get('DB_HOST') .';dbname='. \App\Configuration::get('DB_DB') .';port='. \App\Configuration::get('DB_PORT') .';';
+        $dsn =
+            'mysql:host='.
+            \App\Configuration::get('DB_HOST') .
+            ';dbname='.
+            \App\Configuration::get('DB_DB') .
+            ';port='. \App\Configuration::get('DB_PORT') .
+            ';';
 
         $this->dbh = new \PDO($dsn, \App\Configuration::get('DB_USER'), \App\Configuration::get('DB_PWD'));
         if (is_null($this->dbh)) {
