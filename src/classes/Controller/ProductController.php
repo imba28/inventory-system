@@ -38,11 +38,7 @@ class ProductController extends ApplicationController
                     //TODO: implements claim product
                 }
             } else {
-                if ($this->responseType === 'html') {
-                    $this->display($this->product);
-                } else {
-                    $this->renderContent();
-                }
+                $this->display($this->product);
             }
         }
     }
@@ -110,7 +106,7 @@ class ProductController extends ApplicationController
                 ));
                 return;
             } elseif ($params['action'] == 'add') {
-                $this->addProduct();
+                $this->create();
             } elseif ($params['action'] == 'rent') {
                 $this->rentMask();
             }

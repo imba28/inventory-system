@@ -144,7 +144,9 @@ abstract class Model implements \JsonSerializable
 
     public function get($property = null)
     {
-        if(is_null($property)) return $this->state;
+        if (is_null($property)) {
+            return $this->state;
+        }
 
         if (array_key_exists($property, $this->state)) {
             return $this->state[$property];
@@ -152,7 +154,7 @@ abstract class Model implements \JsonSerializable
         return null;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $json = array();
 
@@ -180,7 +182,7 @@ abstract class Model implements \JsonSerializable
         return $this->foreignKey;
     }
 
-    private function getChangedProperties()
+    private function getChangedProperties(): array
     {
         $properties_update = array();
 
