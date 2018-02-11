@@ -38,7 +38,7 @@ class ProductController extends ApplicationController
                     //TODO: implements claim product
                 }
             } else {
-                $this->display($this->product);
+                $this->show($this->product);
             }
         }
     }
@@ -54,7 +54,7 @@ class ProductController extends ApplicationController
                 \App\System::success('Produkt wurde gelöscht.');
             }
 
-            $this->products(array());
+            $this->products();
         }
     }
 
@@ -105,7 +105,7 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('products-search');
     }
 
-    public function products($params)
+    public function products($params = array())
     {
         if (isset($params['action'])) {
             if (intval($params['action']) > 0) { // TODO: naja, echt grausig....
@@ -119,7 +119,7 @@ class ProductController extends ApplicationController
                 $this->rentMask();
             }
         } else {
-            $this->displayProducts($params);
+            $this->index($params);
             /*$this->view->assign('products', \App\Models\Product::all());
             $this->view->setTemplate('products');*/
         }
@@ -359,7 +359,7 @@ class ProductController extends ApplicationController
         }
     }
 
-    private function display()
+    private function show()
     {
         $this->respondTo(function ($wants) {
             $wants->html(function () {
@@ -506,7 +506,7 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('products-search-mask');
     }
 
-    private function displayProducts($params)
+    private function index($params)
     {
         $this->view->setTemplate('products');
 

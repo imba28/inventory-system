@@ -187,7 +187,7 @@ abstract class Model implements \JsonSerializable
         $properties_update = array();
 
         foreach ($this->state as $name => $value) {
-            if (@$this->originalState[$name] != $value) { // has changed
+            if ($this->originalState[$name] != $value) { // has changed
                 if ($value instanceof \App\Model) {
                     if (!$value->isCreated()) {
                         $value->save();
@@ -267,9 +267,7 @@ abstract class Model implements \JsonSerializable
     public static function create(array $data): Model
     {
         $obj = self::new();
-        foreach ($data as $key => $value) {
-            $obj->set($key, $value);
-        }
+        $obj->setAll($data);
         $obj->save();
         return $obj;
     }
