@@ -11,14 +11,16 @@ abstract class Model implements \JsonSerializable
     protected $state = [];
 
     private $foreignKey;
+    private $relations = [];
 
     static private $instances = array();
-    static private $relationRules = array();
 
     public function __construct($options = array())
     {
         $this->originalState = array_merge($this->attributes, ['id', 'user', 'createDate', 'stamp', 'deleted']);
-        $this->originalState = array_map(function() { return null; }, array_flip($this->originalState));
+        $this->originalState = array_map(function () {
+            return null;
+        }, array_flip($this->originalState));
 
         foreach ($options as $key => $value) {
             if (preg_match('/([\w]+)_id$/', $key, $m)) {
@@ -50,35 +52,18 @@ abstract class Model implements \JsonSerializable
         $this->init();
     }
 
-    protected function init() {}
+    protected function init()
+    {
+    }
 
     public function isCreated()
     {
-        return isset($this->id) && !is_null($this->id);
+        return !empty($this->getId());
     }
 
     public function getId()
     {
-        return $this->id;
-    }
-
-    public function jsonSerialize()
-    {
-        $json = array();
-
-        foreach ($this->data as $key => $value) {
-            if ($key == 'deleted') {
-                continue;
-            }
-
-            if ($this->data[$key] instanceof \App\Model) {
-                $value = $value->jsonSerialize();
-            }
-
-            $json[$key] = $value;
-        }
-
-        return $json;
+        return $this->get('id');
     }
 
     public function remove()
@@ -108,7 +93,7 @@ abstract class Model implements \JsonSerializable
         $query = new QueryBuilder\Builder(self::getTableName());
 
         if ($this->isCreated()) {
-            $res = $query->where('id', '=', $this->id)->update($properties_update);
+            $res = $query->where('id', '=', $this->getId())->update($properties_update);
 
             if ($res === false) {
                 throw new \App\QueryBuilder\QueryBuilderException("could not update data", $query->getError());
@@ -125,11 +110,15 @@ abstract class Model implements \JsonSerializable
                 throw new \App\QueryBuilder\QueryBuilderException("could not insert data", $query->getError());
             }
 
-            $this->id = $query->lastInsertId();
-            $this->data['id'] = $this->id;
+            $this->originalState['id'] = $query->lastInsertId();
+            $this->state['id'] = $query->lastInsertId();
 
             self::$instances[get_called_class()][$this->getId()] = $this;
         }
+
+        array_walk($this->relations, function ($collection) {
+            $collection->save();
+        });
 
         array_walk($properties_update, function ($value, $key) {
             $this->{$key} = $value;
@@ -150,7 +139,7 @@ abstract class Model implements \JsonSerializable
 
     public function get($property)
     {
-        if (array_key_exists($property, $this->originalState)) {
+        if (array_key_exists($property, $this->state)) {
             return $this->state[$property];
         }
         return null;
@@ -160,12 +149,12 @@ abstract class Model implements \JsonSerializable
     {
         $json = array();
 
-        foreach ($this->data as $key => $value) {
+        foreach ($this->state as $key => $value) {
             if ($key == 'deleted') {
                 continue;
             }
 
-            if ($this->data[$key] instanceof \App\Model) {
+            if ($this->state[$key] instanceof \App\Model) {
                 $value = $value->jsonSerialize();
             }
 
@@ -177,7 +166,7 @@ abstract class Model implements \JsonSerializable
 
     public function getForeignKey(): string
     {
-        if(!isset($this->foreignKey)) {
+        if (!isset($this->foreignKey)) {
             $namespaceParts = explode('\\', get_called_class());
             $this->foreignKey = strtolower($namespaceParts[count($namespaceParts) - 1] . '_id');
         }
@@ -201,7 +190,7 @@ abstract class Model implements \JsonSerializable
                 } elseif ($value === "NOW()") {
                     $date = new \DateTime();
                     $value = $date->format('Y-m-d H:i:s');
-                    $this->data[$name] = $value;
+                    $this->state[$name] = $value;
                 }
 
                 $properties_update[$name] = $value;
@@ -211,16 +200,137 @@ abstract class Model implements \JsonSerializable
         return $properties_update;
     }
 
-    /*
-    Doof, weil das nur mit primitiven Datentypen funktioniert....
-    public function refresh() {
-        list($options) = self::getModelData($this->id);
-        foreach($options as $key => $value) {
-            $this->$key = $value;
+    // PUBLIC STATIC API
+    public static function find($value, $column = 'id'): \App\Model
+    {
+        $self_class = get_called_class();
+        if ($column == 'id' && isset(self::$instances[$self_class][$value])) {
+            return self::$instances[$self_class][$value];
         }
-    }*/
 
-    // Static methods.
+        $options = self::getModelData(array(
+            array($column, '=', $value)
+        ), 1);
+
+        return new $self_class($options);
+    }
+
+    public static function findByFilter(array $filters, $limit = false, $order = array('id' => 'DESC'))
+    {
+        if ($limit === false || $limit !== 1) {
+            $collection = new Collection();
+
+            try {
+                foreach (self::getModelData($filters, $limit, $order) as $option) {
+                    $collection->append(self::getModelFromOption($option));
+                }
+            } catch (\App\Exceptions\NothingFoundException $e) {
+            }
+
+            return $collection;
+        } else {
+            return self::getModelFromOption(self::getModelData($filters, $limit, $order));
+        }
+    }
+
+    public static function all(): \Traversable
+    {
+        $options = self::getModelData(array());
+        $collection = new Collection();
+
+        foreach ($options as $option) {
+            $collection->append(self::getModelFromOption($option));
+        }
+
+        return $collection;
+    }
+
+    public static function new(): Model
+    {
+        $self_class = get_called_class();
+        if ($self_class == false) {
+            throw new \RuntimeException('Oh shit.');
+        }
+
+        return new $self_class();
+    }
+
+    public static function create(array $data): Model
+    {
+        $obj = self::new();
+        foreach ($data as $key => $value) {
+            $obj->set($key, $value);
+        }
+        $obj->save();
+        return $obj;
+    }
+
+    public static function delete(int $id)
+    {
+        try {
+            $obj = self::find($id);
+            $obj->trigger('delete');
+            $obj->set('deleted', 1);
+
+            return $obj->save();
+        } catch (\App\Exceptions\NothingFoundException $e) {
+            return false;
+        }
+    }
+
+    // RELATIONSHIP METHODS
+    protected function hasMany($modelName, $foreignKey = null, $localKey = null): Collection
+    {
+        if (isset($this->relations["{$modelName}_{$foreignKey}_hasmany"])) {
+            return $this->relations["{$modelName}_{$foreignKey}"];
+        }
+
+        $foreignKey = is_null($foreignKey) ? $this->getForeignKey() : $foreignKey;
+        $fullModelName = "\\App\\Models\\{$modelName}";
+
+        if (class_exists($fullModelName)) {
+            $collection = $fullModelName::findByFilter(
+                array($this->getForeignKey(), '=', $this->get('id')),
+                false,
+                array('id' => 'ASC')
+            );
+
+            $collection->setParent($this);
+
+            $this->relations["{$modelName}_{$foreignKey}_hasmany"] = $collection;
+            return $this->relations["{$modelName}_{$foreignKey}_hasmany"];
+        } else {
+            throw new \InvalidArgumentException("Model {$fullModelName} does not exist!");
+        }
+    }
+
+    // PRIVATE STATIC HELPERS
+    private static function getModelFromOption(array $data)
+    {
+        if (!isset(self::$instances[get_called_class()])) {
+            self::$instances[get_called_class()] = array();
+        }
+
+        $self_class = get_called_class();
+
+        if (!isset(self::$instances[$self_class][$data['id']])) {
+            self::$instances[$self_class][$data['id']] = new $self_class($data);
+        }
+
+        return self::$instances[$self_class][$data['id']];
+    }
+
+    protected static function getTableName()
+    {
+        $self_class = get_called_class();
+        if ($self_class === false) {
+            throw new \UnexpectedValueException('Oh shit.');
+        }
+        $self_class = strtolower($self_class);
+
+        return preg_replace('/(.+)\\\/', '', $self_class).'s';
+    }
+
     public static function getQuery(array $filters, $limit = false): \App\QueryBuilder\Builder
     {
         $table_name = self::getTableName();
@@ -246,7 +356,7 @@ abstract class Model implements \JsonSerializable
         return $query;
     }
 
-    public static function getModelData(array $filters, $limit = false, $order = array('id' => 'DESC'))
+    protected static function getModelData(array $filters, $limit = false, $order = array('id' => 'DESC'))
     {
         $query = new \App\QueryBuilder\Builder(self::getTableName());
         $query->where('deleted', '=', '0');
@@ -273,140 +383,7 @@ abstract class Model implements \JsonSerializable
         if (!empty($res)) {
             return $limit == 1 ? current($res) : $res;
         } else {
-            throw new \App\Exceptions\NothingFoundException('No entries found for '. get_called_class() . '!');
+            throw new \App\Exceptions\NothingFoundException('No entries found for '. get_called_class() . '!' . json_encode($filters));
         }
-    }
-
-    public static function find($value, $column = 'id'): \App\Model
-    {
-        $self_class = get_called_class();
-        if ($column == 'id' && isset(self::$instances[$self_class][$value])) {
-            return self::$instances[$self_class][$value];
-        }
-
-        $options = self::getModelData(array(
-            array($column, '=', $value)
-        ), 1);
-
-        return new $self_class($options);
-    }
-
-    public static function findByFilter(array $filters, $limit = false, $order = array('id' => 'DESC'))
-    {
-        $data = self::getModelData($filters, $limit, $order);
-
-        if ($limit === false || $limit !== 1) {
-            $collection = new Collection();
-
-            foreach ($data as $option) {
-                $collection->append(self::getModelFromOption($option));
-            }
-
-            return $collection;
-        } else {
-            return self::getModelFromOption($data);
-        }
-    }
-
-    public static function all(): \Traversable
-    {
-        $options = self::getModelData(array());
-        $collection = new Collection();
-
-        foreach ($options as $option) {
-            $collection->append(self::getModelFromOption($option));
-        }
-
-        return $collection;
-    }
-
-    private static function getModelFromOption(array $data)
-    {
-        if (!isset(self::$instances[get_called_class()])) {
-            self::$instances[get_called_class()] = array();
-        }
-
-        $self_class = get_called_class();
-
-        if (!isset(self::$instances[$self_class][$data['id']])) {
-            self::$instances[$self_class][$data['id']] = new $self_class($data);
-        }
-
-        return self::$instances[$self_class][$data['id']];
-    }
-
-    public static function new(): \App\Model
-    {
-        $self_class = get_called_class();
-        if ($self_class == false) {
-            throw new \RuntimeException('Oh shit.');
-        }
-
-        return new $self_class();
-    }
-
-    public static function delete(int $id)
-    {
-        try {
-            $obj = self::find($id);
-            $obj->trigger('delete');
-            $obj->set('deleted', 1);
-
-            return $obj->save();
-        } catch (\App\Exceptions\NothingFoundException $e) {
-            return false;
-        }
-    }
-
-    public function __get($property)
-    {
- // z.B product->images => undefined => __get('images') => load image collection and set property => return Collection
-        $self_class = get_called_class();
-        if (isset(self::$relationRules[$self_class][$property])) {
-            try {
-                $this->{$property} = self::$relationRules[$self_class][$property]($this->getId());
-            } catch (\App\Exceptions\NothingFoundException $e) {
-                $this->{$property} = new Collection();
-            }
-
-            return $this->{$property};
-        }
-
-        throw new \InvalidOperationException('Oh shit.');
-    }
-
-    protected static function getTableName()
-    {
-        $self_class = get_called_class();
-        if ($self_class === false) {
-            throw new \UnexpectedValueException('Oh shit.');
-        }
-        $self_class = strtolower($self_class);
-
-        return preg_replace('/(.+)\\\/', '', $self_class).'s';
-    }
-
-    protected static function hasMany($modelName, $alias = null)
-    {
- // 1:n relation, other model must have the foreign key
-        if (is_null($alias)) {
-            $alias = $modelName;
-        }
-        $self_class = get_called_class();
-
-        if (!isset(self::$relationRules[$self_class])) {
-            self::$relationRules[$self_class] = array();
-        }
-
-        self::$relationRules[$self_class][$alias] = function ($id) use ($modelName) {
-            $fullModelName = "\\App\\Models\\{$modelName}";
-
-            if (class_exists($fullModelName)) {
-                $foreignColumn = rtrim(self::getTableName(), 's') . '_id';
-                return $fullModelName::findByFilter(array($foreignColumn, '=', $id), false, array('id' => 'ASC'));
-            }
-
-            throw new \InvalidArgumentException("Model {$fullModelName} does not exist!");
-        };
     }
 }

@@ -4,11 +4,13 @@ namespace App;
 class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countable
 {
     protected $items;
+    private $parent;
     private $position;
 
     public function __construct($items = array())
     {
         $this->position = 0;
+        $this->parent = null;
         $this->items = $items;
     }
 
@@ -53,6 +55,24 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
     public function toArray()
     {
         return $this->items;
+    }
+
+    public function save()
+    {
+        if ($this->parent == null) {
+            throw new \LogicException('Collections needs a parent model in order to save!');
+        }
+
+        foreach ($this->items as $item) {
+            $image->set($this->parent->getForeignKey(), $parent->getId());
+            $image->save();
+        }
+    }
+
+    /* SETTER */
+    public function setParent(Model $parent)
+    {
+        $this->parent = $parent;
     }
 
     /* ITERATOR METHODS */

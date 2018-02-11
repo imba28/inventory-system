@@ -1,24 +1,28 @@
 <?php
 namespace App\Models;
 
+use App\Collection;
+use App\Model;
+
 class Product extends \App\Model
 {
     protected $attributes = ['name', 'invNr', 'type', 'description', 'condition', 'note'];
+
+    public function images(): Collection
     {
-        parent::__construct($options);
-        self::hasMany('ProductImage', 'images');
+        return $this->hasMany('ProductImage');
     }
 
-    public function getFrontImage()
+    public function getFrontImage(): Model
     {
-        foreach ($this->images as $key => $image) {
+        foreach ($this->images() as $key => $image) {
             if ($image->get('title') == 'frontimage') {
                 return $image;
             }
         }
 
-        if (!$this->images->isEmpty()) {
-            return $this->images->first();
+        if (!$this->images()->isEmpty()) {
+            return $this->images()->first();
         }
 
         return new ProductImage(array(
@@ -29,42 +33,33 @@ class Product extends \App\Model
 
     public function addImage(ProductImage $image)
     {
-        $this->images->append($image);
+        $this->images()->append($image);
     }
+
     public function getImages()
     {
-        return $this->images;
-    }
-
-    public function save($head_column = null, $head_id = null, $exception = false)
-    {
-        if (!empty($this->images)) {
-            $images = $this->images;
-            unset($this->images);
-
-            parent::save($head_column, $head_id);
-
-            foreach ($images as $image) {
-                $image->save('product_id', $this->getId());
-            }
-
-            $this->images = $images;
-        } else {
-            parent::save($head_column, $head_id, $exception);
-        }
+        return $this->images();
     }
 
     public function isAvailable()
     {
         try {
             $action = \App\Models\Action::findByFilter(array(
-                array('product_id', '=', $this->id),
+                array('product_id', '=', $this->getId()),
                 array('returnDate', 'IS', 'NULL')
             ));
             return count($action) == 0;
         } catch (\App\Exceptions\NothingFoundException $e) {
             return true;
         }
+    }
+
+    public function getRentalAction(): \App\Models\Action
+    {
+        return \App\Models\Action::findByFilter(array(
+            array('product', '=', $this),
+            array('returnDate', 'IS', 'NULL')
+        ), 1);
     }
 
     public function jsonSerialize(): array
