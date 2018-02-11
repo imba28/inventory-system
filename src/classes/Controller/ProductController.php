@@ -316,43 +316,27 @@ class ProductController extends ApplicationController
     private function return()
     {
         $this->authenticateUser();
+        $this->view->setTemplate('product-return');
 
-        try {
-            $action = \App\Models\Action::findByFilter(array(
-                array('returnDate' , 'IS', 'NULL'),
-                array('product_id', '=', $this->product->getId())
-            ), 1);
-
-            if (count($action) == 0) {
-                \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
-            } elseif (count($action) > 1) {
-                \App\Debugger::log("Es gibt mehrere aktive Aktionen für das Produkt {$this->product->getId()}! DAS SOLLTE NICHT PASSIEREN!", 'fatal');
-                \App\System::getInstance()->addMessage('error', 'Das Produkt wurde mehrfach verliehen? Administrator kontaktieren.');
-            } else {
-                if ($this->request->issetParam('submit')) {
-                    if ($this->product->isAvailable()) {
-                        \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
-                    } else {
-                        if ($this->request->issetParam('returnDate')) {
-                            $date = \DateTime::createFromFormat('d.m.Y', $this->request->getParam('returnDate'));
-                            if ($date !== false) {
-                                $action->returnProduct($date->format('Y-m-d H:i:s'));
-                            } else {
-                                $action->returnProduct();
-                            }
-                        } else {
-                            $action->returnProduct();
-                        }
-
-                        \App\System::getInstance()->addMessage('success', "{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
-                    }
-                }
-            }
-        } catch (\Exception $e) {
+        if ($this->product->isAvailable()) {
             \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
+            return;
         }
 
-        $this->view->setTemplate('product-return');
+        if ($this->request->issetParam('submit')) {
+            $returnDate = 'NOW()';
+
+            if ($this->request->issetParam('returnDate')) {
+                $date = \DateTime::createFromFormat('d.m.Y', $this->request->getParam('returnDate'));
+                if ($date !== false) {
+                    $returnDate = $date->format('Y-m-d H:i:s');
+                }
+            }
+
+            $this->product->getRentalAction()->returnProduct($returnDate);
+
+            \App\System::getInstance()->addMessage('success', "{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
+        }
     }
 
     private function display()
@@ -385,7 +369,6 @@ class ProductController extends ApplicationController
                 }
 
                 try {
-                    $this->product->save();
 
                     if ($this->request->issetFile("add-productImage")) {
                         $files = $this->request->getFiles("add-productImage");
@@ -398,13 +381,10 @@ class ProductController extends ApplicationController
                                 if ($image->save("/images")) {
                                     $product_image = \App\Models\ProductImage::new();
                                     $product_image->set('src', "/public/files/images/{$image->getDestination()}");
-                                    $product_image->set('product', $this->product);
                                     $product_image->set('title', $image->getInfo('name'));
                                     $product_image->set('user', $this->getCurrentUser());
 
-                                    if ($product_image->save()) {
-                                        $this->product->addImage($product_image);
-                                    }
+                                    $this->product->images()->append($product_image);
                                 } else {
                                     $error = true;
                                     \App\System::getInstance()->addMessage('error', "Fehler beim Speichern von {$image->getInfo('name')}");
@@ -418,6 +398,7 @@ class ProductController extends ApplicationController
                         }
 
                         if (!$error) {
+                            $this->product->save();
                             \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
                         }
                     }
