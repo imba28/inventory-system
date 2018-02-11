@@ -51,9 +51,9 @@ class ProductController extends ApplicationController
 
         if (isset($params['id'])) {
             if (\App\Models\Product::delete(intval($params['id'])) === false) {
-                \App\System::getInstance()->addMessage('error', 'Es ist ein Fehler beim Löschen aufgetreten!');
+                \App\System::error('Es ist ein Fehler beim Löschen aufgetreten!');
             } else {
-                \App\System::getInstance()->addMessage('success', 'Produkt wurde gelöscht.');
+                \App\System::success('Produkt wurde gelöscht.');
             }
 
             $this->products(array());
@@ -90,7 +90,7 @@ class ProductController extends ApplicationController
         } catch (\App\Exceptions\NothingFoundException $e) {
             $products = array();
             $this->view->assign('totals', 0);
-            \App\System::getInstance()->addMessage('info', 'Deine Suche lieferte keine Ergebnisse!');
+            \App\System::info('Deine Suche lieferte keine Ergebnisse!');
         }
 
         $this->view->assign('products', $products);
@@ -177,7 +177,7 @@ class ProductController extends ApplicationController
         } catch (\App\Exceptions\NothingFoundException $e) {
             $products = array();
             $this->view->assign('totals', 0);
-            \App\System::getInstance()->addMessage('info', 'Deine Suche lieferte keine Ergebnisse!');
+            \App\System::info('Deine Suche lieferte keine Ergebnisse!');
         }
 
         $query = new \App\QueryBuilder\Builder('products');
@@ -212,22 +212,22 @@ class ProductController extends ApplicationController
             }
 
             if (empty($this->product->get('name')) || empty($this->product->get('invNr'))) {
-                \App\System::getInstance()->addMessage('error', 'Name/Inventar Nummer muss angegeben werden!');
+                \App\System::error('Name/Inventar Nummer muss angegeben werden!');
                 return;
             }
 
             try {
                 $this->product->save();
-                \App\System::getInstance()->addMessage('success', $this->product->get('name'). ' wurde aktualisiert!');
+                \App\System::success($this->product->get('name'). ' wurde aktualisiert!');
             } catch (\App\QueryBuilder\QueryBuilderException $e) {
                 list($error_code, $error_message, $error_value, $error_column) = $e->getData();
-                \App\System::getInstance()->addMessage('error', $error_message);
+                \App\System::error($error_message);
             } catch (\App\QueryBuilder\NothingChangedException $e) {
-                //\App\System::getInstance()->addMessage('info', 'Es wurde nichts geändert.');
+                //\App\System::info('Es wurde nichts geändert.');
             } catch (\InvalidOperationException $e) {
-                \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern! ' . $e->getMessage());
+                \App\System::error('Fehler beim Speichern! ' . $e->getMessage());
             } catch (\Exception $e) {
-                \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
+                \App\System::error('Fehler beim Speichern!');
             }
         }
 
@@ -251,18 +251,18 @@ class ProductController extends ApplicationController
                         }
                     } else {
                         $error = true;
-                        \App\System::getInstance()->addMessage('error', "Fehler beim Speichern von {$image->getInfo('name')}");
+                        \App\System::error("Fehler beim Speichern von {$image->getInfo('name')}");
                     }
                 } else {
                     $error = true;
                     if (get_class($image->getError()) !== 'App\File\NoFileSentException') {
-                        \App\System::getInstance()->addMessage('error', $image->getError()->getMessage());
+                        \App\System::error($image->getError()->getMessage());
                     }
                 }
             }
 
             if (!$error) {
-                \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
+                \App\System::success('Bilder wurden gespeichert!');
             }
         }
     }
@@ -290,7 +290,7 @@ class ProductController extends ApplicationController
 
                     $customer->save();
 
-                    \App\System::getInstance()->addMessage('info', "Ein neuer Kunde <a href='/customer/{$customer->getId()}/edit'> {$customer->get('internal_id')}</a> wurde angelegt.");
+                    \App\System::info("Ein neuer Kunde <a href='/customer/{$customer->getId()}/edit'> {$customer->get('internal_id')}</a> wurde angelegt.");
                 }
 
                 $expectedReturnDate = !empty($this->request->getParam('expectedReturnDate')) ? $this->request->getParam('expectedReturnDate') : null;
@@ -303,9 +303,9 @@ class ProductController extends ApplicationController
                 $action->set('user', $this->getCurrentUser());
 
                 if ($action->save()) {
-                    \App\System::getInstance()->addMessage('success', 'Produkt verliehen!');
+                    \App\System::success('Produkt verliehen!');
                 } else {
-                    \App\System::getInstance()->addMessage('error', 'Produkt konnte nicht verliehen werden!');
+                    \App\System::error('Produkt konnte nicht verliehen werden!');
                 }
             }
 
@@ -319,7 +319,7 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-return');
 
         if ($this->product->isAvailable()) {
-            \App\System::getInstance()->addMessage('error', 'Produkt wurde bereits zurückgegeben!');
+            \App\System::error('Produkt wurde bereits zurückgegeben!');
             return;
         }
 
@@ -335,26 +335,39 @@ class ProductController extends ApplicationController
 
             $this->product->getRentalAction()->returnProduct($returnDate);
 
-            \App\System::getInstance()->addMessage('success', "{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
+            \App\System::success("{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
         }
     }
 
     private function display()
     {
-        try {
-            $this->view->assign('rentHistory', \App\Models\Action::findByFilter(array('product', '=', $this->product), 10));
-        } catch (\App\Exceptions\NothingFoundException $e) {
-            $this->view->assign('rentHistory', array());
-        }
+        $this->respondTo(function ($wants) {
+            $wants->html(function () {
+                $this->view->setTemplate('product');
 
-        $this->view->setTemplate('product');
+                try {
+                    $this->view->assign(
+                        'rentHistory',
+                        \App\Models\Action::findByFilter(
+                            array(
+                                'product',
+                                '=',
+                                $this->product
+                            ),
+                            10
+                        )
+                    );
+                } catch (\App\Exceptions\NothingFoundException $e) {
+                    $this->view->assign('rentHistory', array());
+                }
+            });
+        });
     }
 
-    private function addProduct()
+    private function create()
     {
         $this->authenticateUser();
 
-        //\App\Debugger::log('hello there');
         if ($this->request->issetParam('submit')) {
             $this->product = \App\Models\Product::new();
             $this->product->set('user', $this->getCurrentUser());
@@ -362,14 +375,11 @@ class ProductController extends ApplicationController
             $params = $this->request->getParams();
 
             if (empty($this->request->getParam('name')) || empty($this->request->getParam('invNr'))) {
-                \App\System::getInstance()->addMessage('error', 'Name/Inventar Nummer muss angegeben werden!');
+                \App\System::error('Name/Inventar Nummer muss angegeben werden!');
             } else {
-                foreach ($params as $key) {
-                    $this->product->set($key, $this->request->getParam($key));
-                }
-
+                $this->product->setAll($params);
+                
                 try {
-
                     if ($this->request->issetFile("add-productImage")) {
                         $files = $this->request->getFiles("add-productImage");
                         $error = false;
@@ -387,28 +397,31 @@ class ProductController extends ApplicationController
                                     $this->product->images()->append($product_image);
                                 } else {
                                     $error = true;
-                                    \App\System::getInstance()->addMessage('error', "Fehler beim Speichern von {$image->getInfo('name')}");
+                                    \App\System::error("Fehler beim Speichern von {$image->getInfo('name')}");
                                 }
                             } else {
                                 $error = true;
-                                if (get_class($image->getError()) !== 'App\File\NoFileSentException') {
-                                    \App\System::getInstance()->addMessage('error', $image->getError()->getMessage());
+                                if (get_class($image->getError()) !== NoFileSentException::class) {
+                                    \App\System::error($image->getError()->getMessage());
                                 }
                             }
                         }
 
                         if (!$error) {
-                            $this->product->save();
-                            \App\System::getInstance()->addMessage('success', 'Bilder wurden gespeichert!');
+                            \App\System::success('Bilder wurden gespeichert!');
                         }
                     }
 
-                    \App\System::getInstance()->addMessage('success', $this->product->get('name'). ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>');
+                    if ($this->product->save()) {
+                        \App\System::success($this->product->get('name'). ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>');
+                    } else {
+                        \App\System::success($this->product->get('name'). ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>');
+                    }
                 } catch (\App\QueryBuilder\QueryBuilderException $e) {
                     list($error_code, $error_message, $error_value, $error_column) = $e->getData();
-                    \App\System::getInstance()->addMessage('error', $error_message);
+                    \App\System::error($error_message);
                 } catch (\Exception $e) {
-                    \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
+                    \App\System::error('Fehler beim Speichern!');
                 }
             }
         }
@@ -443,11 +456,11 @@ class ProductController extends ApplicationController
                 });
 
                 if (count($products) == 0) {
-                    \App\System::getInstance()->addMessage('error', 'Es wurde kein passendes Produkt gefunden!');
+                    \App\System::error('Es wurde kein passendes Produkt gefunden!');
                 } elseif (count($products) == 1) {
                     $this->response->redirect('/product/'. current($products)->getId() . '/rent');
                 } else {
-                    \App\System::getInstance()->addMessage('info', 'Die Suche lieferte mehrere Ergebnisse.');
+                    \App\System::info('Die Suche lieferte mehrere Ergebnisse.');
                     $this->view->assign('products', $products);
                     $this->view->assign('totals', count($products));
 
@@ -458,9 +471,9 @@ class ProductController extends ApplicationController
 
                     $this->view->assign('buttons', array($rentButton));
                 }
-                //\App\System::getInstance()->addMessage('success', $product->get('name'). ' wurde verliehen!');
+                //\App\System::success($product->get('name'). ' wurde verliehen!');
             } catch (\App\Exceptions\NothingFoundException $e) {
-                \App\System::getInstance()->addMessage('error', 'Es wurde kein passendes Produkt gefunden!');
+                \App\System::error('Es wurde kein passendes Produkt gefunden!');
             }
         }
 
@@ -494,7 +507,7 @@ class ProductController extends ApplicationController
                     $this->view->assign('paginator', $paginator);
                 } catch (\App\Exceptions\NothingFoundException $e) {
                     $this->view->assign('totals', 0);
-                    \App\System::getInstance()->addMessage('error', 'Keine Ergebnisse gefunden!');
+                    \App\System::error('Keine Ergebnisse gefunden!');
                 }
             });
 
@@ -528,7 +541,7 @@ class ProductController extends ApplicationController
                 if (empty($this->request->get('email'))) {
                     // honeypot für bots o.Ä. echte email adresse ist in 'aklnslknat'
                     if (empty($this->request->get('aklnslknat'))) {
-                        \App\System::getInstance()->addMessage('error', 'Bitte gib deine E-Mail Adresse an!');
+                        \App\System::error('Bitte gib deine E-Mail Adresse an!');
                     } else {
                         $to = implode($adminEmail, ';');
                         $subject = "MMT Verleih: Anfrage für Produkt {$this->product->get('name')}";
@@ -538,15 +551,15 @@ class ProductController extends ApplicationController
                             'X-Mailer: PHP/' . phpversion();
 
                         if (mail($to, $subject, $message, $header)) {
-                            \App\System::getInstance()->addMessage('success', 'Deine Anfrage wurde erfolgreich gesendet!');
+                            \App\System::success('Deine Anfrage wurde erfolgreich gesendet!');
                         } else {
-                            \App\System::getInstance()->addMessage('error', 'Deine Anfrage konnte leider nicht gesendet werden!');
+                            \App\System::error('Deine Anfrage konnte leider nicht gesendet werden!');
                         }
                     }
                 }
             }
         } else {
-            \App\System::getInstance()->addMessage('error', 'Produkt ist bereits verliehen!');
+            \App\System::error('Produkt ist bereits verliehen!');
             $this->redirectToRoute("/product/{$this->product->getId()}");
         }
     }

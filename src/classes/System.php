@@ -70,4 +70,25 @@ final class System
 
         return $html;
     }
+
+    // Notification helpers
+    public static function success($msg)
+    {
+        self::getInstance()->addMessage('success', $msg);
+    }
+
+    public static function error($msg)
+    {
+        self::getInstance()->addMessage('danger', $msg);
+    }
+
+    public static function warn($msg)
+    {
+        self::getInstance()->addMessage('warning', $msg);
+    }
+
+    public static function info($msg)
+    {
+        self::getInstance()->addMessage('info', $msg);
+    }
 }

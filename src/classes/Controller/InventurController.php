@@ -117,15 +117,15 @@ class InventurController extends ApplicationController
 
             try {
                 if ($this->inventur->registerProduct($product)) {
-                    \App\System::getInstance()->addMessage('success', "Inventarnummer <em>{$invNr}</em> wurde erfasst!");
+                    \App\System::success("Inventarnummer <em>{$invNr}</em> wurde erfasst!");
                 } else {
-                    \App\System::getInstance()->addMessage('error', "Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
+                    \App\System::error("Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
                 }
             } catch (\App\QueryBuilder\NothingChangedException $e) {
-                \App\System::getInstance()->addMessage('info', "Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
+                \App\System::info("Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
         } catch (\App\Exceptions\NothingFoundException $e) {
-            \App\System::getInstance()->addMessage('error', "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden. Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?");
+            \App\System::error("Inventarnummer <em>{$invNr}</em> wurde nicht gefunden. Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?");
         }
 
         $this->view->assign('inventur', $this->inventur);
@@ -141,15 +141,15 @@ class InventurController extends ApplicationController
 
             try {
                 if ($this->inventur->missingProduct($product)) {
-                    \App\System::getInstance()->addMessage('success', "Inventarnummer <em>{$invNr}</em> wurde als fehlend markiert!");
+                    \App\System::success("Inventarnummer <em>{$invNr}</em> wurde als fehlend markiert!");
                 } else {
-                    \App\System::getInstance()->addMessage('error', "Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
+                    \App\System::error("Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
                 }
             } catch (\App\QueryBuilder\NothingChangedException $e) {
-                \App\System::getInstance()->addMessage('info', "Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
+                \App\System::info("Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
         } catch (\App\Exceptions\NothingFoundException $e) {
-            \App\System::getInstance()->addMessage('error', "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden. Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?");
+            \App\System::error("Inventarnummer <em>{$invNr}</em> wurde nicht gefunden. Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?");
         }
 
         $this->view->assign('inventur', $this->inventur);
@@ -161,10 +161,10 @@ class InventurController extends ApplicationController
     private function startInventur()
     {
         if ($this->inventur->isStarted()) {
-            \App\System::getInstance()->addMessage('error', 'Inventur wurde bereits gestartet!');
+            \App\System::error('Inventur wurde bereits gestartet!');
         } else {
             $this->inventur->start($this->getCurrentUser());
-            \App\System::getInstance()->addMessage('success', 'Inventur wurde erfolgreich gestartet!');
+            \App\System::success('Inventur wurde erfolgreich gestartet!');
             $this->redirectToRoute('/inventur', 'GET');
         }
 
@@ -178,11 +178,11 @@ class InventurController extends ApplicationController
     {
         try {
             $this->inventur->end();
-            \App\System::getInstance()->addMessage('success', 'Inventur wurde erfolgreich beendet!');
+            \App\System::success('Inventur wurde erfolgreich beendet!');
         } catch (\App\Exceptions\InventurNotFinishedException $e) {
-            \App\System::getInstance()->addMessage('error', $e->getMessage());
+            \App\System::error($e->getMessage());
         } catch (\App\Exceptions\InvalidOperationException $e) {
-            \App\System::getInstance()->addMessage('error', $e->getMessage());
+            \App\System::error($e->getMessage());
         }
 
         $this->view->assign('inventur', $this->inventur);

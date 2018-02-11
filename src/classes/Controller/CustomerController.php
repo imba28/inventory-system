@@ -54,22 +54,21 @@ class CustomerController extends ApplicationController
         }
 
         if (empty($this->customer->get('name')) || empty($this->customer->get('internal_id'))) {
-            \App\System::getInstance()->addMessage('error', 'Name/FHS Nummer muss angegeben werden!');
+            \App\System::error('Name/FHS Nummer muss angegeben werden!');
         } else {
             try {
                 $this->customer->save();
-                \App\System::getInstance()->addMessage('success', "<a href='/customer/{$this->customer->getId()}'>{$this->customer->get('name')}</a> wurde gespeichert!");
+                \App\System::success("<a href='/customer/{$this->customer->getId()}'>{$this->customer->get('name')}</a> wurde gespeichert!");
             } catch (\App\QueryBuilder\QueryBuilderException $e) {
                 list($error_code, $error_message, $error_value, $error_column) = $e->getData();
 
-                \App\System::getInstance()->addMessage('error', $error_message);
+                \App\System::error($error_message);
             } catch (\App\QueryBuilder\NothingChangedException $e) {
-                //\App\System::getInstance()->addMessage('info', 'Es wurde nichts geändert.');
+                //\App\System::info('Es wurde nichts geändert.');
             } catch (\InvalidOperationException $e) {
-                \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern! ' . $e->getMessage());
+                \App\System::error('Fehler beim Speichern! ' . $e->getMessage());
             } catch (\Exception $e) {
-                vd($e);
-                \App\System::getInstance()->addMessage('error', 'Fehler beim Speichern!');
+                \App\System::error('Fehler beim Speichern!');
             }
         }
 
@@ -91,9 +90,9 @@ class CustomerController extends ApplicationController
     public function delete()
     {
         if ($this->customer->remove()) {
-            \App\System::getInstance()->addMessage('success', 'Kunde wurde gelöscht.');
+            \App\System::success('Kunde wurde gelöscht.');
         } else {
-            \App\System::getInstance()->addMessage('error', 'Es ist ein Fehler beim Löschen aufgetreten!');
+            \App\System::error('Es ist ein Fehler beim Löschen aufgetreten!');
         }
 
         $this->index();
