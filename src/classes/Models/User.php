@@ -29,9 +29,9 @@ class User extends \App\Model
         $json = array();
 
         foreach (array(
-            'id' => $this->id,
-            'name' => $this->name,
-            'username' => $this->username
+            'id' => $this->getId(),
+            'name' => $this->get('name'),
+            'username' => $this->get('username')
         ) as $key => $value) {
             if ($this->get($key) instanceof \App\Model) {
                 $value = $value->jsonSerialize();
