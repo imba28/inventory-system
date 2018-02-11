@@ -113,7 +113,7 @@ abstract class BasicController
         $responseFormats->execute($this->responseType);
     }
 
-    protected function redirectToRoute($route, $request_method)
+    protected function redirectToRoute($route, $request_method = 'GET')
     {
         \App\Router::getInstance()->route($route, $request_method);
     }
