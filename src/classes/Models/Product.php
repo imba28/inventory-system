@@ -64,12 +64,12 @@ class Product extends \App\Model
 
     public function jsonSerialize(): array
     {
-        $json = $this->data;
+        $json = $this->get();
         $json['images'] = array();
 
-        foreach ($this->images as $image) {
+        foreach ($this->images() as $image) {
             $object = new \stdClass();
-            foreach ($image->data as $key => $value) {
+            foreach ($image->get() as $key => $value) {
                 if ($value instanceof \App\Model) {
                     continue;
                 }

@@ -137,8 +137,10 @@ abstract class Model implements \JsonSerializable
         return false;
     }
 
-    public function get($property)
+    public function get($property = null)
     {
+        if(is_null($property)) return $this->state;
+
         if (array_key_exists($property, $this->state)) {
             return $this->state[$property];
         }
