@@ -32,7 +32,7 @@ $(document).ready(function(){
             if(answer !== confirm) return false;
         }
         else {
-            if(window.confirm('Das Löschen kann nicht rückgängig gemacht werden. Bitte bestätige diese Aktion.') === false) {
+            if(window.confirm('Die Aktion kann nicht rückgängig gemacht werden. Willst du wirklich fortfahren?') === false) {
                 return false;
             }
         }
