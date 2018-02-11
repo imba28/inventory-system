@@ -2,7 +2,9 @@
 
 ## Installation
 
-Benötigt MySQL Server mit UTF-8 kodierter Datenbank.
+Benötigt:
+* MySQL Server mit UTF-8 kodierter Datenbank.
+* PHP >= 7.0
 
 Pakete installieren: `composer install`
 
@@ -68,6 +70,8 @@ CREATE TABLE `PREFIX_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` enum('error','info','warning','debug') NOT NULL DEFAULT 'info',
   `message` text,
+  `stamp` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `user_id` int(11) NOT NULL,
   `createDate` datetime NOT NULL,
   `deleted` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
@@ -134,7 +138,7 @@ Zum Entwickeln kann der integrierte Webserver von PHP verwendet werden:
 \App\Configuration::set('DB_PORT', '3306');
 \App\Configuration::set('DB_USER', 'db_user');
 \App\Configuration::set('DB_PWD', '');
-App\Configuration::set('DB_PREFIX', 'v');
+\App\Configuration::set('DB_PREFIX', 'v');
 ?>
 ```
 
@@ -172,6 +176,42 @@ class Controller {
 
 #### Models
 
+Models besitzen Attribute, die automatisch aus der / in die Datenbank gemappt werden. Einfache Columns werden übernommen, Fremdschlüssel nach dem Schema `MODEL_id` werden automatisch in eine Beziehung gesetzt.
+
+Beispiel:
+Tabelle `Products`
+```
+|id|name|material|product_id|user_id|
+-------------------------------------
+|42|Bank|  Holz  |     1    |   2   |
+```
+
+wird automatisch zu (falls es ein Model für Product und User gibt)
+```json
+{
+    "id": 42,
+    "name": "Bank",
+    "material": "Holz",
+    "product": {
+        "id": 1,
+        ...
+    },
+    "user": {
+        "id": 2,
+        ...
+    }
+}
+```
+
+Falls der Fremdschlüssel in einer anderen Tabelle gespeichert ist, lässt sich mit folgendem Code eine Collection erzeugen:
+
+```
+public function images(): \Traversable
+{
+    return $this->hasMany('ProductsImage');
+}
+```
+
 Neue Models benötigen:
 
 eine Tabelle mit Namen des Modells im Plural und mindestens folgenden Feldern:
@@ -183,14 +223,30 @@ eine Tabelle mit Namen des Modells im Plural und mindestens folgenden Feldern:
 5. `deleted` enum('0','1') NOT NULL DEFAULT '0'
 
 eine Model Klasse nach folgendem Schema gespeichert in `src/classes/models`:
-
+Beispiel:
 ```php
 <?php
 namespace App\Models;
 
-class MODELNAME extends \App\Model {
-    protected $MYCUSTOMFIELD;
-    protected $ANOTHERCUSTOMFIELD;
+use \App\Model;
+use \Traversable;
+
+class Product extends Model
+{
+    protected $attributes = ['name', 'material'];
+
+    protected function init()
+    {
+        foreach ($this->images() as $image) {
+            echo $image->get('title');
+        }
+    }
+
+    // 1:n Beziehung
+    public function images(): Traversable
+    {
+        return $this->hasMany('ProductsImage');
+    }
 }
 ?>
 ```
