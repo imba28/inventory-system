@@ -110,19 +110,17 @@ abstract class Model implements \JsonSerializable
                 throw new \App\QueryBuilder\QueryBuilderException("could not insert data", $query->getError());
             }
 
-            $this->originalState['id'] = $query->lastInsertId();
-            $this->state['id'] = $query->lastInsertId();
+            $this->set('id', $query->lastInsertId());
 
             self::$instances[get_called_class()][$this->getId()] = $this;
         }
+
+        $this->originalState = $this->state;
 
         array_walk($this->relations, function ($collection) {
             $collection->save();
         });
 
-        array_walk($properties_update, function ($value, $key) {
-            $this->{$key} = $value;
-        });
 
         return true;
     }
