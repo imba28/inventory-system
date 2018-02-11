@@ -3,12 +3,11 @@ namespace App\Models;
 
 class Log extends \App\Model
 {
-    protected $message;
-    protected $type;
+    protected $attributes = ['message', 'type'];
 
     public function save($head_column = null, $head_id = null, $exception = false)
     {
-        $properties = $this->data;
+        $properties = $this->state;
 
         list($table_name, $self_class) = self::getTableName();
 

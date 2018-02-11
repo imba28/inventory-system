@@ -3,14 +3,13 @@ namespace App\Models;
 
 class User extends \App\Model
 {
+    protected $attributes = ['name', 'username', 'password'];
     protected $name;
     protected $username;
     protected $password;
 
-    public function __construct($options = array())
+    protected function int()
     {
-        parent::__construct($options);
-
         $this->on('save', function ($e) {
             $user = $e->getContext();
 
@@ -34,7 +33,7 @@ class User extends \App\Model
             'name' => $this->name,
             'username' => $this->username
         ) as $key => $value) {
-            if ($this->data[$key] instanceof \App\Model) {
+            if ($this->get($key) instanceof \App\Model) {
                 $value = $value->jsonSerialize();
             }
 

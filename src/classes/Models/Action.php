@@ -3,19 +3,12 @@ namespace App\Models;
 
 class Action extends \App\Model
 {
-    protected $id;
-    protected $product;
-    protected $customer;
-    protected $rentDate;
-    protected $returnDate = null;
-    protected $expectedReturnDate = null;
+    protected $attributes = ['product', 'customer', 'rentDate', 'returnDate', 'expectedReturnDate'];
 
-    public function __construct($data = array())
+    protected function int()
     {
-        parent::__construct($data);
-
+        // convert datetime fields to Y-m-d H:i:s
         $this->on('set', function ($e) {
- // convert datetime fields to Y-m-d H:i:s
             $property = ($e->getInfo())['property'];
             $value = $e->getInfo()['value'];
             if ($property === 'returnDate' || $property === 'expectedReturnDate') {
@@ -32,7 +25,7 @@ class Action extends \App\Model
 
     public function isProductReturned()
     {
-        return !is_null($this->returnDate);
+        return !is_null($this->get('returnDate'));
     }
 
     public function returnProduct($date = 'NOW()')

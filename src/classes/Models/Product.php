@@ -3,14 +3,7 @@ namespace App\Models;
 
 class Product extends \App\Model
 {
-    protected $name;
-    protected $invNr;
-    protected $type;
-    protected $description = null;
-    protected $condition = null;
-    protected $note = null;
-
-    public function __construct($options = array())
+    protected $attributes = ['name', 'invNr', 'type', 'description', 'condition', 'note'];
     {
         parent::__construct($options);
         self::hasMany('ProductImage', 'images');

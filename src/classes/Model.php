@@ -3,22 +3,26 @@ namespace App;
 
 abstract class Model implements \JsonSerializable
 {
-    use Traits\GetSetData;
     use Traits\Events;
 
-    protected $id;
-    protected $deleted;
-    protected $user;
+    protected $attributes = [];
+
+    protected $originalState = [];
+    protected $state = [];
+
+    private $foreignKey;
 
     static private $instances = array();
     static private $relationRules = array();
 
     public function __construct($options = array())
     {
+        $this->originalState = array_merge($this->attributes, ['id', 'user', 'createDate', 'stamp', 'deleted']);
+        $this->originalState = array_map(function() { return null; }, array_flip($this->originalState));
+
         foreach ($options as $key => $value) {
             if (preg_match('/([\w]+)_id$/', $key, $m)) {
                 $class_name = '\App\Models\\'.ucfirst($m[1]);
-                //if(ClassManager::markedNotExisting($class_name) == false) {
                 if (class_exists($class_name)) {
                     $key = $m[1];
                     try {
@@ -28,11 +32,11 @@ abstract class Model implements \JsonSerializable
                         $value = null;
                     }
                 }
-                //}
             }
-            if (property_exists($this, $key)) {
-                $this->$key = $value;
-                $this->data[$key] = $value;
+
+            if (array_key_exists($key, $this->originalState)) {
+                $this->originalState[$key] = $value;
+                $this->state[$key] = $value;
             }
         }
 
@@ -42,7 +46,11 @@ abstract class Model implements \JsonSerializable
             }
             self::$instances[get_called_class()][$this->getId()] = $this;
         }
+
+        $this->init();
     }
+
+    protected function init() {}
 
     public function isCreated()
     {
@@ -130,12 +138,58 @@ abstract class Model implements \JsonSerializable
         return true;
     }
 
+    public function set($property, $value)
+    {
+        if (array_key_exists($property, $this->originalState)) {
+            $this->state[$property] = $value;
+            $this->trigger('set', $this, array('property' => $property, 'value' => $value));
+            return true;
+        }
+        return false;
+    }
+
+    public function get($property)
+    {
+        if (array_key_exists($property, $this->originalState)) {
+            return $this->state[$property];
+        }
+        return null;
+    }
+
+    public function jsonSerialize()
+    {
+        $json = array();
+
+        foreach ($this->data as $key => $value) {
+            if ($key == 'deleted') {
+                continue;
+            }
+
+            if ($this->data[$key] instanceof \App\Model) {
+                $value = $value->jsonSerialize();
+            }
+
+            $json[$key] = $value;
+        }
+
+        return $json;
+    }
+
+    public function getForeignKey(): string
+    {
+        if(!isset($this->foreignKey)) {
+            $namespaceParts = explode('\\', get_called_class());
+            $this->foreignKey = strtolower($namespaceParts[count($namespaceParts) - 1] . '_id');
+        }
+        return $this->foreignKey;
+    }
+
     private function getChangedProperties()
     {
         $properties_update = array();
 
-        foreach ($this->data as $name => $value) {
-            if (@$this->$name != $value) { // has changed
+        foreach ($this->state as $name => $value) {
+            if (@$this->originalState[$name] != $value) { // has changed
                 if ($value instanceof \App\Model) {
                     if (!$value->isCreated()) {
                         $value->save();

@@ -3,13 +3,10 @@ namespace App\Models;
 
 class InventurProduct extends \App\Model
 {
-    protected $product;
-    protected $inventur;
-    protected $in_stock;
-    protected $missing;
-
+    protected $attributes = ['product', 'inventur', 'in_stock', 'missing'];
+    
     public function isInStock()
     {
-        return $this->in_stock;
+        return $this->get('in_stock');
     }
 }
