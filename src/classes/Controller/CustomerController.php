@@ -48,10 +48,7 @@ class CustomerController extends ApplicationController
 
     public function update()
     {
-        $params = $this->request->getParams();
-        foreach ($params as $key) {
-            $this->customer->set($key, $this->request->getParam($key));
-        }
+        $this->customer->setAll($this->request->getParams());
 
         if (empty($this->customer->get('name')) || empty($this->customer->get('internal_id'))) {
             \App\System::error('Name/FHS Nummer muss angegeben werden!');

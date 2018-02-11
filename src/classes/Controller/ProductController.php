@@ -1,6 +1,8 @@
 <?php
 namespace App\Controller;
 
+use App\File\NoFileSentException;
+
 class ProductController extends ApplicationController
 {
     public function __construct($responseType = 'html', $layout = 'default')
@@ -206,10 +208,7 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-update');
 
         if ($this->request->issetParam('submit')) {
-            $params = $this->request->getParams();
-            foreach ($params as $key) {
-                $this->product->set($key, $this->request->getParam($key));
-            }
+            $this->product->setAll($this->request->getParams());
 
             if (empty($this->product->get('name')) || empty($this->product->get('invNr'))) {
                 \App\System::error('Name/Inventar Nummer muss angegeben werden!');
@@ -372,13 +371,11 @@ class ProductController extends ApplicationController
             $this->product = \App\Models\Product::new();
             $this->product->set('user', $this->getCurrentUser());
 
-            $params = $this->request->getParams();
-
             if (empty($this->request->getParam('name')) || empty($this->request->getParam('invNr'))) {
                 \App\System::error('Name/Inventar Nummer muss angegeben werden!');
             } else {
-                $this->product->setAll($params);
-                
+                $this->product->setAll($this->request->getParams());
+
                 try {
                     if ($this->request->issetFile("add-productImage")) {
                         $files = $this->request->getFiles("add-productImage");

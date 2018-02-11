@@ -30,7 +30,7 @@ class HttpRequest implements \App\Interfaces\Request
 
     public function getParams()
     {
-        return array_keys($this->params);
+        return $this->params;
     }
 
     public function getHeader($name)

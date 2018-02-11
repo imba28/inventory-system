@@ -125,6 +125,13 @@ abstract class Model implements \JsonSerializable
         return true;
     }
 
+    public function setAll(array $data)
+    {
+        foreach ($data as $key => $value) {
+            $this->set($key, $value);
+        }
+    }
+
     public function set($property, $value)
     {
         if (array_key_exists($property, $this->originalState)) {
