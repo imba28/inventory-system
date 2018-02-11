@@ -39,8 +39,7 @@ class Paginator
             <li class='disabled page-item'>
                 <a href='javascript:void(0)' class='page-link'>&laquo;</a>
             </li>";
-        }
-        else {
+        } else {
             $html .= "
             <li class='page-item'>
                 <a class='page-link' href='$this->linkRoot/". ($this->currentPage - 1) ."'>&laquo;</a>
