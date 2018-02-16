@@ -264,7 +264,10 @@ abstract class Model implements \JsonSerializable
             throw new \RuntimeException('Oh shit.');
         }
 
-        return new $self_class();
+        $model = new $selfClass();
+        $model->setQueryBuilder(new QueryBuilder\Builder(self::getTableName()));
+
+        return $model;
     }
 
     public static function create(array $data): Model
