@@ -45,4 +45,19 @@ class HttpResponse implements \App\Interfaces\Response
         $this->headers = array();
         $this->body = null;
     }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    public function getBody()
+    {
+        return $this->body;
+    }
 }
