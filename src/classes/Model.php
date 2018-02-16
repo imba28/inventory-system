@@ -79,9 +79,9 @@ abstract class Model implements \JsonSerializable
     {
         $this->trigger('save');
 
-        $properties_update = $this->getChangedProperties();
+        $propertiesUpdate = $this->getChangedProperties();
 
-        if (count($properties_update) == 0) {
+        if (count($propertiesUpdate) == 0) {
             if ($this->isCreated()) {
                 if ($exception) {
                     throw new \App\QueryBuilder\NothingChangedException("nothing changed!");
@@ -91,7 +91,7 @@ abstract class Model implements \JsonSerializable
         }
 
         if ($this->isCreated()) {
-            $res = $this->builder->where('id', '=', $this->getId())->update($properties_update);
+            $res = $this->builder->where('id', '=', $this->getId())->update($propertiesUpdate);
 
             if ($res === false) {
                 throw new \App\QueryBuilder\QueryBuilderException("could not update data", $this->builder->getError());
@@ -99,10 +99,10 @@ abstract class Model implements \JsonSerializable
         } else {
             $this->trigger('create');
 
-            $properties_update['createDate'] = 'NOW()';
-            $properties_update['deleted'] = '0';
+            $propertiesUpdate['createDate'] = 'NOW()';
+            $propertiesUpdate['deleted'] = '0';
 
-            $res = $this->builder->insert($properties_update);
+            $res = $this->builder->insert($propertiesUpdate);
 
             if ($res === false) {
                 throw new \App\QueryBuilder\QueryBuilderException("could not insert data", $this->builder->getError());
@@ -187,7 +187,7 @@ abstract class Model implements \JsonSerializable
 
     public function getChangedProperties(): array
     {
-        $properties_update = array();
+        $propertiesUpdate = array();
 
         foreach ($this->state as $name => $value) {
             if ($this->originalState[$name] != $value) { // has changed
@@ -205,26 +205,26 @@ abstract class Model implements \JsonSerializable
                     $this->state[$name] = $value;
                 }
 
-                $properties_update[$name] = $value;
+                $propertiesUpdate[$name] = $value;
             }
         }
 
-        return $properties_update;
+        return $propertiesUpdate;
     }
 
     // PUBLIC STATIC API
     public static function find($value, $column = 'id'): \App\Model
     {
-        $self_class = get_called_class();
-        if ($column == 'id' && isset(self::$instances[$self_class][$value])) {
-            return self::$instances[$self_class][$value];
+        $selfClass = get_called_class();
+        if ($column == 'id' && isset(self::$instances[$selfClass][$value])) {
+            return self::$instances[$selfClass][$value];
         }
 
         $options = self::getModelData(array(
             array($column, '=', $value)
         ), 1);
 
-        return new $self_class($options);
+        return self::getModelFromOption($options);
     }
 
     public static function findByFilter(array $filters, $limit = false, $order = array('id' => 'DESC'))
@@ -259,8 +259,8 @@ abstract class Model implements \JsonSerializable
 
     public static function new(): Model
     {
-        $self_class = get_called_class();
-        if ($self_class == false) {
+        $selfClass = get_called_class();
+        if ($selfClass == false) {
             throw new \RuntimeException('Oh shit.');
         }
 
@@ -321,27 +321,27 @@ abstract class Model implements \JsonSerializable
             self::$instances[get_called_class()] = array();
         }
 
-        $self_class = get_called_class();
+        $selfClass = get_called_class();
 
-        if (!isset(self::$instances[$self_class][$data['id']])) {
-            $model = new $self_class($data);
+        if (!isset(self::$instances[$selfClass][$data['id']])) {
+            $model = new $selfClass($data);
             $model->setQueryBuilder(new QueryBuilder\Builder(self::getTableName()));
 
-            self::$instances[$self_class][$data['id']] = $model;
+            self::$instances[$selfClass][$data['id']] = $model;
         }
 
-        return self::$instances[$self_class][$data['id']];
+        return self::$instances[$selfClass][$data['id']];
     }
 
     public static function getTableName()
     {
-        $self_class = get_called_class();
-        if ($self_class === false) {
+        $selfClass = get_called_class();
+        if ($selfClass === false) {
             throw new \UnexpectedValueException('Oh shit.');
         }
-        $self_class = strtolower($self_class);
+        $selfClass = strtolower($selfClass);
 
-        return preg_replace('/(.+)\\\/', '', $self_class).'s';
+        return preg_replace('/(.+)\\\/', '', $selfClass).'s';
     }
 
     public static function getModelName()
@@ -351,9 +351,7 @@ abstract class Model implements \JsonSerializable
 
     public static function getQuery(array $filters, $limit = false): \App\QueryBuilder\Builder
     {
-        $table_name = self::getTableName();
-
-        $query = new \App\QueryBuilder\Builder($table_name);
+        $query = new \App\QueryBuilder\Builder(self::getTableName());
         $query->where('deleted', '=', '0')->orderBy('id', 'DESC');
 
         if ($limit !== false) {

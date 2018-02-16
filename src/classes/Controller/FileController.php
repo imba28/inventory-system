@@ -7,18 +7,18 @@ class FileController extends ApplicationController
 
     public function main($params)
     {
-        $requested_file = ABS_PATH . $this->request->getHeader('REQUEST_URI');
+        $requestedFile = ABS_PATH . $this->request->getHeader('REQUEST_URI');
 
-        if (file_exists($requested_file)) {
-            $path_split = explode('/', $requested_file);
-            $file_split = explode('.', end($path_split));
+        if (file_exists($requestedFile)) {
+            $pathSplit = explode('/', $requestedFile);
+            $fileSplit = explode('.', end($pathSplit));
 
-            if (in_array(end($file_split), self::$allowedFileTypes)) {
+            if (in_array(end($fileSplit), self::$allowedFileTypes)) {
                 $this->response->setStatus(200);
 
-                $this->response->addHeader('Content-Type', fileext_to_mime($requested_file));
-                $this->response->addHeader('Content-Length', filesize($requested_file));
-                $this->response->append(file_get_contents($requested_file));
+                $this->response->addHeader('Content-Type', fileext_to_mime($requestedFile));
+                $this->response->addHeader('Content-Length', filesize($requestedFile));
+                $this->response->append(file_get_contents($requestedFile));
 
                 $this->response->flush();
             } else {

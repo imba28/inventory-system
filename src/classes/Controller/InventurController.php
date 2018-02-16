@@ -114,7 +114,6 @@ class InventurController extends ApplicationController
     {
         try {
             $product = \App\Models\Product::find($invNr, 'invNr');
-
             try {
                 if ($this->inventur->registerProduct($product)) {
                     \App\System::success("Inventarnummer <em>{$invNr}</em> wurde erfasst!");

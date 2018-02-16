@@ -59,13 +59,13 @@ class Query
 
     final protected function log($error, $sql, array $values = null)
     {
-        $error_message = "Fehler: " . $error . "\nCallstack:\n";
-        $error_message .= generateCallTrace();
-        $error_message .= "\nSql: $sql";
+        $errorMessage = "Fehler: " . $error . "\nCallstack:\n";
+        $errorMessage .= generateCallTrace();
+        $errorMessage .= "\nSql: $sql";
         if (!is_null($values)) {
-            $error_message .= "\nValues: ". join(", ", $values);
+            $errorMessage .= "\nValues: ". join(", ", $values);
         }
 
-        \App\Debugger::log($error_message, 'error');
+        \App\Debugger::log($errorMessage, 'error');
     }
 }

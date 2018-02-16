@@ -20,8 +20,8 @@ class View
     {
         $html = $this->getLayoutComponent($layout, 'head');
 
-        $template_file = "{$this->template}.html.twig";
-        if (file_exists(ABS_PATH."/src/views/" . $template_file)) {
+        $templateFile = "{$this->template}.html.twig";
+        if (file_exists(ABS_PATH."/src/views/" . $templateFile)) {
             $loader = new \Twig_Loader_Filesystem(ABS_PATH."/src/views/");
 
             $twigOptions = array();
@@ -40,7 +40,7 @@ class View
 
             $twig->addExtension(new \Twig_Extension_Debug());
 
-            $html .= $twig->render($template_file, $this->data);
+            $html .= $twig->render($templateFile, $this->data);
             $html .= $this->getLayoutComponent($layout, 'footer');
 
             return $html;

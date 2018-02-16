@@ -9,9 +9,7 @@ class Log extends \App\Model
     {
         $properties = $this->state;
 
-        list($table_name, $self_class) = self::getTableName();
-
-        $query = new \App\QueryBuilder\Builder($table_name);
+        $query = new \App\QueryBuilder\Builder(self::getTableName());
         $query->setLogging(false);
 
         $properties['createDate'] = 'NOW()';

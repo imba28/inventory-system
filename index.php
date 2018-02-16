@@ -4,8 +4,7 @@ require_once('src/init.php');
 
 try {
     $router->route();
-}
-catch(\Exception $e) {
+} catch(\Exception $e) {
     echo $e->getMessage();
 }
 ?>

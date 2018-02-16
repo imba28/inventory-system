@@ -3,17 +3,17 @@ namespace App\File;
 
 class Image extends File
 {
-    public static $max_file_size = 1048576; // 10MB
+    public static $maxFileSize = 1048576; // 10MB
 
-    protected static $image_types = array (
+    protected static $imageTypes = array (
         IMAGETYPE_GIF => "gif",
         IMAGETYPE_JPEG => "jpg",
         IMAGETYPE_PNG => "png"
     );
-    protected static $image_whitelist = array(IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF);
+    protected static $imageWhitelist = array(IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF);
 
     /*public function getDestination() {
-        return $this->file_name. "." .self::$image_types[exif_imagetype($this->getSource())];
+        return $this->file_name. "." .self::$imageTypes[exif_imagetype($this->getSource())];
     }*/
 
     public static function getAllowedMimes()

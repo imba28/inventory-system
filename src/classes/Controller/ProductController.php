@@ -2,6 +2,13 @@
 namespace App\Controller;
 
 use App\File\NoFileSentException;
+use App\Model;
+use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\Customer;
+use App\Models\Action;
+use App\System;
+use App\QueryBuilder\Builder;
 
 class ProductController extends ApplicationController
 {
@@ -11,7 +18,7 @@ class ProductController extends ApplicationController
 
         $this->beforeAction('product', function ($params) {
             try {
-                $this->product = \App\Models\Product::find($params['id']);
+                $this->product = Product::find($params['id']);
             } catch (\App\Exceptions\NothingFoundException $e) {
                 $this->product = null;
             }
@@ -48,10 +55,10 @@ class ProductController extends ApplicationController
         $this->authenticateUser();
 
         if (isset($params['id'])) {
-            if (\App\Models\Product::delete(intval($params['id'])) === false) {
-                \App\System::error('Es ist ein Fehler beim Löschen aufgetreten!');
+            if (Product::delete(intval($params['id'])) === false) {
+                System::error('Es ist ein Fehler beim Löschen aufgetreten!');
             } else {
-                \App\System::success('Produkt wurde gelöscht.');
+                System::success('Produkt wurde gelöscht.');
             }
 
             $this->products();
@@ -64,28 +71,28 @@ class ProductController extends ApplicationController
             $_SESSION['search_string'] = $this->request->getParam('search_string');
         }
 
-        $search_string = $_SESSION['search_string'];
+        $searchString = $_SESSION['search_string'];
         $currentPage = isset($params['page']) ? intval($params['page']) : 1;
         $itemsPerPage = 8;
 
         try {
             $filter = array(
                 array(
-                    array('name', 'LIKE', "%{$search_string}%"),
+                    array('name', 'LIKE', "%{$searchString}%"),
                     'OR',
-                    array('type', 'LIKE', "%{$search_string}%")
+                    array('type', 'LIKE', "%{$searchString}%")
                 ),
                 'OR',
-                array('invNr', 'LIKE', "%{$search_string}%")
+                array('invNr', 'LIKE', "%{$searchString}%")
             );
 
-            $products = \App\Models\Product::findByFilter(
+            $products = Product::findByFilter(
                 $filter,
                 (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
             );
 
             $paginator = new \App\Paginator(
-                \App\Models\Product::getQuery($filter)->count(),
+                Product::getQuery($filter)->count(),
                 $currentPage,
                 $itemsPerPage,
                 '/products/search'
@@ -96,11 +103,11 @@ class ProductController extends ApplicationController
         } catch (\App\Exceptions\NothingFoundException $e) {
             $products = array();
             $this->view->assign('totals', 0);
-            \App\System::info('Deine Suche lieferte keine Ergebnisse!');
+            System::info('Deine Suche lieferte keine Ergebnisse!');
         }
 
         $this->view->assign('products', $products);
-        $this->view->assign('search_string', $search_string);
+        $this->view->assign('search_string', $searchString);
 
         $this->view->setTemplate('products-search');
     }
@@ -120,7 +127,7 @@ class ProductController extends ApplicationController
             }
         } else {
             $this->index($params);
-            /*$this->view->assign('products', \App\Models\Product::all());
+            /*$this->view->assign('products', Product::all());
             $this->view->setTemplate('products');*/
         }
     }
@@ -129,26 +136,26 @@ class ProductController extends ApplicationController
     {
         if ($this->isUserSignedIn()) {
             try {
-                $this->view->assign('actions', \App\Models\Action::findByFilter(array(
+                $this->view->assign('actions', Action::findByFilter(array(
                     array('returnDate', 'IS', 'NULL')
                 )));
             } catch (\App\Exceptions\NothingFoundException $e) {
                 $this->view->assign('actions', array());
             }
 
-            $query = new \App\QueryBuilder\Builder('actions');
-            $query->select(\App\QueryBuilder\Builder::alias('COUNT(*)', 'count'));
+            $query = new Builder('actions');
+            $query->select(Builder::alias('COUNT(*)', 'count'));
             $query->select('product_id');
             $query->groupBy('product_id');
-            $query->orderBy(\App\QueryBuilder\Builder::raw('count'));
+            $query->orderBy(Builder::raw('count'));
             $query->orderBy('product_id');
 
             $products = array();
-            foreach ($query->get() as $p_info) {
+            foreach ($query->get() as $productData) {
                 try {
                     $products[] = array(
-                        'product' => \App\Models\Product::find($p_info['product_id']),
-                        'frequency' => $p_info['count']
+                        'product' => Product::find($productData['product_id']),
+                        'frequency' => $productData['count']
                     );
                 } catch (\App\Exceptions\NothingFoundException $e) {
                 }
@@ -161,7 +168,7 @@ class ProductController extends ApplicationController
         }
     }
 
-    public function displayCategories($params)
+    public function displayCategories()
     {
         $categories = $this->getCategories();
         $this->view->assign('categories', $categories);
@@ -173,12 +180,12 @@ class ProductController extends ApplicationController
         $itemsPerPage = 8;
 
         try {
-            $products = \App\Models\Product::findByFilter(array(
+            $products = Product::findByFilter(array(
                 'type', '=', $params['category']
             ), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
 
             $paginator = new \App\Paginator(
-                \App\Models\Product::getQuery(
+                Product::getQuery(
                     array('type', '=', $params['category'])
                 )
                 ->count(),
@@ -192,11 +199,11 @@ class ProductController extends ApplicationController
         } catch (\App\Exceptions\NothingFoundException $e) {
             $products = array();
             $this->view->assign('totals', 0);
-            \App\System::info('Deine Suche lieferte keine Ergebnisse!');
+            System::info('Deine Suche lieferte keine Ergebnisse!');
         }
 
-        $query = new \App\QueryBuilder\Builder('products');
-        $query->select(\App\QueryBuilder\Builder::alias($query::raw('DISTINCT type'), 'name'));
+        $query = new Builder('products');
+        $query->select(Builder::alias($query::raw('DISTINCT type'), 'name'));
         $query->where('deleted', '0');
         $this->view->assign('categories', $query->get());
 
@@ -224,22 +231,22 @@ class ProductController extends ApplicationController
             $this->product->setAll($this->request->getParams());
 
             if (empty($this->product->get('name')) || empty($this->product->get('invNr'))) {
-                \App\System::error('Name/Inventar Nummer muss angegeben werden!');
+                System::error('Name/Inventar Nummer muss angegeben werden!');
                 return;
             }
 
             try {
                 $this->product->save();
-                \App\System::success($this->product->get('name'). ' wurde aktualisiert!');
+                System::success($this->product->get('name'). ' wurde aktualisiert!');
             } catch (\App\QueryBuilder\QueryBuilderException $e) {
-                list($error_code, $error_message, $error_value, $error_column) = $e->getData();
-                \App\System::error($error_message);
+                list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
+                System::error($errorMessage);
             } catch (\App\QueryBuilder\NothingChangedException $e) {
-                //\App\System::info('Es wurde nichts geändert.');
+                //System::info('Es wurde nichts geändert.');
             } catch (\InvalidOperationException $e) {
-                \App\System::error('Fehler beim Speichern! ' . $e->getMessage());
+                System::error('Fehler beim Speichern! ' . $e->getMessage());
             } catch (\Exception $e) {
-                \App\System::error('Fehler beim Speichern!');
+                System::error('Fehler beim Speichern!');
             }
         }
 
@@ -252,29 +259,29 @@ class ProductController extends ApplicationController
 
                 if ($image->isValid()) {
                     if ($image->save("/images")) {
-                        $product_image = \App\Models\ProductImage::new();
-                        $product_image->set('src', "/public/files/images/{$image->getDestination()}");
-                        $product_image->set('product', $this->product);
-                        $product_image->set('title', $image->getInfo('name'));
-                        $product_image->set('user', $this->getCurrentUser());
+                        $productImage = ProductImage::new();
+                        $productImage->set('src', "/public/files/images/{$image->getDestination()}");
+                        $productImage->set('product', $this->product);
+                        $productImage->set('title', $image->getInfo('name'));
+                        $productImage->set('user', $this->getCurrentUser());
 
-                        if ($product_image->save()) {
-                            $this->product->addImage($product_image);
+                        if ($productImage->save()) {
+                            $this->product->addImage($productImage);
                         }
                     } else {
                         $error = true;
-                        \App\System::error("Fehler beim Speichern von {$image->getInfo('name')}");
+                        System::error("Fehler beim Speichern von {$image->getInfo('name')}");
                     }
                 } else {
                     $error = true;
                     if (get_class($image->getError()) !== 'App\File\NoFileSentException') {
-                        \App\System::error($image->getError()->getMessage());
+                        System::error($image->getError()->getMessage());
                     }
                 }
             }
 
             if (!$error) {
-                \App\System::success('Bilder wurden gespeichert!');
+                System::success('Bilder wurden gespeichert!');
             }
         }
     }
@@ -284,7 +291,7 @@ class ProductController extends ApplicationController
         $this->authenticateUser();
 
         if (!$this->product->isAvailable()) {
-            $action = current(\App\Models\Action::findByFilter(array(
+            $action = current(Action::findByFilter(array(
                 array('product_id', '=', $this->product->getId()),
                 array('returnDate', 'IS', 'NULL')
             )));
@@ -294,15 +301,15 @@ class ProductController extends ApplicationController
         } else {
             if ($this->request->issetParam('submit')) {
                 try {
-                    $customer = \App\Models\Customer::find($this->request->getParam('internal_id'), 'internal_id');
+                    $customer = Customer::find($this->request->getParam('internal_id'), 'internal_id');
                 } catch (\App\Exceptions\NothingFoundException $e) {
-                    $customer = \App\Models\Customer::new();
+                    $customer = Customer::new();
                     $customer->set('user', $this->getCurrentUser());
                     $customer->set('internal_id', $this->request->getParam('internal_id'));
 
                     $customer->save();
 
-                    \App\System::info(
+                    System::info(
                         "Ein neuer Kunde
                         <a href='/customer/{$customer->getId()}/edit'>
                             {$customer->get('internal_id')}
@@ -315,7 +322,7 @@ class ProductController extends ApplicationController
                     $this->request->getParam('expectedReturnDate') :
                     null;
 
-                $action = \App\Models\Action::new();
+                $action = Action::new();
                 $action->set('product', $this->product);
                 $action->set('customer', $customer);
                 $action->set('rentDate', 'NOW()');
@@ -323,9 +330,9 @@ class ProductController extends ApplicationController
                 $action->set('user', $this->getCurrentUser());
 
                 if ($action->save()) {
-                    \App\System::success('Produkt verliehen!');
+                    System::success('Produkt verliehen!');
                 } else {
-                    \App\System::error('Produkt konnte nicht verliehen werden!');
+                    System::error('Produkt konnte nicht verliehen werden!');
                 }
             }
 
@@ -339,7 +346,7 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-return');
 
         if ($this->product->isAvailable()) {
-            \App\System::error('Produkt wurde bereits zurückgegeben!');
+            System::error('Produkt wurde bereits zurückgegeben!');
             return;
         }
 
@@ -355,7 +362,7 @@ class ProductController extends ApplicationController
 
             $this->product->getRentalAction()->returnProduct($returnDate);
 
-            \App\System::success("{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
+            System::success("{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
         }
     }
 
@@ -368,7 +375,7 @@ class ProductController extends ApplicationController
                 try {
                     $this->view->assign(
                         'rentHistory',
-                        \App\Models\Action::findByFilter(
+                        Action::findByFilter(
                             array(
                                 'product',
                                 '=',
@@ -389,11 +396,11 @@ class ProductController extends ApplicationController
         $this->authenticateUser();
 
         if ($this->request->issetParam('submit')) {
-            $this->product = \App\Models\Product::new();
+            $this->product = Product::new();
             $this->product->set('user', $this->getCurrentUser());
 
             if (empty($this->request->getParam('name')) || empty($this->request->getParam('invNr'))) {
-                \App\System::error('Name/Inventar Nummer muss angegeben werden!');
+                System::error('Name/Inventar Nummer muss angegeben werden!');
             } else {
                 $this->product->setAll($this->request->getParams());
 
@@ -407,47 +414,47 @@ class ProductController extends ApplicationController
 
                             if ($image->isValid()) {
                                 if ($image->save("/images")) {
-                                    $product_image = \App\Models\ProductImage::new();
-                                    $product_image->set('src', "/public/files/images/{$image->getDestination()}");
-                                    $product_image->set('title', $image->getInfo('name'));
-                                    $product_image->set('user', $this->getCurrentUser());
+                                    $productImage = ProductImage::new();
+                                    $productImage->set('src', "/public/files/images/{$image->getDestination()}");
+                                    $productImage->set('title', $image->getInfo('name'));
+                                    $productImage->set('user', $this->getCurrentUser());
 
-                                    $this->product->images()->append($product_image);
+                                    $this->product->images()->append($productImage);
                                 } else {
                                     $error = true;
-                                    \App\System::error("Fehler beim Speichern von {$image->getInfo('name')}");
+                                    System::error("Fehler beim Speichern von {$image->getInfo('name')}");
                                 }
                             } else {
                                 $error = true;
                                 if (get_class($image->getError()) !== NoFileSentException::class) {
-                                    \App\System::error($image->getError()->getMessage());
+                                    System::error($image->getError()->getMessage());
                                 }
                             }
                         }
 
                         if (!$error) {
-                            \App\System::success('Bilder wurden gespeichert!');
+                            System::success('Bilder wurden gespeichert!');
                         }
                     }
 
                     if ($this->product->save()) {
-                        \App\System::success(
+                        System::success(
                             $this->product->get('name'). ' wurde erstellt!
                             <a href="/product/'. $this->product->getId() .'">
                                 zum Produkt
                             </a>'
                         );
                     } else {
-                        \App\System::success(
+                        System::success(
                             $this->product->get('name').
                             ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>'
                         );
                     }
                 } catch (\App\QueryBuilder\QueryBuilderException $e) {
-                    list($error_code, $error_message, $error_value, $error_column) = $e->getData();
-                    \App\System::error($error_message);
+                    list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
+                    System::error($errorMessage);
                 } catch (\Exception $e) {
-                    \App\System::error('Fehler beim Speichern!');
+                    System::error('Fehler beim Speichern!');
                 }
             }
         }
@@ -461,32 +468,32 @@ class ProductController extends ApplicationController
 
         if ($this->request->issetParam('submit') && $this->request->issetParam('search')) {
             try {
-                $search_string = $this->request->getParam('search');
+                $searchString = $this->request->getParam('search');
 
-                $this->view->assign('search_string', $search_string);
+                $this->view->assign('search_string', $searchString);
                 $this->view->assign('totals', 0);
 
                 $filter = array(
                     array(
-                        array('name', 'LIKE', "%{$search_string}%"),
+                        array('name', 'LIKE', "%{$searchString}%"),
                         'OR',
-                        array('type', 'LIKE', "%{$search_string}%")
+                        array('type', 'LIKE', "%{$searchString}%")
                     ),
                     'OR',
-                    array('invNr', 'LIKE', "%{$search_string}%")
+                    array('invNr', 'LIKE', "%{$searchString}%")
                 );
 
-                $products = \App\Models\Product::findByFilter($filter);
+                $products = Product::findByFilter($filter);
                 $products = array_filter($products->toArray(), function ($p) {
                     return $p->isAvailable();
                 });
 
                 if (count($products) == 0) {
-                    \App\System::error('Es wurde kein passendes Produkt gefunden!');
+                    System::error('Es wurde kein passendes Produkt gefunden!');
                 } elseif (count($products) == 1) {
                     $this->response->redirect('/product/'. current($products)->getId() . '/rent');
                 } else {
-                    \App\System::info('Die Suche lieferte mehrere Ergebnisse.');
+                    System::info('Die Suche lieferte mehrere Ergebnisse.');
                     $this->view->assign('products', $products);
                     $this->view->assign('totals', count($products));
 
@@ -497,9 +504,9 @@ class ProductController extends ApplicationController
 
                     $this->view->assign('buttons', array($rentButton));
                 }
-                //\App\System::success($product->get('name'). ' wurde verliehen!');
+                //System::success($product->get('name'). ' wurde verliehen!');
             } catch (\App\Exceptions\NothingFoundException $e) {
-                \App\System::error('Es wurde kein passendes Produkt gefunden!');
+                System::error('Es wurde kein passendes Produkt gefunden!');
             }
         }
 
@@ -516,12 +523,12 @@ class ProductController extends ApplicationController
                 $itemsPerPage = 8;
 
                 try {
-                    $products = \App\Models\Product::findByFilter(
+                    $products = Product::findByFilter(
                         array(),
                         (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
                     );
                     $paginator = new \App\Paginator(
-                        \App\Models\Product::getQuery(array())->count(),
+                        Product::getQuery(array())->count(),
                         $currentPage,
                         $itemsPerPage,
                         '/products'
@@ -533,20 +540,20 @@ class ProductController extends ApplicationController
                     $this->view->assign('paginator', $paginator);
                 } catch (\App\Exceptions\NothingFoundException $e) {
                     $this->view->assign('totals', 0);
-                    \App\System::error('Keine Ergebnisse gefunden!');
+                    System::error('Keine Ergebnisse gefunden!');
                 }
             });
 
             $wants->json(function () {
-                $this->view->assign('products', \App\Models\Product::all());
+                $this->view->assign('products', Product::all());
             });
         });
     }
 
     private function getCategories()
     {
-        $query = new \App\QueryBuilder\Builder('products');
-        $query->select(\App\QueryBuilder\Builder::alias($query::raw('DISTINCT type'), 'name'));
+        $query = new Builder('products');
+        $query->select(Builder::alias($query::raw('DISTINCT type'), 'name'));
         $query->where('deleted', '0');
 
         return $query->get();
@@ -567,7 +574,7 @@ class ProductController extends ApplicationController
                 if (empty($this->request->get('email'))) {
                     // honeypot für bots o.Ä. echte email adresse ist in 'aklnslknat'
                     if (empty($this->request->get('aklnslknat'))) {
-                        \App\System::error('Bitte gib deine E-Mail Adresse an!');
+                        System::error('Bitte gib deine E-Mail Adresse an!');
                     } else {
                         $to = implode($adminEmail, ';');
                         $subject = "MMT Verleih: Anfrage für Produkt {$this->product->get('name')}";
@@ -577,15 +584,15 @@ class ProductController extends ApplicationController
                             'X-Mailer: PHP/' . phpversion();
 
                         if (mail($to, $subject, $message, $header)) {
-                            \App\System::success('Deine Anfrage wurde erfolgreich gesendet!');
+                            System::success('Deine Anfrage wurde erfolgreich gesendet!');
                         } else {
-                            \App\System::error('Deine Anfrage konnte leider nicht gesendet werden!');
+                            System::error('Deine Anfrage konnte leider nicht gesendet werden!');
                         }
                     }
                 }
             }
         } else {
-            \App\System::error('Produkt ist bereits verliehen!');
+            System::error('Produkt ist bereits verliehen!');
             $this->redirectToRoute("/product/{$this->product->getId()}");
         }
     }

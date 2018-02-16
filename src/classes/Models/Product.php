@@ -15,7 +15,7 @@ class Product extends \App\Model
 
     public function getFrontImage(): Model
     {
-        foreach ($this->images() as $key => $image) {
+        foreach ($this->images() as $image) {
             if ($image->get('title') == 'frontimage') {
                 return $image;
             }

@@ -3,33 +3,33 @@ namespace App\File;
 
 class File
 {
-    public static $max_file_size = 1875; // 15kb
+    public static $maxFileSize = 1875; // 15kb
 
-    protected $file_info;
+    protected $fileInfo;
 
-    protected $file_name;
-    protected $file_ext;
+    protected $fileName;
+    protected $fileExt;
 
     protected $error;
 
     private $isValid = false;
 
-    public function __construct($file_info)
+    public function __construct($fileInfo)
     {
-        $this->file_info = $file_info;
+        $this->fileInfo = $fileInfo;
 
-        $file_parts = explode(".", $this->file_info["name"]);
-        $this->file_name = sha1($file_parts[0] . time() . rand(0, 10));
+        $fileParts = explode(".", $this->fileInfo["name"]);
+        $this->fileName = sha1($fileParts[0] . time() . rand(0, 10));
     }
 
     public function isValid()
     {
         try {
-            if (!isset($this->file_info['error']) || is_array($this->file_info['error'])) {
+            if (!isset($this->fileInfo['error']) || is_array($this->fileInfo['error'])) {
                 throw new \RuntimeException('Ungültige Bildparameter!');
             }
 
-            switch ($this->file_info['error']) {
+            switch ($this->fileInfo['error']) {
                 case UPLOAD_ERR_OK:
                     break;
                 case UPLOAD_ERR_NO_FILE:
@@ -41,29 +41,29 @@ class File
                     throw new \RuntimeException('Unbekannter Fehler während des Uploads!');
             }
 
-            if ($this->file_info['error'] > 0) {
+            if ($this->fileInfo['error'] > 0) {
                 throw new \RuntimeException("Datei ist beschädigt, da während des Upload ein Fehler aufgetreten ist!");
             }
 
-            if ($this->file_info['size'] > 83886080) { // 10MB
+            if ($this->fileInfo['size'] > 83886080) { // 10MB
                 throw new \RuntimeException('Datei ist zu groß!');
             }
 
-            $allowed_mime_types = self::getAllowedMimes();
+            $allowedMimeTypes = self::getAllowedMimes();
 
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
             $mimetype_idx = array_search(
-                $finfo->file($this->file_info['tmp_name']),
-                $allowed_mime_types,
+                $finfo->file($this->fileInfo['tmp_name']),
+                $allowedMimeTypes,
                 true
             );
             if ($mimetype_idx === false) {
                 throw new \RuntimeException(
-                    "`{$finfo->file($this->file_info['tmp_name'])}` ist kein erlaubtes Dateiformat!"
+                    "`{$finfo->file($this->fileInfo['tmp_name'])}` ist kein erlaubtes Dateiformat!"
                 );
             }
 
-            $mime_type = $allowed_mime_types[$mimetype_idx];
+            $mime_type = $allowedMimeTypes[$mimetype_idx];
             $this->file_ext = mime2ext($mime_type);
             //if($this->file_ext != "html") throw new Execption("Fehler beim Upload des Bildes!");
 
@@ -77,11 +77,11 @@ class File
 
     public function getSource()
     {
-        return $this->file_info["tmp_name"];
+        return $this->fileInfo["tmp_name"];
     }
     public function getDestination()
     {
-        return $this->file_name. "." . $this->file_ext;
+        return $this->fileName. "." . $this->file_ext;
     }
 
     public function getError()
@@ -100,15 +100,15 @@ class File
             }
 
             $dir = ABS_PATH . '/public/files/' . ltrim(trim($directory), '/') . '/';
-            return move_uploaded_file($this->file_info['tmp_name'], $dir . $this->getDestination());
+            return move_uploaded_file($this->fileInfo['tmp_name'], $dir . $this->getDestination());
         }
         return false;
     }
 
     public function getInfo($key)
     {
-        if (isset($this->file_info[$key])) {
-            return $this->file_info[$key];
+        if (isset($this->fileInfo[$key])) {
+            return $this->fileInfo[$key];
         }
         return "";
     }
@@ -141,18 +141,17 @@ class File
         return false;
     }
 
-    public static function get($file_info)
+    public static function get($fileInfo)
     {
-        return new File($file_info);
+        return new File($fileInfo);
     }
 
     public static function getAllowedMimes()
     {
-        $mime_types = array(
+        return array(
             'image/jpeg',
             'image/png',
             'image/gif',
         );
-        return $mime_types;
     }
 }

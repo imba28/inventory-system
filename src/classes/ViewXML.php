@@ -24,34 +24,34 @@ class ViewXML extends View
         }
     }
     // functions adopted from http://www.sean-barton.co.uk/2009/03/turning-an-array-or-object-into-xml-using-php/
-    private function generateValidXmlFromObj(\stdClass $obj, $node_block = 'nodes', $node_name = 'node')
+    private function generateValidXmlFromObj(\stdClass $obj, $nodeBlock = 'nodes', $nodeName = 'node')
     {
         $arr = get_object_vars($obj);
-        return self::generateValidXmlFromArray($arr, $node_block, $node_name);
+        return self::generateValidXmlFromArray($arr, $nodeBlock, $nodeName);
     }
 
-    private function generateValidXmlFromArray($array, $node_block = 'nodes', $node_name = 'node')
+    private function generateValidXmlFromArray($array, $nodeBlock = 'nodes', $nodeName = 'node')
     {
         $xml = '<?xml version="1.0" encoding="UTF-8" ?>';
 
-        $xml .= '<' . $node_block . '>';
-        $xml .= self::generateXmlFromArray($array, $node_name);
-        $xml .= '</' . $node_block . '>';
+        $xml .= '<' . $nodeBlock . '>';
+        $xml .= self::generateXmlFromArray($array, $nodeName);
+        $xml .= '</' . $nodeBlock . '>';
 
         return $xml;
     }
 
-    private static function generateXmlFromArray($array, $node_name)
+    private static function generateXmlFromArray($array, $nodeName)
     {
         $xml = '';
 
         if (is_array($array) || is_object($array)) {
             foreach ($array as $key => $value) {
                 if (is_numeric($key)) {
-                    $key = $node_name;
+                    $key = $nodeName;
                 }
 
-                $xml .= '<' . $key . '>' . self::generateXmlFromArray($value, $node_name) . '</' . $key . '>';
+                $xml .= '<' . $key . '>' . self::generateXmlFromArray($value, $nodeName) . '</' . $key . '>';
             }
         } else {
             $xml = htmlspecialchars($array, ENT_QUOTES);

@@ -6,17 +6,17 @@ class QueryJoin
     use \App\Traits\GetSet;
 
     protected $table;
-    protected $table_on_join;
+    protected $tableOnJoin;
     protected $type;
 
     protected $selection = array("*");
     protected $on;
 
-    public function __construct($table, $table_on_join, $type = "inner")
+    public function __construct($table, $tableOnJoin, $type = "inner")
     {
         $this->table = $table;
         $this->type = $type;
-        $this->table_on_join = $table_on_join;
+        $this->table_on_join = $tableOnJoin;
 
         return $this;
     }
@@ -51,9 +51,9 @@ class QueryJoin
 
     public function getStatement()
     {
-        $table_name = Builder::getTableName($this->table);
+        $tableName = Builder::getTableName($this->table);
 
-        $statement = " ". strtoupper($this->type) . " JOIN `{$table_name}` ON ";
+        $statement = " ". strtoupper($this->type) . " JOIN `{$tableName}` ON ";
         foreach ($this->on as $on) {
             $statement .= join(' ', $on);
         }
@@ -77,8 +77,8 @@ class QueryJoin
 
     final public function sanitizeColumnName($column)
     {
-        $sanitized_column = $column == "*" ? $column : $this->sanitize($column);
-        return $this->sanitize(Builder::getTableName($this->table)) . "." . $sanitized_column;
+        $sanitizedColumn = $column == "*" ? $column : $this->sanitize($column);
+        return $this->sanitize(Builder::getTableName($this->table)) . "." . $sanitizedColumn;
     }
 
     final public function sanitize($value)

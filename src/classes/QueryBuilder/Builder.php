@@ -23,7 +23,7 @@ class Builder
 
     private static $tablePrefix = null;
 
-    protected static $sql_keywords = array("NOW()", "COUNT(*)", "AUTO_INCREMENT", "CURRENT_DATE", "CURRENT_USER", "DEFAULT", "CURRENT_TIMESTAMP()", "CURTIME()", "CURDATE()", "DAYNAME()", "DAYOFMONTH()", "DAYOFWEEK()", "DAYOFYEAR()");
+    protected static $sqlKeywords = array("NOW()", "COUNT(*)", "AUTO_INCREMENT", "CURRENT_DATE", "CURRENT_USER", "DEFAULT", "CURRENT_TIMESTAMP()", "CURTIME()", "CURDATE()", "DAYNAME()", "DAYOFMONTH()", "DAYOFWEEK()", "DAYOFYEAR()");
 
     public function __construct($table, $debug = false)
     {
@@ -64,13 +64,14 @@ class Builder
             //echo "Fehler: {$e->getMessage()}";
             return false;
         }
+
         return $this;
     }
 
-    public function next($id, $select_columns = null, $column = 'id')
+    public function next($id, $selectolumns = null, $column = 'id')
     {
-        if ($select_columns != null) {
-            $this->select($select_columns);
+        if ($selectolumns != null) {
+            $this->select($selectolumns);
         }
         $this->where($column, ">", $id)->orderBy($column, "ASC")->limit(1);
 
@@ -85,10 +86,10 @@ class Builder
         return $result[0]["count"];
     }
 
-    public function prev($id, $select_columns = null, $column = 'id')
+    public function prev($id, $selectolumns = null, $column = 'id')
     {
-        if ($select_columns != null) {
-            $this->select($select_columns);
+        if ($selectolumns != null) {
+            $this->select($selectolumns);
         }
         $this->where($column, "<", $id)->orderBy($column, "DESC")->limit(1);
 
@@ -102,7 +103,7 @@ class Builder
         } else {
             $col =  $column;
         }
-        
+
         $this->order[] = $col . " " . strtoupper($type);
 
         return $this;
@@ -163,7 +164,6 @@ class Builder
     public function getSelectStatement()
     {
         $tmp = $this->selection;
-        $sql_keywords = self::$sql_keywords;
 
         foreach ($tmp as $idx => $select) {
             if ($select instanceof \App\QueryBuilder\QueryAlias) {
@@ -172,7 +172,7 @@ class Builder
                 $column = $select;
             }
 
-            if (!$column instanceof Raw && !in_array($column, $sql_keywords)) {
+            if (!$column instanceof Raw && !in_array($column, self::$sqlKeywords)) {
                 $column = $this->sanitizeColumnName($column);
             }
 
@@ -183,11 +183,11 @@ class Builder
             $tmp[$idx] = $column;
         }
 
-        /*array_walk($tmp, function(&$select) use(&$sql_keywords) {
+        /*array_walk($tmp, function(&$select) use(&self::$sqlKeywords) {
             if($select instanceof \App\QueryBuilder\QueryAlias) $column = $select->get('name');
             else $column = $select;
 
-            if(!in_array($column, $sql_keywords)) {
+            if(!in_array($column, self::$sqlKeywords)) {
                 $column = $this->sanitizeColumnName($column);
             }
 
@@ -294,25 +294,16 @@ class Builder
         return !isset($this->last_exception) ? null : self::getErrorMessage($this->last_exception);
     }
 
-    public function find($id, $column = null)
-    {
-        $column = is_null($column) ? "ID" : $column;
-
-        $this->where[] = new QueryWhere($column, "=", $id, self::getTableName($this->table));
-
-        return $this->get();
-    }
-
     public function update(array $data)
     {
         list($statement, $bindings) = $this->getUpdateStatement($data);
         $criteria = $this->getCriteriaString();
-        $where_bindings = $this->getCriteriaBindings();
+        $whereBindings = $this->getCriteriaBindings();
 
-        $bindings = array_merge($bindings, $where_bindings);
+        $bindings = array_merge($bindings, $whereBindings);
         $limit = isset($this->limit) ? 'LIMIT ' . join(", ", $this->limit) : '';
 
-        $sql_arr = array(
+        $sql = array(
             "UPDATE",
             $this->sanitize(self::getTableName($this->table)),
             "SET " . $statement,
@@ -320,7 +311,7 @@ class Builder
             $limit
         );
 
-        $sql = join(" ", $sql_arr);
+        $sql = join(" ", $sql);
 
         if ($this->debug) {
             vd($sql);
@@ -340,13 +331,13 @@ class Builder
     {
         list($statement, $bindings) = $this->getInsertStatement($data);
 
-        $sql_arr = array(
+        $sql = array(
             "INSERT IGNORE INTO",
             $this->sanitize(self::getTableName($this->table)),
             $statement
         );
 
-        $sql = join(" ", $sql_arr);
+        $sql = join(" ", $sql);
 
         //vd($sql);
 
@@ -358,13 +349,13 @@ class Builder
     {
         list($statement, $bindings) = $this->getInsertStatement($data);
 
-        $sql_arr = array(
+        $sql = array(
             "INSERT INTO",
             $this->sanitize(self::getTableName($this->table)),
             $statement
         );
 
-        $sql = join(" ", $sql_arr);
+        $sql = join(" ", $sql);
 
         if ($this->debug) {
             vd($sql);
@@ -376,12 +367,10 @@ class Builder
 
     private function getCriteriaString()
     {
-        $table_name = self::getTableName($this->table);
-
-        if (count($this->where) > 0) {
+       if (count($this->where) > 0) {
             $clauses = array();
             foreach ($this->where as $clause) {
-                $clauses[] = $clause->getClause($table_name);
+                $clauses[] = $clause->getClause(self::getTableName($this->table));
             }
             return ' WHERE ' . implode($clauses, ' AND ');
         }
@@ -392,8 +381,7 @@ class Builder
     private function getCriteriaBindings()
     {
         $bindings = array();
-        $table_name = self::getTableName($this->table);
-
+        
         if (count($this->where) > 0) {
             foreach ($this->where as $clause) {
                 $bindings = array_merge($bindings, $clause->getBindings());
@@ -405,7 +393,6 @@ class Builder
 
     public function getSQL()
     {
-        $table_name = self::getTableName($this->table);
         $selection = $this->getSelectStatement();
 
         $join_statement = array();
@@ -423,7 +410,7 @@ class Builder
 
         $join_statement = implode($join_statement, ' ');
 
-        $sql = "SELECT $selection FROM " . $this->sanitize($table_name);
+        $sql = "SELECT $selection FROM " . $this->sanitize(self::getTableName($this->table));
         $sql .= $join_statement;
 
         if (count($this->where) > 0) {
@@ -457,7 +444,7 @@ class Builder
         $bindings = array();
 
         foreach ($data as $key => $value) {
-            if (in_array($value, self::$sql_keywords)) {
+            if (in_array($value, self::$sqlKeywords)) {
                 $values[] = $value;
             } elseif (is_null($value) || strlen($value) == 0) {
                 $values[] = "NULL";
@@ -482,7 +469,7 @@ class Builder
         foreach ($data as $key => $value) {
             if (is_null($value) || (empty($value) && $value !== 0)) {
                 $statement.= $this->sanitizeColumnName($key) . " = NULL, ";
-            } elseif (in_array($value, self::$sql_keywords)) {
+            } elseif (in_array($value, self::$sqlKeywords)) {
                 $statement.= $this->sanitizeColumnName($key) . " = $value, ";
             } else {
                 $statement .= $this->sanitizeColumnName($key) . " = ?, ";
@@ -506,8 +493,8 @@ class Builder
 
     final public function sanitizeColumnName($column)
     {
-        $sanitized_column = $column == "*" ? $column : $this->sanitize($column);
-        return $this->sanitize(self::getTableName($this->table)) . "." . $sanitized_column;
+        $sanitizedColumn = $column == "*" ? $column : $this->sanitize($column);
+        return $this->sanitize(self::getTableName($this->table)) . "." . $sanitizedColumn;
     }
 
     final public function sanitize($value)
@@ -518,31 +505,31 @@ class Builder
     private static function getErrorMessage($e)
     {
  // TODO
-        $error_message = "Es ist ein Fehler bei der Verarbeitung aufgetreten!";
-        $error_value = null;
-        $error_column = null;
-        $error_code = -1;
+        $errorMessage = "Es ist ein Fehler bei der Verarbeitung aufgetreten!";
+        $errorValue = null;
+        $errorColumn = null;
+        $errorCode = -1;
 
         if (preg_match("/: ([0-9]+) /", $e->getMessage(), $matches)) {
-            $error_code = $matches[1];
-            switch ($error_code) {
+            $errorCode = $matches[1];
+            switch ($errorCode) {
                 case 1062: // Duplicate Index
                     if (preg_match("/entry '(.[^']+)'/", $e->getMessage(), $m)) {
-                        $error_message = "Es gibt bereits einen Eintrag mit dem Wert <i>{$m[1]}</i>!";
-                        $error_value = $m[1];
+                        $errorMessage = "Es gibt bereits einen Eintrag mit dem Wert <i>{$m[1]}</i>!";
+                        $errorValue = $m[1];
                     }
                     break;
 
                 case 1048: // Column must not be null
                     if (preg_match("/Column '(.[^']+)'/", $e->getMessage(), $m)) {
-                        $error_message = "Dieser Wert darf nicht leer sein!";
-                        $error_column = $m[1];
+                        $errorMessage = "Dieser Wert darf nicht leer sein!";
+                        $errorColumn = $m[1];
                     }
                     break;
             }
         }
 
-        return array($error_code, $error_message, $error_value, $error_column);
+        return array($errorCode, $errorMessage, $errorValue, $errorColumn);
     }
 
     public static function alias($field, $alias)

@@ -82,7 +82,7 @@ abstract class BasicController
             foreach ($this->beforeActions[$method] as $function) {
                 if ($function instanceof \Closure) {
                     call_user_func_array($function, array($args));
-                } elseif (is_callable(array($this, $function), false, $callableName)) {
+                } elseif (is_callable(array($this, $function), false)) {
                     $this->$function($args);
                 } elseif (function_exists($function)) {
                     $function($args);
@@ -115,9 +115,9 @@ abstract class BasicController
         $responseFormats->execute($this->responseType);
     }
 
-    protected function redirectToRoute($route, $request_method = 'GET')
+    protected function redirectToRoute($route, $requestMethod = 'GET')
     {
-        \App\Router::getInstance()->route($route, $request_method);
+        \App\Router::getInstance()->route($route, $requestMethod);
     }
 
     abstract public function error($status);

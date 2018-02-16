@@ -45,7 +45,7 @@ class QueryWhere
         if (is_array($value) && count($value) != 3) {
             return false;
         }
-        if (!in_array(strtoupper($operator), QueryWhere::$validOperators)) {
+        if (!in_array(strtoupper($operator), self::$validOperators)) {
             return false;
         }
 

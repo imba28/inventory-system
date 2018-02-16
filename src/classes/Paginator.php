@@ -22,7 +22,7 @@ class Paginator
         return $this->totals;
     }
 
-    public function render($list_class = 'pagination')
+    public function render($listClass = 'pagination')
     {
         if ($this->itemsPerPage == 'all') {
             return '';
@@ -32,7 +32,7 @@ class Paginator
         $start = 1;
         $end = ($this->currentPage > $last ) ? $this->currentPage : $last;
 
-        $html = "<ul class='$list_class mt-4 justify-content-center'>";
+        $html = "<ul class='$listClass mt-4 justify-content-center'>";
 
         if ($this->currentPage === 1) {
             $html .= "
