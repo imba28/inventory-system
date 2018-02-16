@@ -79,7 +79,7 @@ final class System
 
     public static function error($msg)
     {
-        self::getInstance()->addMessage('danger', $msg);
+        self::getInstance()->addMessage('error', $msg);
     }
 
     public static function warn($msg)
