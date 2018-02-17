@@ -1,6 +1,8 @@
 <?php
 namespace App\QueryBuilder;
 
+use App\Exceptions\InvalidArgumentException;
+
 class QueryWhere
 {
     protected $key;
@@ -33,7 +35,7 @@ class QueryWhere
                 }
             }
         } else {
-            throw new InvalidArgumentException('invalid arguments');
+            throw new \InvalidArgumentException('invalid arguments');
         }
     }
 
