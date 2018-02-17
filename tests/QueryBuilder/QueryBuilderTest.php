@@ -156,7 +156,8 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals($this->query->getSql(), 'SELECT SUM(price) as total FROM `test`');
     }
 
-    public function testFullSQL() {
+    public function testFullSQL()
+    {
         $this->query->where('name', '=', 'Wick')->where('firstname', '=', 'John');
         $this->assertEquals(
             $this->query->getFullSQL(),
@@ -172,5 +173,4 @@ class QueryBuilderTest extends TestCase
         $this->query->select('name')->where('id', '=', 1);
         $this->assertEquals($this->query->getSql(), 'SELECT `pre_test`.`name` FROM `pre_test` WHERE (`pre_test`.`id` = ?)');
     }
-
 }
