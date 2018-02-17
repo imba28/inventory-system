@@ -8,29 +8,29 @@ class QueryWhereTest extends TestCase
     {
         try {
             $where = new QueryWhere('a', '=', 1, 'test');
-            $this->assertTrue(true);            
-        } catch(Exception $e) {
+            $this->assertTrue(true);
+        } catch (Exception $e) {
             $this->assertFalse(true);
         }
 
         try {
             $where = new QueryWhere('a', 'IS', 1, 'test');
-            $this->assertTrue(true);            
-        } catch(Exception $e) {
+            $this->assertTrue(true);
+        } catch (Exception $e) {
             $this->assertFalse(true);
         }
 
         try {
             $where = new QueryWhere('a', '<>', 1, 'test');
-            $this->assertTrue(true);            
-        } catch(Exception $e) {
+            $this->assertTrue(true);
+        } catch (Exception $e) {
             $this->assertFalse(true);
         }
 
         try {
             $where = new QueryWhere('a', '1', 1, 'test');
-            $this->assertFalse(true);            
-        } catch(Exception $e) {
+            $this->assertFalse(true);
+        } catch (Exception $e) {
             $this->assertTrue(true);
         }
     }

@@ -10,8 +10,9 @@ class HttpResponseTest extends TestCase
         $this->response = new \App\HttpResponse();
     }
 
-    public function testSetStatus() {
-        $this->assertEquals('200 OK', $this->response->getStatus());        
+    public function testSetStatus()
+    {
+        $this->assertEquals('200 OK', $this->response->getStatus());
 
         $this->response->setStatus('404 Not Found');
         $this->assertEquals('404 Not Found', $this->response->getStatus());
@@ -23,20 +24,20 @@ class HttpResponseTest extends TestCase
     public function testAddHeader()
     {
         $this->response->addHeader('Location', 'https://google.de');
-        $this->assertArrayHasKey('Location', $this->response->getHeaders());        
+        $this->assertArrayHasKey('Location', $this->response->getHeaders());
         $this->assertContains('https://google.de', $this->response->getHeaders());
     
 
         $this->response->addHeader('Authorization', 'somerandomhash');
         $this->assertArrayHasKey('Authorization', $this->response->getHeaders());
-        $this->assertContains('somerandomhash', $this->response->getHeaders());  
+        $this->assertContains('somerandomhash', $this->response->getHeaders());
     }
     
     public function testAppend()
     {
         $this->response->append('Hello');
         $this->response->append('World');
-        $this->response->append('!');    
+        $this->response->append('!');
         
         $this->assertEquals($this->response->getBody(), 'HelloWorld!');
     }
