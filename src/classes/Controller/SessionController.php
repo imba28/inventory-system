@@ -29,10 +29,10 @@ class SessionController extends ApplicationController
                 \App\System::success("Willkommen zurück {$user->get('name')}!");
                 $this->redirectToRoute('/');
             } else {
-                \App\System::error('Passwort ist falsch!');
+                \App\System::error('Benutzer/Passwort ist falsch!');
             }
         } catch (\App\Exceptions\NothingFoundException $e) {
-            \App\System::error('Benutzer wurde nicht gefunden!');
+            \App\System::error('Benutzer/Passwort ist falsch!');
         }
     }
 
