@@ -31,9 +31,9 @@
                 <h5>Produktbilder</h5>
                 <ul class="productimages row">
                     {% if product %}
-                        {% for image in product.getImages() %}
-                            <li class="col col-md-3">
-                                <button type="button" class="btn btn-danger btn-sm">x</button>
+                        {% for image in product.images() %}
+                            <li class="col col-md-3" id="image-{{ image.getId() }}">
+                                <button type="button" class="btn btn-danger btn-sm" onclick="deleteImage({{ image.getId() }})">x</button>
                                 <img src="{{ image.get('src') }}" alt="{{ image.get('title') }}" class="d-block w-100">
                             </li>
                         {% endfor %}
@@ -76,6 +76,23 @@
                     }
                 });
             });
+
+            window.deleteImage = function(id) {
+                $.ajax({
+                    url: '/images/' + id + '.json',
+                    data: {
+                        id: id
+                    },
+                    dataType: 'json',
+                    method: "delete",
+                    success: function(response) {
+                        $("#image-" + id).remove();
+                    },
+                    error: function(err) {
+                        alert(err.responseText);
+                    }
+                })
+            }
         });
     </script>
 {% endmacro %}
