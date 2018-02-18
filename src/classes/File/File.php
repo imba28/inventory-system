@@ -116,7 +116,7 @@ class File
     public static function delete($source)
     {
         if (file_exists(ABS_PATH . $source)) {
-            throw new Exception("Not yet implemented!");
+            return unlink(ABS_PATH . $source);
         } else {
             Debugger::log("Fehler beim Löschen des Bildes `$source`. Meldung: Bild nicht gefunden.", 'Fehler');
         }

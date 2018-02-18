@@ -30,4 +30,6 @@ $router->addRoute('post', '/logout', 'SessionController#logout');
 
 $router->addRoute('get', '/logs', 'LogController#index');
 
+$router->addRoute('delete', '/images/:id', 'ProductImageController#delete');
+
 $router->addRoute('get', '*', 'FileController#main');
