@@ -79,24 +79,20 @@ abstract class Model implements \JsonSerializable
     {
         $this->trigger('save');
 
+        self::$builder->setTable(self::getTableName());
         $propertiesUpdate = $this->getChangedProperties();
 
-        if (count($propertiesUpdate) == 0) {
-            if ($this->isCreated()) {
+        if ($this->isCreated()) {
+            if (count($propertiesUpdate) > 0) {
+                $res = self::$builder->where('id', '=', $this->getId())->update($propertiesUpdate);
+    
+                if ($res === false) {
+                    throw new \App\QueryBuilder\QueryBuilderException("could not update data", self::$builder->getError());
+                }
+            } else {
                 if ($exception) {
                     throw new \App\QueryBuilder\NothingChangedException("nothing changed!");
                 }
-                return false;
-            }
-        }
-
-        self::$builder->setTable(self::getTableName());
-
-        if ($this->isCreated()) {
-            $res = self::$builder->where('id', '=', $this->getId())->update($propertiesUpdate);
-
-            if ($res === false) {
-                throw new \App\QueryBuilder\QueryBuilderException("could not update data", self::$builder->getError());
             }
         } else {
             $this->trigger('create');
@@ -120,7 +116,6 @@ abstract class Model implements \JsonSerializable
         array_walk($this->relations, function ($collection) {
             $collection->save();
         });
-
 
         return true;
     }
@@ -291,19 +286,23 @@ abstract class Model implements \JsonSerializable
     // RELATIONSHIP METHODS
     protected function hasMany($modelName, $foreignKey = null, $localKey = null): Collection
     {
-        if (isset($this->relations["{$modelName}_{$foreignKey}_hasmany"])) {
-            return $this->relations["{$modelName}_{$foreignKey}"];
-        }
-
         $foreignKey = is_null($foreignKey) ? $this->getForeignKey() : $foreignKey;
         $fullModelName = "\\App\\Models\\{$modelName}";
+        
+        if (isset($this->relations["{$modelName}_{$foreignKey}_hasmany"])) {
+            return $this->relations["{$modelName}_{$foreignKey}_hasmany"];
+        }
 
         if (class_exists($fullModelName)) {
-            $collection = $fullModelName::findByFilter(
-                array($this->getForeignKey(), '=', $this->get('id')),
-                false,
-                array('id' => 'ASC')
-            );
+            if ($this->isCreated()) {
+                $collection = $fullModelName::findByFilter(
+                    array($this->getForeignKey(), '=', $this->get('id')),
+                    false,
+                    array('id' => 'ASC')
+                );
+            } else {
+                $collection = new Collection();
+            }
 
             $collection->setParent($this);
 
