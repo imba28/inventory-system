@@ -28,4 +28,6 @@ $router->addRoute('get', '/login', 'SessionController#loginForm');
 $router->addRoute('post', '/login', 'SessionController#login');
 $router->addRoute('post', '/logout', 'SessionController#logout');
 
+$router->addRoute('get', '/logs', 'LogController#index');
+
 $router->addRoute('get', '*', 'FileController#main');
