@@ -227,7 +227,7 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-update');
 
         if ($this->request->issetParam('submit')) {
-            if($this->saveUploadedImages()) {
+            if ($this->saveUploadedImages()) {
                 $this->product->setAll($this->request->getParams());
 
                 if (empty($this->product->get('name')) || empty($this->product->get('invNr'))) {
@@ -248,7 +248,7 @@ class ProductController extends ApplicationController
                 } catch (\Exception $e) {
                     System::error('Fehler beim Speichern!');
                 }
-            }            
+            }
         }
     }
 
@@ -534,7 +534,8 @@ class ProductController extends ApplicationController
         }
     }
 
-    private function saveUploadedImages() {
+    private function saveUploadedImages()
+    {
         if ($this->request->issetFile("add-productImage")) {
             $files = $this->request->getFiles("add-productImage");
             $success = true;
@@ -556,13 +557,12 @@ class ProductController extends ApplicationController
                         System::error("Fehler beim Speichern von {$image->getInfo('name')}");
                     }
                 } else {
-                    $success = false;                                            
+                    $success = false;
                     if (get_class($image->getError()) !== 'App\File\NoFileSentException') {
                         vd($image->getError());
                         System::error($image->getError()->getMessage());
-                    }
-                    else {
-                        return true;                        
+                    } else {
+                        return true;
                     }
                 }
             }

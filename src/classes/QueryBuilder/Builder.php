@@ -367,7 +367,7 @@ class Builder
 
     private function getCriteriaString()
     {
-       if (count($this->where) > 0) {
+        if (count($this->where) > 0) {
             $clauses = array();
             foreach ($this->where as $clause) {
                 $clauses[] = $clause->getClause(self::getTableName($this->table));
