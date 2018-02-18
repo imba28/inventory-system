@@ -29,7 +29,6 @@ abstract class BasicController
 
     public function init()
     {
-
     }
 
     protected function renderContent()
@@ -56,12 +55,25 @@ abstract class BasicController
 
     public function handle($method, $args)
     {
+        $this->setViewTemplate($method);
+        
         $this->callFormats();
         $this->callBeforeActions($method, $args);
         $this->$method($args);
 
         $this->renderContent();
-        exit();
+    }
+
+    private function setViewTemplate($templateName)
+    {
+        $selfClass = get_called_class();
+
+        if (preg_match('/([^\\\]+)Controller$/', $selfClass, $m)) {
+            $dir = strtolower($m[1]);
+            if (file_exists(ABS_PATH . "/src/views/{$dir}/{$templateName}.html.twig")) {
+                $this->view->setTemplate("{$dir}/{$templateName}");
+            }
+        }
     }
 
     private function callFormats()
