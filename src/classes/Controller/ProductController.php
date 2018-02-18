@@ -227,61 +227,28 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-update');
 
         if ($this->request->issetParam('submit')) {
-            $this->product->setAll($this->request->getParams());
+            if($this->saveUploadedImages()) {
+                $this->product->setAll($this->request->getParams());
 
-            if (empty($this->product->get('name')) || empty($this->product->get('invNr'))) {
-                System::error('Name/Inventar Nummer muss angegeben werden!');
-                return;
-            }
-
-            try {
-                $this->product->save();
-                System::success($this->product->get('name'). ' wurde aktualisiert!');
-            } catch (\App\QueryBuilder\QueryBuilderException $e) {
-                list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
-                System::error($errorMessage);
-            } catch (\App\QueryBuilder\NothingChangedException $e) {
-                //System::info('Es wurde nichts geändert.');
-            } catch (\InvalidOperationException $e) {
-                System::error('Fehler beim Speichern! ' . $e->getMessage());
-            } catch (\Exception $e) {
-                System::error('Fehler beim Speichern!');
-            }
-        }
-
-        if ($this->request->issetFile("add-productImage")) {
-            $files = $this->request->getFiles("add-productImage");
-            $error = false;
-
-            foreach ($files as $file) {
-                $image = new \App\File\Image($file);
-
-                if ($image->isValid()) {
-                    if ($image->save("/images")) {
-                        $productImage = ProductImage::new();
-                        $productImage->set('src', "/public/files/images/{$image->getDestination()}");
-                        $productImage->set('product', $this->product);
-                        $productImage->set('title', $image->getInfo('name'));
-                        $productImage->set('user', $this->getCurrentUser());
-
-                        if ($productImage->save()) {
-                            $this->product->addImage($productImage);
-                        }
-                    } else {
-                        $error = true;
-                        System::error("Fehler beim Speichern von {$image->getInfo('name')}");
-                    }
-                } else {
-                    $error = true;
-                    if (get_class($image->getError()) !== 'App\File\NoFileSentException') {
-                        System::error($image->getError()->getMessage());
-                    }
+                if (empty($this->product->get('name')) || empty($this->product->get('invNr'))) {
+                    System::error('Name/Inventar Nummer muss angegeben werden!');
+                    return;
                 }
-            }
 
-            if (!$error) {
-                System::success('Bilder wurden gespeichert!');
-            }
+                try {
+                    $this->product->save();
+                    System::success($this->product->get('name'). ' wurde aktualisiert!');
+                } catch (\App\QueryBuilder\QueryBuilderException $e) {
+                    list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
+                    System::error($errorMessage);
+                } catch (\App\QueryBuilder\NothingChangedException $e) {
+                    //System::info('Es wurde nichts geändert.');
+                } catch (\InvalidOperationException $e) {
+                    System::error('Fehler beim Speichern! ' . $e->getMessage());
+                } catch (\Exception $e) {
+                    System::error('Fehler beim Speichern!');
+                }
+            }            
         }
     }
 
@@ -404,53 +371,24 @@ class ProductController extends ApplicationController
                 $this->product->setAll($this->request->getParams());
 
                 try {
-                    if ($this->request->issetFile("add-productImage")) {
-                        $files = $this->request->getFiles("add-productImage");
-                        $error = false;
-
-                        foreach ($files as $file) {
-                            $image = new \App\File\Image($file);
-
-                            if ($image->isValid()) {
-                                if ($image->save("/images")) {
-                                    $productImage = ProductImage::new();
-                                    $productImage->set('src', "/public/files/images/{$image->getDestination()}");
-                                    $productImage->set('title', $image->getInfo('name'));
-                                    $productImage->set('user', $this->getCurrentUser());
-
-                                    $this->product->images()->append($productImage);
-                                } else {
-                                    $error = true;
-                                    System::error("Fehler beim Speichern von {$image->getInfo('name')}");
-                                }
-                            } else {
-                                $error = true;
-                                if (get_class($image->getError()) !== NoFileSentException::class) {
-                                    System::error($image->getError()->getMessage());
-                                }
-                            }
+                    if ($this->saveUploadedImages()) {
+                        if ($this->product->save()) {
+                            System::success(
+                                $this->product->get('name'). ' wurde erstellt!
+                                <a href="/product/'. $this->product->getId() .'">
+                                    zum Produkt
+                                </a>'
+                            );
+                        } else {
+                            System::success(
+                                $this->product->get('name').
+                                ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>'
+                            );
                         }
-
-                        if (!$error) {
-                            System::success('Bilder wurden gespeichert!');
-                        }
-                    }
-
-                    if ($this->product->save()) {
-                        System::success(
-                            $this->product->get('name'). ' wurde erstellt!
-                            <a href="/product/'. $this->product->getId() .'">
-                                zum Produkt
-                            </a>'
-                        );
-                    } else {
-                        System::success(
-                            $this->product->get('name').
-                            ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>'
-                        );
                     }
                 } catch (\App\QueryBuilder\QueryBuilderException $e) {
                     list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
+                    vd($e);
                     System::error($errorMessage);
                 } catch (\Exception $e) {
                     System::error('Fehler beim Speichern!');
@@ -594,5 +532,47 @@ class ProductController extends ApplicationController
             System::error('Produkt ist bereits verliehen!');
             $this->redirectToRoute("/product/{$this->product->getId()}");
         }
+    }
+
+    private function saveUploadedImages() {
+        if ($this->request->issetFile("add-productImage")) {
+            $files = $this->request->getFiles("add-productImage");
+            $success = true;
+
+            foreach ($files as $file) {
+                $image = new \App\File\Image($file);
+
+                if ($image->isValid()) {
+                    if ($image->save("/images")) {
+                        $productImage = ProductImage::new();
+                        $productImage->set('src', "/public/files/images/{$image->getDestination()}");
+                        $productImage->set('product', $this->product);
+                        $productImage->set('title', $image->getInfo('name'));
+                        $productImage->set('user', $this->getCurrentUser());
+
+                        $this->product->images()->append($productImage);
+                    } else {
+                        $success = false;
+                        System::error("Fehler beim Speichern von {$image->getInfo('name')}");
+                    }
+                } else {
+                    $success = false;                                            
+                    if (get_class($image->getError()) !== 'App\File\NoFileSentException') {
+                        vd($image->getError());
+                        System::error($image->getError()->getMessage());
+                    }
+                    else {
+                        return true;                        
+                    }
+                }
+            }
+            if ($success) {
+                System::success('Bilder wurden gespeichert!');
+            }
+
+            return $success;
+        }
+        
+        return true;
     }
 }
