@@ -5,10 +5,10 @@ class InventurController extends ApplicationController
 {
     protected $inventur;
 
-    public function __construct($responseType = 'html', $layout = 'default')
+    public function init()
     {
-        parent::__construct($responseType, $layout);
-
+        parent::init();
+        
         $this->authenticateUser();
         $this->inventur = new \App\Inventur();
     }

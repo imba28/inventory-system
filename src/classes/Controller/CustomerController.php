@@ -5,10 +5,10 @@ class CustomerController extends ApplicationController
 {
     private $customer;
 
-    public function __construct($responseType = 'html', $layout = 'default')
+    public function init()
     {
-        parent::__construct($responseType, $layout);
-
+        parent::init();
+        
         $this->authenticateUser();
 
         $this->beforeAction(array('show', 'update', 'delete', 'edit'), function ($params) {

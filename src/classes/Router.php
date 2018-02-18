@@ -72,6 +72,7 @@ class Router
             $controller_action = $split[1];
 
             $controller = new $controller_class($responseType);
+            $controller->init();
 
             if (is_callable(array($controller, $controller_action), true)) {
                 $controller->handle($controller_action, $params);

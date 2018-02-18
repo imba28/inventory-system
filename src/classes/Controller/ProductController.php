@@ -12,10 +12,9 @@ use App\QueryBuilder\Builder;
 
 class ProductController extends ApplicationController
 {
-    public function __construct($responseType = 'html', $layout = 'default')
+    public function init()
     {
-        parent::__construct($responseType, $layout);
-
+        parent::init();
         $this->beforeAction('product', function ($params) {
             try {
                 $this->product = Product::find($params['id']);

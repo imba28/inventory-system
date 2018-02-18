@@ -27,6 +27,11 @@ abstract class BasicController
         });
     }
 
+    public function init()
+    {
+
+    }
+
     protected function renderContent()
     {
         $this->response->append($this->view->render());
