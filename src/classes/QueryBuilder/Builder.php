@@ -15,7 +15,7 @@ class Builder
     protected $selection = array();
     protected $group = array();
     protected $order = array();
-    protected $limit;
+    protected $limit = array();
 
     protected $result;
     protected $lastInsertID;
@@ -301,7 +301,7 @@ class Builder
         $whereBindings = $this->getCriteriaBindings();
 
         $bindings = array_merge($bindings, $whereBindings);
-        $limit = isset($this->limit) ? 'LIMIT ' . join(", ", $this->limit) : '';
+        $limit = !empty($this->limit) ? 'LIMIT ' . join(", ", $this->limit) : '';
 
         $sql = array(
             "UPDATE",
