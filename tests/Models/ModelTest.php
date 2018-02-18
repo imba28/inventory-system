@@ -1,8 +1,23 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use App\QueryBuilder\Builder;
+use App\Model;
 
 class ModelTest extends TestCase
 {
+    public function setUp()
+    {
+        $stub = $this->getMockBuilder(Builder::class)
+        ->setConstructorArgs(['customers'])
+        ->setMethods(['update', 'insert'])
+        ->getMock();
+
+        $stub->method('insert')->willReturn(true);
+        $stub->method('update')->willReturn(true);
+
+        Model::setQueryBuilder($stub);
+    }
+
     public function testModelCreation()
     {
         $this->assertInstanceOf(
@@ -38,16 +53,7 @@ class ModelTest extends TestCase
 
     public function testGetChangedProperties()
     {
-        $stub = $this->getMockBuilder(\App\QueryBuilder\Builder::class)
-            ->setConstructorArgs(['customers'])
-            ->setMethods(['update', 'insert'])
-            ->getMock();
-
-        $stub->method('insert')->willReturn(true);
-        $stub->method('update')->willReturn(true);
-
         $customer = new \App\Models\Customer($this->existingModelProvider());
-        $customer->setQueryBuilder($stub);
 
         $this->assertEmpty($customer->getChangedProperties());
         $this->assertTrue($customer->set('name', 'Changed'));

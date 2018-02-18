@@ -289,28 +289,27 @@ abstract class Model implements \JsonSerializable
         $foreignKey = is_null($foreignKey) ? $this->getForeignKey() : $foreignKey;
         $fullModelName = "\\App\\Models\\{$modelName}";
         
-        if (isset($this->relations["{$modelName}_{$foreignKey}_hasmany"])) {
-            return $this->relations["{$modelName}_{$foreignKey}_hasmany"];
-        }
+        $relationName = "{$modelName}_{$foreignKey}_hasmany";
 
-        if (class_exists($fullModelName)) {
-            if ($this->isCreated()) {
-                $collection = $fullModelName::findByFilter(
-                    array($this->getForeignKey(), '=', $this->get('id')),
-                    false,
-                    array('id' => 'ASC')
-                );
+        if (!isset($this->relations[$relationName])) {
+            if (class_exists($fullModelName)) {
+                $collection = $this->isCreated() ?
+                    $fullModelName::findByFilter(
+                        array($this->getForeignKey(), '=', $this->get('id')),
+                        false,
+                        array('id' => 'ASC')
+                    )
+                    : new Collection();
+
+                $collection->setParent($this);
+
+                $this->relations[$relationName] = $collection;
             } else {
-                $collection = new Collection();
+                throw new \InvalidArgumentException("Model {$fullModelName} does not exist!");
             }
-
-            $collection->setParent($this);
-
-            $this->relations["{$modelName}_{$foreignKey}_hasmany"] = $collection;
-            return $this->relations["{$modelName}_{$foreignKey}_hasmany"];
-        } else {
-            throw new \InvalidArgumentException("Model {$fullModelName} does not exist!");
         }
+
+        return $this->relations[$relationName];
     }
 
     // PRIVATE STATIC HELPERS
