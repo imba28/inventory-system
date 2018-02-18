@@ -25,7 +25,7 @@ class Builder
 
     protected static $sqlKeywords = array("NOW()", "COUNT(*)", "AUTO_INCREMENT", "CURRENT_DATE", "CURRENT_USER", "DEFAULT", "CURRENT_TIMESTAMP()", "CURTIME()", "CURDATE()", "DAYNAME()", "DAYOFMONTH()", "DAYOFWEEK()", "DAYOFYEAR()");
 
-    public function __construct($table, $debug = false)
+    public function __construct($table = null, $debug = false)
     {
         $this->table = $table;
         $this->debug = $debug;

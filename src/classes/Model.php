@@ -15,7 +15,7 @@ abstract class Model implements \JsonSerializable
     private $foreignKey;
     private $relations = [];
 
-    private $builder;
+    private static $builder;
 
     static private $instances = array();
 
@@ -28,13 +28,13 @@ abstract class Model implements \JsonSerializable
 
         foreach ($options as $key => $value) {
             if (preg_match('/([\w]+)_id$/', $key, $m)) {
-                $class_name = '\App\Models\\'.ucfirst($m[1]);
-                if (class_exists($class_name)) {
+                $className = '\App\Models\\'.ucfirst($m[1]);
+                if (class_exists($className)) {
                     $key = $m[1];
                     try {
-                        $value = $class_name::find($value);
+                        $value = $className::find($value);
                     } catch (\App\Exceptions\NothingFoundException $e) {
-                        \App\Debugger::log("{$class_name} with id {$value} not found!", 'warning');
+                        \App\Debugger::log("{$className} with id {$value} not found!", 'warning');
                         $value = null;
                     }
                 }
@@ -90,11 +90,13 @@ abstract class Model implements \JsonSerializable
             }
         }
 
+        self::$builder->setTable(self::getTableName());
+
         if ($this->isCreated()) {
-            $res = $this->builder->where('id', '=', $this->getId())->update($propertiesUpdate);
+            $res = self::$builder->where('id', '=', $this->getId())->update($propertiesUpdate);
 
             if ($res === false) {
-                throw new \App\QueryBuilder\QueryBuilderException("could not update data", $this->builder->getError());
+                throw new \App\QueryBuilder\QueryBuilderException("could not update data", self::$builder->getError());
             }
         } else {
             $this->trigger('create');
@@ -102,13 +104,13 @@ abstract class Model implements \JsonSerializable
             $propertiesUpdate['createDate'] = 'NOW()';
             $propertiesUpdate['deleted'] = '0';
 
-            $res = $this->builder->insert($propertiesUpdate);
+            $res = self::$builder->insert($propertiesUpdate);
 
             if ($res === false) {
-                throw new \App\QueryBuilder\QueryBuilderException("could not insert data", $this->builder->getError());
+                throw new \App\QueryBuilder\QueryBuilderException("could not insert data", self::$builder->getError());
             }
 
-            $this->set('id', $this->builder->lastInsertId());
+            $this->set('id', self::$builder->lastInsertId());
 
             self::$instances[get_called_class()][$this->getId()] = $this;
         }
@@ -150,11 +152,6 @@ abstract class Model implements \JsonSerializable
             return $this->state[$property];
         }
         return null;
-    }
-
-    public function setQueryBuilder(Builder $builder)
-    {
-        $this->builder = $builder;
     }
 
     public function jsonSerialize(): array
@@ -265,7 +262,7 @@ abstract class Model implements \JsonSerializable
         }
 
         $model = new $selfClass();
-        $model->setQueryBuilder(new QueryBuilder\Builder(self::getTableName()));
+        //$model->setQueryBuilder(new QueryBuilder\Builder(self::getTableName()));
 
         return $model;
     }
@@ -328,7 +325,7 @@ abstract class Model implements \JsonSerializable
 
         if (!isset(self::$instances[$selfClass][$data['id']])) {
             $model = new $selfClass($data);
-            $model->setQueryBuilder(new QueryBuilder\Builder(self::getTableName()));
+            //$model->setQueryBuilder(new QueryBuilder\Builder(self::getTableName()));
 
             self::$instances[$selfClass][$data['id']] = $model;
         }
@@ -350,6 +347,11 @@ abstract class Model implements \JsonSerializable
     public static function getModelName()
     {
         return rtrim(self::getTableName(), 's');
+    }
+
+    public static function setQueryBuilder(Builder $builder)
+    {
+        self::$builder = $builder;
     }
 
     public static function getQuery(array $filters, $limit = false): \App\QueryBuilder\Builder
@@ -377,15 +379,17 @@ abstract class Model implements \JsonSerializable
 
     protected static function getModelData(array $filters, $limit = false, $order = array('id' => 'DESC'))
     {
-        $query = new \App\QueryBuilder\Builder(self::getTableName());
-        $query->where('deleted', '=', '0');
+        //$query = new \App\QueryBuilder\Builder(self::getTableName());
+        self::$builder->setTable(self::getTableName());
+        
+        self::$builder->where('deleted', '=', '0');
 
         if ($limit !== false) {
-            $query->limit($limit);
+            self::$builder->limit($limit);
         }
 
         foreach ($order as $column => $order) {
-            $query->orderBy($column, $order);
+            self::$builder->orderBy($column, $order);
         }
 
         if (count($filters) == 3 && is_string($filters[1])) {
@@ -394,11 +398,11 @@ abstract class Model implements \JsonSerializable
 
         foreach ($filters as $filter) {
             if (count($filter) == 3) {
-                $query->where($filter[0], $filter[1], $filter[2]);
+                self::$builder->where($filter[0], $filter[1], $filter[2]);
             }
         }
 
-        $res = $query->get();
+        $res = self::$builder->get();
         if (!empty($res)) {
             return $limit == 1 ? current($res) : $res;
         } else {

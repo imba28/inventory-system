@@ -7,6 +7,7 @@ require(ABS_PATH . '/vendor/autoload.php');
 require_once(ABS_PATH . '/src/config/config.php');
 
 App\QueryBuilder\Builder::setTablePrefix(\App\Configuration::get('DB_PREFIX', 'av'));
+App\Model::setQueryBuilder(new \App\QueryBuilder\Builder());
 
 if (App\Configuration::get('env') === 'dev') {
     ini_set('display_errors', 1);
