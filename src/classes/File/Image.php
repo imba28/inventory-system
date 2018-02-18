@@ -3,7 +3,7 @@ namespace App\File;
 
 class Image extends File
 {
-    public static $maxFileSize = 1048576; // 10MB
+    protected static $maxFileSize = 2097152; // 2MB
 
     protected static $imageTypes = array (
         IMAGETYPE_GIF => "gif",

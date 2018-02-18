@@ -3,7 +3,7 @@ namespace App\File;
 
 class File
 {
-    public static $maxFileSize = 1875; // 15kb
+    protected static $maxFileSize = 15360; // 15kb
 
     protected $fileInfo;
 
@@ -45,8 +45,8 @@ class File
                 throw new \RuntimeException("Datei ist beschädigt, da während des Upload ein Fehler aufgetreten ist!");
             }
 
-            if ($this->fileInfo['size'] > 83886080) { // 10MB
-                throw new \RuntimeException('Datei ist zu groß!');
+            if ($this->fileInfo['size'] > $this::$maxFileSize) {
+                throw new \RuntimeException('Datei ist zu groß! Erlaubt sind maximal ' . $this::$maxFileSize / 1024 . 'kb.');
             }
 
             $allowedMimeTypes = self::getAllowedMimes();
@@ -116,25 +116,7 @@ class File
     public static function delete($source)
     {
         if (file_exists(ABS_PATH . $source)) {
-            try {
-                if (preg_match("/\/([\w\s]+\/)+/", $source, $matches)) {
-                    $dest = str_replace($matches[0], "/tmp/", $source);
-                    $batch = new Batch();
-                    $batch->add(
-                        new MoveFile(
-                            Registry::getConfig()->get("FTP_ABS_PATH") . $source,
-                            Registry::getConfig()->get("FTP_ABS_PATH") . $dest
-                        )
-                    );
-                    $batch->execute();
-                    return true;
-                }
-            } catch (Exception $e) {
-                Debugger::log(
-                    "Fehler beim Löschen des Bildes `$source`. Meldung: " . $e->getMessage(),
-                    'Fehler'
-                );
-            }
+            throw new Exception("Not yet implemented!");
         } else {
             Debugger::log("Fehler beim Löschen des Bildes `$source`. Meldung: Bild nicht gefunden.", 'Fehler');
         }
@@ -143,7 +125,7 @@ class File
 
     public static function get($fileInfo)
     {
-        return new File($fileInfo);
+        return new self($fileInfo);
     }
 
     public static function getAllowedMimes()
