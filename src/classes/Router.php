@@ -99,9 +99,9 @@ class Router
         $routes = $this->routes[$requestMethod] + $this->routes['ALL'];
         ksort($routes);
 
-        $this->findHandler($routes, $requestURI);
-
-        throw new \ErrorException("Route `{$uri}`not defined!");
+        if ($this->findHandler($routes, $requestURI) === false) {
+            throw new \ErrorException("Route `{$uri}`not defined!");
+        }
     }
 
     private function findHandler(array $routes, $requestURI)
