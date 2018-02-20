@@ -7,17 +7,56 @@ abstract class Model implements \JsonSerializable
 {
     use Traits\Events;
 
+    /**
+     * The model's attributes.
+     *
+     * @var array
+     */
     protected $attributes = [];
 
+    /**
+     * The model's state when it was created.
+     *
+     * @var array
+     */
     protected $originalState = [];
+
+    /**
+     * The model's current state.
+     *
+     * @var array
+     */
     protected $state = [];
 
+    /**
+     * Array of validations that have to be passes before the model can bse successfully saved.
+     *
+     * @var array
+     */
+    protected $validators = [];
+
     private $foreignKey;
+
+    /**
+     * The model's relationships. Contains collections of other models.
+     *
+     * @var array
+     */
     private $relations = [];
 
+    /**
+     * QueryBuilder which is used to retrieve data from the database.
+     *
+     * @var \App\QueryBuilder\Builder
+     */
     private static $builder;
 
-    static private $instances = array();
+    /**
+     * Array of arrays of models. Each model object exists only once.
+     *
+     * @var array
+     */
+    static private $instances = [];
 
     public function __construct($options = array())
     {
@@ -56,27 +95,59 @@ abstract class Model implements \JsonSerializable
         $this->init();
     }
 
+    /**
+     * Helper method that is called inside constructor. May be overridden/extended from sub classes.
+     *
+     * @return void
+     */
     protected function init()
     {
     }
 
+    /**
+     * Returns whether or not a model instance exists inside the database.
+     *
+     * @return bool
+     */
     public function isCreated()
     {
         return !empty($this->getId());
     }
 
+    /**
+     * Returns the model's id, helper method.
+     *
+     * @return int
+     */
     public function getId()
     {
         return $this->get('id');
     }
 
-    public function remove()
+    /**
+     * deletes the model
+     *
+     * @return void
+     */
+    public function remove(): bool
     {
         return self::delete($this->getId());
     }
 
-    public function save($exception = false)
+    /**
+     * Saves changed attributes to the database.
+     *
+     * If no changes to the state were made and the argument is set to true, an exception will be thrown.
+     *
+     * @param bool $exception
+     * @return bool
+     */
+    public function save($exception = false): bool
     {
+        if (!$this->isValid()) {
+            return false;
+        }
+        
         $this->trigger('save');
 
         self::$builder->setTable(self::getTableName());
@@ -120,6 +191,12 @@ abstract class Model implements \JsonSerializable
         return true;
     }
 
+    /**
+     * Sets multiple arguments at once.
+     *
+     * @param array $data
+     * @return void
+     */
     public function setAll(array $data)
     {
         foreach ($data as $key => $value) {
@@ -127,6 +204,15 @@ abstract class Model implements \JsonSerializable
         }
     }
 
+    /**
+     * Sets an attribute, if it exists.
+     *
+     * Triggers the internal event 'set'.
+     *
+     * @param mixed $property
+     * @param mixed $value
+     * @return bool
+     */
     public function set($property, $value)
     {
         if (array_key_exists($property, $this->originalState)) {
@@ -137,6 +223,12 @@ abstract class Model implements \JsonSerializable
         return false;
     }
 
+    /**
+     * Returns a specific attribute, if it exists. If no argument is given, all attributes are returned.
+     *
+     * @param mixed $property
+     * @return mixed
+     */
     public function get($property = null)
     {
         if (is_null($property)) {
@@ -168,6 +260,11 @@ abstract class Model implements \JsonSerializable
         return $json;
     }
 
+    /**
+     * Returns the model's foreign key. If no foreign key was set, a default key is generated based on the model's name.
+     *
+     * @return string
+     */
     public function getForeignKey(): string
     {
         if (!isset($this->foreignKey)) {
@@ -177,6 +274,13 @@ abstract class Model implements \JsonSerializable
         return $this->foreignKey;
     }
 
+    /**
+     * Returns all attributes that have changed since the last save operation.
+     *
+     * Converts attributes of type model automatically to foreign key => id
+     *
+     * @return array
+     */
     public function getChangedProperties(): array
     {
         $propertiesUpdate = array();
@@ -204,7 +308,15 @@ abstract class Model implements \JsonSerializable
         return $propertiesUpdate;
     }
 
-    // PUBLIC STATIC API
+    /**
+     * Searches for a model that matches $column = $value. Throws exception if no record was found.
+     *
+     * Called class determines the database table were the lookup is conducted.
+     *
+     * @param mixed $value
+     * @param mixed $column
+     * @return \App\Model
+     */
     public static function find($value, $column = 'id'): \App\Model
     {
         $selfClass = get_called_class();
@@ -219,6 +331,14 @@ abstract class Model implements \JsonSerializable
         return self::getModelFromOption($options);
     }
 
+    /**
+     * Find all models that match specific criterias.
+     *
+     * @param array $filters
+     * @param mixed $limit
+     * @param mixed $order
+     * @return \App\Collection
+     */
     public static function findByFilter(array $filters, $limit = false, $order = array('id' => 'DESC'))
     {
         if ($limit !== 1) {
@@ -237,6 +357,11 @@ abstract class Model implements \JsonSerializable
         }
     }
 
+    /**
+     * Find all models
+     *
+     * @return void
+     */
     public static function all(): \Traversable
     {
         $options = self::getModelData(array());
@@ -249,6 +374,11 @@ abstract class Model implements \JsonSerializable
         return $collection;
     }
 
+    /**
+     * Factory method creates a new instance.
+     *
+     * @return \App\Model
+     */
     public static function new(): Model
     {
         $selfClass = get_called_class();
@@ -262,6 +392,12 @@ abstract class Model implements \JsonSerializable
         return $model;
     }
 
+    /**
+     * Creates a new model instance, sets attributes and saves it afterwards.
+     *
+     * @param array $data
+     * @return \App\Model
+     */
     public static function create(array $data): Model
     {
         $obj = self::new();
@@ -270,7 +406,13 @@ abstract class Model implements \JsonSerializable
         return $obj;
     }
 
-    public static function delete(int $id)
+    /**
+     * Deletes a model with a specific id.
+     *
+     * @param int $id
+     * @return bool
+     */
+    public static function delete(int $id): bool
     {
         try {
             $obj = self::find($id);
@@ -283,8 +425,16 @@ abstract class Model implements \JsonSerializable
         }
     }
 
-    // RELATIONSHIP METHODS
-    protected function hasMany($modelName, $foreignKey = null, $localKey = null): Collection
+    /**
+     * Initializes a one to many relation between this and other models. Returns a collection of models.
+     *
+     * Accepts the class name of another model and optionally the foreign key.
+     *
+     * @param mixed $modelName
+     * @param mixed $foreignKey
+     * @return \App\Collection
+     */
+    protected function hasMany($modelName, $foreignKey = null): Collection
     {
         $foreignKey = is_null($foreignKey) ? $this->getForeignKey() : $foreignKey;
         $fullModelName = "\\App\\Models\\{$modelName}";
@@ -312,7 +462,6 @@ abstract class Model implements \JsonSerializable
         return $this->relations[$relationName];
     }
 
-    // PRIVATE STATIC HELPERS
     private static function getModelFromOption(array $data)
     {
         if (!isset(self::$instances[get_called_class()])) {
@@ -331,7 +480,12 @@ abstract class Model implements \JsonSerializable
         return self::$instances[$selfClass][$data['id']];
     }
 
-    public static function getTableName()
+    /**
+     * Returns a model's tabe name. It's assumed the table name follows the rule 'classNameOfModel' + s
+     *
+     * @return string
+     */
+    public static function getTableName(): string
     {
         $selfClass = get_called_class();
         if ($selfClass === false) {
@@ -342,11 +496,17 @@ abstract class Model implements \JsonSerializable
         return preg_replace('/(.+)\\\/', '', $selfClass).'s';
     }
 
-    public static function getModelName()
+    public static function getModelName(): string
     {
         return rtrim(self::getTableName(), 's');
     }
 
+    /**
+     * Injects a query builder object.
+     *
+     * @param \App\QueryBuilder\Builder $builder
+     * @return void
+     */
     public static function setQueryBuilder(Builder $builder)
     {
         self::$builder = $builder;
@@ -375,6 +535,14 @@ abstract class Model implements \JsonSerializable
         return $query;
     }
 
+    /**
+     * Loads rows matching filters from the database.
+     *
+     * @param array $filters
+     * @param mixed $limit
+     * @param mixed $order
+     * @return mixed
+     */
     protected static function getModelData(array $filters, $limit = false, $order = array('id' => 'DESC'))
     {
         //$query = new \App\QueryBuilder\Builder(self::getTableName());
