@@ -7,3 +7,7 @@ results
 vendor
 *config.php
 cache
+
+*.sq3
+*sqlite
+*sqlite3
