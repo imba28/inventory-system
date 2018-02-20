@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use App\Validator;
 use App\QueryBuilder\Builder;
 
 abstract class Model implements \JsonSerializable
@@ -34,6 +35,8 @@ abstract class Model implements \JsonSerializable
      * @var array
      */
     protected $validators = [];
+
+    private $validationErrors = [];
 
     private $foreignKey;
 
@@ -124,6 +127,11 @@ abstract class Model implements \JsonSerializable
         return $this->get('id');
     }
 
+    public function getErrors(): array
+    {
+        return $this->validationErrors;
+    }
+
     /**
      * deletes the model
      *
@@ -140,12 +148,13 @@ abstract class Model implements \JsonSerializable
      * If no changes to the state were made and the argument is set to true, an exception will be thrown.
      *
      * @param bool $exception
+     * @throws \App\Exceptions\InvalidModelDataException
      * @return bool
      */
     public function save($exception = false): bool
     {
         if (!$this->isValid()) {
-            return false;
+            throw new \App\Exceptions\InvalidModelDataException("no valid!");
         }
         
         $this->trigger('save');
@@ -189,6 +198,19 @@ abstract class Model implements \JsonSerializable
         });
 
         return true;
+    }
+
+    public function isValid(): bool
+    {
+        $validator = new Validator($this->validators, $this->state);
+
+        $passes = $validator->passes();
+
+        if (!$passes) {
+            $this->validationErrors = $validator->getErrors();
+        }
+
+        return $passes;
     }
 
     /**

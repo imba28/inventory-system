@@ -230,21 +230,16 @@ class ProductController extends ApplicationController
             if ($this->saveUploadedImages()) {
                 $this->product->setAll($this->request->getParams());
 
-                if (empty($this->product->get('name')) || empty($this->product->get('invNr'))) {
-                    System::error('Name/Inventar Nummer muss angegeben werden!');
-                    return;
-                }
-
                 try {
                     $this->product->save();
                     System::success($this->product->get('name'). ' wurde aktualisiert!');
                 } catch (\App\QueryBuilder\QueryBuilderException $e) {
                     list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
                     System::error($errorMessage);
-                } catch (\App\QueryBuilder\NothingChangedException $e) {
-                    //System::info('Es wurde nichts geändert.');
                 } catch (\InvalidOperationException $e) {
                     System::error('Fehler beim Speichern! ' . $e->getMessage());
+                } catch (\App\Exceptions\InvalidModelDataException $e) {
+                    System::error(join(', ', $this->product->getErrors()));
                 } catch (\Exception $e) {
                     System::error('Fehler beim Speichern!');
                 }
@@ -365,34 +360,32 @@ class ProductController extends ApplicationController
             $this->product = Product::new();
             $this->product->set('user', $this->getCurrentUser());
 
-            if (empty($this->request->getParam('name')) || empty($this->request->getParam('invNr'))) {
-                System::error('Name/Inventar Nummer muss angegeben werden!');
-            } else {
-                $this->product->setAll($this->request->getParams());
+            $this->product->setAll($this->request->getParams());
 
-                try {
-                    if ($this->saveUploadedImages()) {
-                        if ($this->product->save()) {
-                            System::success(
-                                $this->product->get('name'). ' wurde erstellt!
-                                <a href="/product/'. $this->product->getId() .'">
-                                    zum Produkt
-                                </a>'
-                            );
-                        } else {
-                            System::success(
-                                $this->product->get('name').
-                                ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>'
-                            );
-                        }
+            try {
+                if ($this->saveUploadedImages()) {
+                    if ($this->product->save()) {
+                        System::success(
+                            $this->product->get('name'). ' wurde erstellt!
+                            <a href="/product/'. $this->product->getId() .'">
+                                zum Produkt
+                            </a>'
+                        );
+                    } else {
+                        System::success(
+                            $this->product->get('name').
+                            ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>'
+                        );
                     }
-                } catch (\App\QueryBuilder\QueryBuilderException $e) {
-                    list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
-                    vd($e);
-                    System::error($errorMessage);
-                } catch (\Exception $e) {
-                    System::error('Fehler beim Speichern!');
                 }
+            } catch (\App\QueryBuilder\QueryBuilderException $e) {
+                list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
+                vd($e);
+                System::error($errorMessage);
+            } catch (\App\Exceptions\InvalidModelDataException $e) {
+                System::error(join(', ', $this->product->getErrors()));
+            } catch (\Exception $e) {
+                System::error('Fehler beim Speichern!');
             }
         }
 

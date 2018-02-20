@@ -7,6 +7,7 @@ use App\Model;
 class Product extends \App\Model
 {
     protected $attributes = ['name', 'invNr', 'type', 'description', 'condition', 'note'];
+    protected $validators = ['name' => 'required', 'invNr' => 'required'];
 
     public function images(): Collection
     {
