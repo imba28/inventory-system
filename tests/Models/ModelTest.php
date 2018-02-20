@@ -70,6 +70,7 @@ class ModelTest extends TestCase
         return array(
             'id' => 1,
             'name' => 'Test Customer',
+            'internal_id' => '112341',
             'email' => 'test@test.de'
         );
     }
