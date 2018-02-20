@@ -437,7 +437,7 @@ class Builder
         return $this->getSQL();
     }
 
-    private function getInsertStatement($data)
+    protected function getInsertStatement($data)
     {
         $insert = array();
         $values = array();
