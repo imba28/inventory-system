@@ -5,7 +5,7 @@ class Log extends \App\Model
 {
     protected $attributes = ['message', 'type'];
 
-    public function save($exception = false)
+    public function save($exception = false): bool
     {
         $properties = $this->state;
 
@@ -15,6 +15,6 @@ class Log extends \App\Model
         $properties['createDate'] = 'NOW()';
         $properties['deleted'] = '0';
 
-        $query->insert($properties);
+        return $query->insert($properties);
     }
 }
