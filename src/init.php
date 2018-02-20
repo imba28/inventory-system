@@ -6,7 +6,7 @@ require_once('lib/functions.php');
 require(ABS_PATH . '/vendor/autoload.php');
 require_once(ABS_PATH . '/src/config/config.php');
 
-App\QueryBuilder\Builder::setTablePrefix(\App\Configuration::get('DB_PREFIX', 'av'));
+App\QueryBuilder\Builder::setTablePrefix(\App\Configuration::get('DB_PREFIX'));
 App\Model::setQueryBuilder(new \App\QueryBuilder\Builder());
 
 if (App\Configuration::get('env') === 'dev') {
@@ -19,11 +19,17 @@ if (App\Configuration::get('env') === 'dev') {
     error_reporting(0);
 }
 
-$router = App\Router::getInstance();
-include(ABS_PATH . '/src/config/routes.php');
-
 try {
-    \App\Registry::setDatabase(new \App\Database());
+    $drivers = [
+        'mysql' => '\\App\\Database\\MySQL',
+        'sqlite' => '\\App\\Database\\SQLite'
+    ];
+
+    $driverClass = $drivers[App\Configuration::get('DB_DRIVER')];
+    \App\Registry::setDatabase(new $driverClass);
 } catch (Exception $e) {
     die("Keine Verbindung zur Datenbank möglich:". $e->getMessage());
 }
+
+$router = App\Router::getInstance();
+include(ABS_PATH . '/src/config/routes.php');

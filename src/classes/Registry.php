@@ -31,7 +31,7 @@ class Registry
         $reg->data[self::KEY_CONFIG] = $config;
     }
 
-    public static function setDatabase(Database $db)
+    public static function setDatabase(Database\DatabaseInterface $db)
     {
         $reg = self::getInstance();
         $reg->data[self::KEY_DATABASE] = $db;
@@ -44,6 +44,6 @@ class Registry
 
     public static function getDatabase()
     {
-        return self::get(self::KEY_DATABASE);
+        return self::get(self::KEY_DATABASE)->getHandler();
     }
 }

@@ -19,7 +19,7 @@ class Query
 
     public function execute(array $columns)
     {
-        $dbh = \App\Registry::getDatabase()->dbh;
+        $dbh = \App\Registry::getDatabase();
 
         try {
             $sth = $dbh->prepare($this->sql);
