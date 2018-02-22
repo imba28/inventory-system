@@ -64,13 +64,16 @@ class QueryJoin
     public function getSelectStatement()
     {
         $tmp = $this->selection;
-        array_walk($tmp, function (&$select) {
-            if ($select instanceof QueryAlias) {
-                $select = $this->sanitizeColumnName($select->get("name")) . " as ". $select->get("alias");
-            } else {
-                $select = $this->sanitizeColumnName($select);
+        array_walk(
+            $tmp,
+            function (&$select) {
+                if ($select instanceof QueryAlias) {
+                    $select = $this->sanitizeColumnName($select->get("name")) . " as ". $select->get("alias");
+                } else {
+                    $select = $this->sanitizeColumnName($select);
+                }
             }
-        });
+        );
 
         return join(", ", $tmp);
     }

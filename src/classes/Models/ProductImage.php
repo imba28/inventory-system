@@ -9,8 +9,11 @@ class ProductImage extends \App\Model
 
     public function init()
     {
-        $this->on('delete', function () {
-            Image::delete($this->get('src'));
-        });
+        $this->on(
+            'delete',
+            function () {
+                Image::delete($this->get('src'));
+            }
+        );
     }
 }

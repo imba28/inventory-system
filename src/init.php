@@ -1,10 +1,10 @@
 <?php
 session_start();
 
-require_once('lib/functions.php');
+require_once 'lib/functions.php';
 
-require(ABS_PATH . '/vendor/autoload.php');
-require_once(ABS_PATH . '/src/config/config.php');
+require ABS_PATH . '/vendor/autoload.php';
+require_once ABS_PATH . '/src/config/config.php';
 
 App\QueryBuilder\Builder::setTablePrefix(\App\Configuration::get('DB_PREFIX'));
 
@@ -38,4 +38,4 @@ try {
 }
 
 $router = App\Router::getInstance();
-include(ABS_PATH . '/src/config/routes.php');
+require ABS_PATH . '/src/config/routes.php';

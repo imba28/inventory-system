@@ -15,69 +15,88 @@ class CustomerController extends ApplicationController
         
         $this->authenticateUser();
 
-        $this->beforeAction(array('show', 'update', 'delete', 'edit'), function ($params) {
-            try {
-                $this->customer = Customer::find($params['id']);
-                $this->view->assign('customer', $this->customer);
-            } catch (\App\Exceptions\NothingFoundException $e) {
-                $this->error(404);
+        $this->beforeAction(
+            array('show', 'update', 'delete', 'edit'),
+            function ($params) {
+                try {
+                    $this->customer = Customer::find($params['id']);
+                    $this->view->assign('customer', $this->customer);
+                } catch (\App\Exceptions\NothingFoundException $e) {
+                    $this->error(404);
+                }
             }
-        });
+        );
     }
 
     public function index($params = array())
     {
-        $this->respondTo(function ($wants) use ($params) {
-            $wants->html(function () use ($params) {
-                $currentPage = isset($params['page']) ? intval($params['page']) : 1;
-                $itemsPerPage = 8;
+        $this->respondTo(
+            function ($wants) use ($params) {
+                $wants->html(
+                    function () use ($params) {
+                        $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+                        $itemsPerPage = 8;
 
-                try {
-                    $customers = Customer::findByFilter(
-                        array(),
-                        (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
-                    );
-                    $paginator = new \App\Paginator(
-                        Customer::getQuery(array())->count(),
-                        $currentPage,
-                        $itemsPerPage,
-                        '/customers'
-                    );
+                        try {
+                            $customers = Customer::findByFilter(
+                                array(),
+                                (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
+                            );
+                            $paginator = new \App\Paginator(
+                                Customer::getQuery(array())->count(),
+                                $currentPage,
+                                $itemsPerPage,
+                                '/customers'
+                            );
 
-                    $this->view->assign('customers', $customers);
-                    $this->view->assign('totals', $paginator->getTotals());
-                    $this->view->assign('paginator', $paginator);
-                } catch (\App\Exceptions\NothingFoundException $e) {
-                    $this->view->assign('totals', 0);
-                    System::error('Keine Ergebnisse gefunden!');
-                }
-            });
+                            $this->view->assign('customers', $customers);
+                            $this->view->assign('totals', $paginator->getTotals());
+                            $this->view->assign('paginator', $paginator);
+                        } catch (\App\Exceptions\NothingFoundException $e) {
+                            $this->view->assign('totals', 0);
+                            System::error('Keine Ergebnisse gefunden!');
+                        }
+                    }
+                );
 
-            $wants->json(function () {
-                $this->view->assign('customers', Customer::all());
-            });
+                $wants->json(
+                    function () {
+                        $this->view->assign('customers', Customer::all());
+                    }
+                );
 
-            $wants->xml(function () {
-                $this->view->assign('customers', Customer::all());
-            });
-        });
+                $wants->xml(
+                    function () {
+                        $this->view->assign('customers', Customer::all());
+                    }
+                );
+            }
+        );
     }
 
     public function show(array $params)
     {
-        $this->respondTo(function ($wants) {
-            $wants->html(function () {
-                try {
-                    $rentalHistory = Action::findByFilter(array(
-                        array('customer', '=', $this->customer)
-                    ), 10, array('returnDate' => 'ASC'));
-                } catch (\App\Exceptions\NothingFoundException $e) {
-                    $rentalHistory = array();
-                }
+        $this->respondTo(
+            function ($wants) {
+                $wants->html(
+                    function () {
+                        try {
+                            $rentalHistory = Action::findByFilter(
+                                array(
+                                array('customer', '=', $this->customer)
+                                ),
+                                10,
+                                array('returnDate' => 'ASC')
+                            );
+                        } catch (\App\Exceptions\NothingFoundException $e) {
+                            $rentalHistory = array();
+                        }
 
-                $this->view->assign('rentHistory', $rentalHistory);
-            });
-        });
+                        $this->view->assign('rentHistory', $rentalHistory);
+                    }
+                );
+            }
+        );
     }
 
     public function update()

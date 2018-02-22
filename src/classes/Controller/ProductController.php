@@ -15,13 +15,16 @@ class ProductController extends ApplicationController
     public function init()
     {
         parent::init();
-        $this->beforeAction('product', function ($params) {
-            try {
-                $this->product = Product::find($params['id']);
-            } catch (\App\Exceptions\NothingFoundException $e) {
-                $this->product = null;
+        $this->beforeAction(
+            'product',
+            function ($params) {
+                try {
+                    $this->product = Product::find($params['id']);
+                } catch (\App\Exceptions\NothingFoundException $e) {
+                    $this->product = null;
+                }
             }
-        });
+        );
     }
 
     public function product($params)
@@ -115,9 +118,11 @@ class ProductController extends ApplicationController
     {
         if (isset($params['action'])) {
             if (intval($params['action']) > 0) { // TODO: naja, echt grausig....
-                $this->products(array(
+                $this->products(
+                    array(
                     'page' => $params['action']
-                ));
+                    )
+                );
                 return;
             } elseif ($params['action'] == 'add') {
                 $this->create();
@@ -135,9 +140,14 @@ class ProductController extends ApplicationController
     {
         if ($this->isUserSignedIn()) {
             try {
-                $this->view->assign('actions', Action::findByFilter(array(
-                    array('returnDate', 'IS', 'NULL')
-                )));
+                $this->view->assign(
+                    'actions',
+                    Action::findByFilter(
+                        array(
+                        array('returnDate', 'IS', 'NULL')
+                        )
+                    )
+                );
             } catch (\App\Exceptions\NothingFoundException $e) {
                 $this->view->assign('actions', array());
             }
@@ -179,9 +189,12 @@ class ProductController extends ApplicationController
         $itemsPerPage = 8;
 
         try {
-            $products = Product::findByFilter(array(
+            $products = Product::findByFilter(
+                array(
                 'type', '=', $params['category']
-            ), (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage");
+                ),
+                (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
+            );
 
             $paginator = new \App\Paginator(
                 Product::getQuery(
@@ -252,10 +265,14 @@ class ProductController extends ApplicationController
         $this->authenticateUser();
 
         if (!$this->product->isAvailable()) {
-            $action = current(Action::findByFilter(array(
-                array('product_id', '=', $this->product->getId()),
-                array('returnDate', 'IS', 'NULL')
-            )));
+            $action = current(
+                Action::findByFilter(
+                    array(
+                    array('product_id', '=', $this->product->getId()),
+                    array('returnDate', 'IS', 'NULL')
+                    )
+                )
+            );
 
             $this->view->assign('action', $action);
             $this->view->setTemplate('product-rented');
@@ -329,27 +346,31 @@ class ProductController extends ApplicationController
 
     private function show()
     {
-        $this->respondTo(function ($wants) {
-            $wants->html(function () {
-                $this->view->setTemplate('product');
+        $this->respondTo(
+            function ($wants) {
+                $wants->html(
+                    function () {
+                        $this->view->setTemplate('product');
 
-                try {
-                    $this->view->assign(
-                        'rentHistory',
-                        Action::findByFilter(
-                            array(
-                                'product',
-                                '=',
-                                $this->product
-                            ),
-                            10
-                        )
-                    );
-                } catch (\App\Exceptions\NothingFoundException $e) {
-                    $this->view->assign('rentHistory', array());
-                }
-            });
-        });
+                        try {
+                            $this->view->assign(
+                                'rentHistory',
+                                Action::findByFilter(
+                                    array(
+                                    'product',
+                                    '=',
+                                    $this->product
+                                    ),
+                                    10
+                                )
+                            );
+                        } catch (\App\Exceptions\NothingFoundException $e) {
+                            $this->view->assign('rentHistory', array());
+                        }
+                    }
+                );
+            }
+        );
     }
 
     private function create()
@@ -414,9 +435,12 @@ class ProductController extends ApplicationController
                 );
 
                 $products = Product::findByFilter($filter);
-                $products = array_filter($products->toArray(), function ($p) {
-                    return $p->isAvailable();
-                });
+                $products = array_filter(
+                    $products->toArray(),
+                    function ($p) {
+                        return $p->isAvailable();
+                    }
+                );
 
                 if (count($products) == 0) {
                     System::error('Es wurde kein passendes Produkt gefunden!');
@@ -447,37 +471,43 @@ class ProductController extends ApplicationController
     {
         $this->view->setTemplate('products');
 
-        $this->respondTo(function ($wants) use ($params) {
-            $wants->html(function () use ($params) {
-                $currentPage = isset($params['page']) ? intval($params['page']) : 1;
-                $itemsPerPage = 8;
+        $this->respondTo(
+            function ($wants) use ($params) {
+                $wants->html(
+                    function () use ($params) {
+                        $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+                        $itemsPerPage = 8;
 
-                try {
-                    $products = Product::findByFilter(
-                        array(),
-                        (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
-                    );
-                    $paginator = new \App\Paginator(
-                        Product::getQuery(array())->count(),
-                        $currentPage,
-                        $itemsPerPage,
-                        '/products'
-                    );
+                        try {
+                            $products = Product::findByFilter(
+                                array(),
+                                (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
+                            );
+                            $paginator = new \App\Paginator(
+                                Product::getQuery(array())->count(),
+                                $currentPage,
+                                $itemsPerPage,
+                                '/products'
+                            );
 
-                    $this->view->assign('products', $products);
-                    $this->view->assign('categories', $this->getCategories());
-                    $this->view->assign('totals', $paginator->getTotals());
-                    $this->view->assign('paginator', $paginator);
-                } catch (\App\Exceptions\NothingFoundException $e) {
-                    $this->view->assign('totals', 0);
-                    System::error('Keine Ergebnisse gefunden!');
-                }
-            });
+                            $this->view->assign('products', $products);
+                            $this->view->assign('categories', $this->getCategories());
+                            $this->view->assign('totals', $paginator->getTotals());
+                            $this->view->assign('paginator', $paginator);
+                        } catch (\App\Exceptions\NothingFoundException $e) {
+                            $this->view->assign('totals', 0);
+                            System::error('Keine Ergebnisse gefunden!');
+                        }
+                    }
+                );
 
-            $wants->json(function () {
-                $this->view->assign('products', Product::all());
-            });
-        });
+                $wants->json(
+                    function () {
+                        $this->view->assign('products', Product::all());
+                    }
+                );
+            }
+        );
     }
 
     private function getCategories()

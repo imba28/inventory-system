@@ -64,9 +64,12 @@ abstract class Model implements \JsonSerializable
     public function __construct($options = array())
     {
         $this->originalState = array_merge($this->attributes, ['id', 'user', 'createDate', 'stamp', 'deleted']);
-        $this->originalState = array_map(function () {
-            return null;
-        }, array_flip($this->originalState));
+        $this->originalState = array_map(
+            function () {
+                return null;
+            },
+            array_flip($this->originalState)
+        );
 
         foreach ($options as $key => $value) {
             if (preg_match('/([\w]+)_id$/', $key, $m)) {
@@ -147,7 +150,7 @@ abstract class Model implements \JsonSerializable
      *
      * If no changes to the state were made and the argument is set to true, an exception will be thrown.
      *
-     * @param bool $exception
+     * @param  bool $exception
      * @throws \App\Exceptions\InvalidModelDataException
      * @return bool
      */
@@ -193,9 +196,12 @@ abstract class Model implements \JsonSerializable
 
         $this->originalState = $this->state;
 
-        array_walk($this->relations, function ($collection) {
-            $collection->save();
-        });
+        array_walk(
+            $this->relations,
+            function ($collection) {
+                $collection->save();
+            }
+        );
 
         return true;
     }
@@ -216,7 +222,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Sets multiple arguments at once.
      *
-     * @param array $data
+     * @param  array $data
      * @return void
      */
     public function setAll(array $data)
@@ -231,8 +237,8 @@ abstract class Model implements \JsonSerializable
      *
      * Triggers the internal event 'set'.
      *
-     * @param mixed $property
-     * @param mixed $value
+     * @param  mixed $property
+     * @param  mixed $value
      * @return bool
      */
     public function set($property, $value)
@@ -248,7 +254,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Returns a specific attribute, if it exists. If no argument is given, all attributes are returned.
      *
-     * @param mixed $property
+     * @param  mixed $property
      * @return mixed
      */
     public function get($property = null)
@@ -335,8 +341,8 @@ abstract class Model implements \JsonSerializable
      *
      * Called class determines the database table were the lookup is conducted.
      *
-     * @param mixed $value
-     * @param mixed $column
+     * @param  mixed $value
+     * @param  mixed $column
      * @return \App\Model
      */
     public static function find($value, $column = 'id'): \App\Model
@@ -346,9 +352,12 @@ abstract class Model implements \JsonSerializable
             return self::$instances[$selfClass][$value];
         }
 
-        $options = self::getModelData(array(
+        $options = self::getModelData(
+            array(
             array($column, '=', $value)
-        ), 1);
+            ),
+            1
+        );
 
         return self::getModelFromOption($options);
     }
@@ -356,9 +365,9 @@ abstract class Model implements \JsonSerializable
     /**
      * Find all models that match specific criterias.
      *
-     * @param array $filters
-     * @param mixed $limit
-     * @param mixed $order
+     * @param  array $filters
+     * @param  mixed $limit
+     * @param  mixed $order
      * @return \App\Collection
      */
     public static function findByFilter(array $filters, $limit = false, $order = array('id' => 'DESC'))
@@ -417,7 +426,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Creates a new model instance, sets attributes and saves it afterwards.
      *
-     * @param array $data
+     * @param  array $data
      * @return \App\Model
      */
     public static function create(array $data): Model
@@ -431,7 +440,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Deletes a model with a specific id.
      *
-     * @param int $id
+     * @param  int $id
      * @return bool
      */
     public static function delete(int $id): bool
@@ -452,8 +461,8 @@ abstract class Model implements \JsonSerializable
      *
      * Accepts the class name of another model and optionally the foreign key.
      *
-     * @param mixed $modelName
-     * @param mixed $foreignKey
+     * @param  mixed $modelName
+     * @param  mixed $foreignKey
      * @return \App\Collection
      */
     protected function hasMany($modelName, $foreignKey = null): Collection
@@ -526,7 +535,7 @@ abstract class Model implements \JsonSerializable
     /**
      * Injects a query builder object.
      *
-     * @param \App\QueryBuilder\Builder $builder
+     * @param  \App\QueryBuilder\Builder $builder
      * @return void
      */
     public static function setQueryBuilder(Builder $builder)
@@ -560,9 +569,9 @@ abstract class Model implements \JsonSerializable
     /**
      * Loads rows matching filters from the database.
      *
-     * @param array $filters
-     * @param mixed $limit
-     * @param mixed $order
+     * @param  array $filters
+     * @param  mixed $limit
+     * @param  mixed $order
      * @return mixed
      */
     protected static function getModelData(array $filters, $limit = false, $order = array('id' => 'DESC'))

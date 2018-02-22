@@ -19,7 +19,7 @@ class HttpRequest implements \App\Interfaces\Request
 
     public function get($param)
     {
- // Alias für Views
+        // Alias für Views
         return $this->getParam($param);
     }
 

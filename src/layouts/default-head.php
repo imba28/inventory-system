@@ -21,14 +21,14 @@
   </head>
   <body>
       <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-          <a class="navbar-brand" href="/"><?= \App\Configuration::get('site_name')?></a>
+          <a class="navbar-brand" href="/"><?php echo \App\Configuration::get('site_name')?></a>
           <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
           </button>
 
           <div class="collapse navbar-collapse" id="navbarsExampleDefault">
               <ul class="navbar-nav mr-auto">
-                  <?= \App\Menu::getItems() ?>
+                    <?php echo \App\Menu::getItems() ?>
               </ul>
 
               <div class="login display-flex text-light mr-2">
@@ -37,7 +37,7 @@
                     ?>
                     <div class="dropdown">
                       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Hallo <?= $currentUser->get('name') ?>!
+                        Hallo <?php echo $currentUser->get('name') ?>!
                       </button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <!--<a class="dropdown-item" href="#">Action</a>
@@ -64,5 +64,5 @@
       </nav>
       <div style="height:55px"></div>
       <div class="system-status">
-        <?= \App\System::getStatus() ?>
+        <?php echo \App\System::getStatus() ?>
       </div>

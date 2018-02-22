@@ -34,9 +34,14 @@ class View
 
             $twig = new \Twig_Environment($loader, $twigOptions);
 
-            $twig->addFilter(new \Twig_Filter('ago', function ($string) {
-                return ago(strtotime($string));
-            }));
+            $twig->addFilter(
+                new \Twig_Filter(
+                    'ago',
+                    function ($string) {
+                        return ago(strtotime($string));
+                    }
+                )
+            );
 
             $twig->addExtension(new \Twig_Extension_Debug());
 
@@ -66,7 +71,7 @@ class View
         extract($this->data);
 
         ob_start();
-        include($path);
+        include $path;
         $content = ob_get_contents();
         ob_end_clean();
 

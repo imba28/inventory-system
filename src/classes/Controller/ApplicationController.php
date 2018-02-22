@@ -7,21 +7,30 @@ abstract class ApplicationController extends \App\BasicController
 
     public function init()
     {
-        $this->ifFormat('html', function () {
-            $this->view->assign('currentUser', $this->getCurrentUser());
-            $this->view->assign('isUserSignedIn', $this->isUserSignedIn());
-        });
+        $this->ifFormat(
+            'html',
+            function () {
+                $this->view->assign('currentUser', $this->getCurrentUser());
+                $this->view->assign('isUserSignedIn', $this->isUserSignedIn());
+            }
+        );
 
         if ($this->isUserSignedIn()) {
-            \App\Menu::getInstance()->set('items', array(
+            \App\Menu::getInstance()->set(
+                'items',
+                array(
                 'Produkte' => 'products',
                 'Kunden' => 'customers',
                 'Inventur' => 'inventur'
-            ));
+                )
+            );
         } else {
-            \App\Menu::getInstance()->set('items', array(
+            \App\Menu::getInstance()->set(
+                'items',
+                array(
                 'Produkte' => 'products'
-            ));
+                )
+            );
         }
     }
 

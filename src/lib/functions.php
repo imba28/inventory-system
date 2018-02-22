@@ -40,7 +40,7 @@ function getTableName(string $table)
 
 function generateCallTrace()
 {
- // author: http://php.net/manual/de/function.debug-backtrace.php#112238
+    // author: http://php.net/manual/de/function.debug-backtrace.php#112238
     $e = new Exception();
     $trace = explode("\n", $e->getTraceAsString());
     // reverse array to make steps line up chronologically

@@ -26,10 +26,12 @@ class Product extends \App\Model
             return $this->images()->first();
         }
 
-        return new ProductImage(array(
+        return new ProductImage(
+            array(
             'src' => 'http://via.placeholder.com/200x200',
             'title' => 'frontimage'
-        ));
+            )
+        );
     }
 
     public function addImage(ProductImage $image)
@@ -45,10 +47,12 @@ class Product extends \App\Model
     public function isAvailable()
     {
         try {
-            $action = \App\Models\Action::findByFilter(array(
+            $action = \App\Models\Action::findByFilter(
+                array(
                 array('product_id', '=', $this->getId()),
                 array('returnDate', 'IS', 'NULL')
-            ));
+                )
+            );
             return count($action) == 0;
         } catch (\App\Exceptions\NothingFoundException $e) {
             return true;
@@ -57,10 +61,13 @@ class Product extends \App\Model
 
     public function getRentalAction(): \App\Models\Action
     {
-        return \App\Models\Action::findByFilter(array(
+        return \App\Models\Action::findByFilter(
+            array(
             array('product', '=', $this),
             array('returnDate', 'IS', 'NULL')
-        ), 1);
+            ),
+            1
+        );
     }
 
     public function jsonSerialize(): array

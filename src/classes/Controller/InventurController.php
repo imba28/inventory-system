@@ -80,20 +80,24 @@ class InventurController extends ApplicationController
                 $scannedProducts = array();
 
                 try {
-                    $missingProducts = \App\Models\InventurProduct::findByFilter(array(
+                    $missingProducts = \App\Models\InventurProduct::findByFilter(
+                        array(
                         array('inventur', '=', $inventur),
                         'AND',
                         array('missing', '=', 1)
-                    ));
+                        )
+                    );
                 } catch (\App\Exceptions\NothingFoundException $e) {
                 }
 
                 try {
-                    $scannedProducts = \App\Models\InventurProduct::findByFilter(array(
+                    $scannedProducts = \App\Models\InventurProduct::findByFilter(
+                        array(
                         array('inventur', '=', $inventur),
                         'AND',
                         array('in_stock', '=', 1)
-                    ));
+                        )
+                    );
                 } catch (\App\Exceptions\NothingFoundException $e) {
                 }
 

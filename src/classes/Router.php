@@ -68,16 +68,16 @@ class Router
         } elseif (is_string($handle)) {
             $split = explode('#', $handle);
 
-            $controller_class = "\App\Controller\\{$split[0]}";
-            $controller_action = $split[1];
+            $controllerClass = "\App\Controller\\{$split[0]}";
+            $controllerAction = $split[1];
 
-            $controller = new $controller_class($responseType);
+            $controller = new $controllerClass($responseType);
             $controller->init();
 
-            if (is_callable(array($controller, $controller_action), true)) {
-                $controller->handle($controller_action, $params);
+            if (is_callable(array($controller, $controllerAction), true)) {
+                $controller->handle($controllerAction, $params);
             } else {
-                $controller->error(501, "{$controller_class} does not provide {$controller_action}()!");
+                $controller->error(501, "{$controllerClass} does not provide {$controllerAction}()!");
             }
         } else {
             throw new \InvalidArgumentException('invalid handle!');

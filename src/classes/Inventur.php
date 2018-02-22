@@ -17,9 +17,12 @@ class Inventur
     public function __construct()
     {
         try {
-            $this->inventurObject = Models\Inventur::findByFilter(array(
+            $this->inventurObject = Models\Inventur::findByFilter(
+                array(
                 'finishDate', 'IS', 'NULL'
-            ), 1);
+                ),
+                1
+            );
         } catch (\App\Exceptions\NothingFoundException $e) {
             $this->inventurObject = Models\Inventur::new();
         }
@@ -99,9 +102,13 @@ class Inventur
     public static function getLastInventur()
     {
         try {
-            return Models\Inventur::findByFilter(array(
+            return Models\Inventur::findByFilter(
+                array(
                 'finishDate', 'IS NOT', 'NULL'
-            ), 1, array('id' => 'DESC'));
+                ),
+                1,
+                array('id' => 'DESC')
+            );
         } catch (\App\Exceptions\NothingFoundException $e) {
             return null;
         }
@@ -112,11 +119,14 @@ class Inventur
         $inventurProduct;
 
         try {
-            $inventurProduct = \App\Models\inventurProduct::findByFilter(array(
+            $inventurProduct = \App\Models\inventurProduct::findByFilter(
+                array(
                 array('product', '=', $product),
                 'AND',
                 array('inventur', '=', $this->inventurObject)
-            ), 1);
+                ),
+                1
+            );
 
             if ($inventurProduct->isInStock()) {
                 throw new \App\QueryBuilder\NothingChangedException("already scanned!");
@@ -160,11 +170,14 @@ class Inventur
         $inventurProduct;
 
         try {
-            $inventurProduct = \App\Models\inventurProduct::findByFilter(array(
+            $inventurProduct = \App\Models\inventurProduct::findByFilter(
+                array(
                 array('product', '=', $product),
                 'AND',
                 array('inventur', '=', $this->inventurObject)
-            ), 1);
+                ),
+                1
+            );
 
             if ($inventurProduct->isInStock()) {
                 throw new \App\QueryBuilder\NothingChangedException("already scanned!");
@@ -229,10 +242,13 @@ class Inventur
     private function getInventurAction(Models\Product $product)
     {
         try {
-            $action = Models\InventurProduct::findByFilter(array(
+            $action = Models\InventurProduct::findByFilter(
+                array(
                 array('product', '=', $product),
                 array('inventur', '=', $this->inventurObject)
-            ), 1);
+                ),
+                1
+            );
         } catch (\App\Exceptions\NothingFoundException $e) {
             $action = Models\InventurProduct::new();
             $action->set('product', $product);

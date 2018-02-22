@@ -322,9 +322,11 @@ class Builder
 
     public function delete()
     {
-        return $this->update(array(
+        return $this->update(
+            array(
             "deleted" => "1"
-        ));
+            )
+        );
     }
 
     public function insertIgnore(array $data)
@@ -504,7 +506,7 @@ class Builder
 
     private static function getErrorMessage($e)
     {
- // TODO
+        // TODO
         $errorMessage = "Es ist ein Fehler bei der Verarbeitung aufgetreten!";
         $errorValue = null;
         $errorColumn = null;

@@ -22,9 +22,12 @@ abstract class BasicController
 
         $this->beforeActions = array();
 
-        $this->ifFormat('html', function () {
-            $this->view->assign('request', $this->request);
-        });
+        $this->ifFormat(
+            'html',
+            function () {
+                $this->view->assign('request', $this->request);
+            }
+        );
     }
 
     public function init()

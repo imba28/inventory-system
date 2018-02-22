@@ -8,8 +8,8 @@ class SQLiteBuilder extends Builder
     /**
      * getInsertStatement
      *
-     * @todo this is bad!!!!
-     * @param mixed $data
+     * @todo   this is bad!!!!
+     * @param  mixed $data
      * @return void
      */
     protected function getInsertStatement($data)

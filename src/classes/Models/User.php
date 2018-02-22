@@ -10,13 +10,16 @@ class User extends \App\Model
 
     protected function int()
     {
-        $this->on('save', function ($e) {
-            $user = $e->getContext();
+        $this->on(
+            'save',
+            function ($e) {
+                $user = $e->getContext();
 
-            $password = self::getHashedString($user->get('password'));
+                $password = self::getHashedString($user->get('password'));
 
-            $user->set('password', $password);
-        });
+                $user->set('password', $password);
+            }
+        );
     }
 
     public static function getHashedString($string): string
