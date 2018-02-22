@@ -164,6 +164,9 @@ class Validator
      */
     protected function validateEmail($value): bool
     {
+        if (!$this->validateRequired($value)) { // if value is not set
+            return true;
+        }
         return filter_var($value, FILTER_VALIDATE_EMAIL);
     }
 
