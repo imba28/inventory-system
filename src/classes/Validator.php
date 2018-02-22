@@ -19,6 +19,11 @@ class Validator
         $this->errors = array();
     }
 
+    /**
+     * checks if all validations pass
+     *
+     * @return bool
+     */
     public function passes(): bool
     {
         $this->errors = array();
@@ -35,6 +40,11 @@ class Validator
         return count($this->errors) == 0;
     }
 
+    /**
+     * checks if validations fail
+     *
+     * @return bool
+     */
     public function fails(): bool
     {
         return !$this->passes();
@@ -87,7 +97,7 @@ class Validator
      *
      * returns a closure, which determines whether or not an attribute value is valid.
      *
-     * @param mixed $string
+     * @param  mixed $string
      * @throws \Exception
      * @return \Closure
      */
@@ -109,12 +119,10 @@ class Validator
         };
     }
 
-    // Validator Methods
-
     /**
      * check if an attribute is set, not null and not empty.
      *
-     * @param mixed $value
+     * @param  mixed $value
      * @return bool
      */
     protected function validateRequired($value): bool
@@ -122,7 +130,7 @@ class Validator
         if (is_null($value)) {
             return false;
         }
-        if (is_string($value) && count(trim($value)) <= 0) {
+        if (is_string($value) && strlen(trim($value)) <= 0) {
             return false;
         }
         if (is_array($value) && count($value) <= 0) {
@@ -135,7 +143,7 @@ class Validator
     /**
      * checks if an attribute is a valid date string
      *
-     * @param mixed $value
+     * @param  mixed $value
      * @return bool
      */
     protected function validateDate($value): bool
@@ -148,7 +156,7 @@ class Validator
     /**
      * checks if an attribute is null
      *
-     * @param mixed $value
+     * @param  mixed $value
      * @return bool
      */
     protected function validateMustBeNull($value): bool
@@ -159,7 +167,7 @@ class Validator
     /**
      * checks if an attribute is a valid email adress
      *
-     * @param mixed $value
+     * @param  mixed $value
      * @return bool
      */
     protected function validateEmail($value): bool
@@ -173,8 +181,8 @@ class Validator
     /**
      * checks if an attribute is smaller than/equal to a threshold.
      *
-     * @param mixed $value
-     * @param mixed $limit
+     * @param  mixed $value
+     * @param  mixed $limit
      * @return bool
      */
     protected function validateMax($value, $limit): bool
@@ -185,8 +193,8 @@ class Validator
     /**
      *  checks if an attribute is greater than/equal to a threshold.
      *
-     * @param mixed $value
-     * @param mixed $limit
+     * @param  mixed $value
+     * @param  mixed $limit
      * @return void
      */
     protected function validateMin($value, $limit): bool
