@@ -9,9 +9,9 @@ $router->addRoute('get', '/products/category', 'ProductController#displayCategor
 $router->addRoute('all', array('/products/search', '/products/:action/:page'), 'ProductController#search');
 $router->addRoute('all', array('/products/:action', '/products'), 'ProductController#products');
 
+$router->addRoute('get', '/customers/new', 'CustomerController#new');
 $router->addRoute('get', ['/customers', '/customers/:page'], 'CustomerController#index');
 $router->addRoute('post', '/customers', 'CustomerController#create');
-$router->addRoute('all', '/customers/new', 'CustomerController#new');
 
 $router->addRoute('get', '/customer/:_id', 'CustomerController#show');
 $router->addRoute('get', '/customer/:_id/edit', 'CustomerController#edit');

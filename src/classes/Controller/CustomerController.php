@@ -51,8 +51,6 @@ class CustomerController extends ApplicationController
                     $this->view->assign('totals', 0);
                     System::error('Keine Ergebnisse gefunden!');
                 }
-
-                $this->view->setTemplate('customers');
             });
 
             $wants->json(function () {
@@ -78,7 +76,6 @@ class CustomerController extends ApplicationController
                 }
 
                 $this->view->assign('rentHistory', $rentalHistory);
-                $this->view->setTemplate('customer');
             });
         });
     }
@@ -114,34 +111,30 @@ class CustomerController extends ApplicationController
 
     public function edit()
     {
-        $this->view->setTemplate('customer-update');
+        $this->view->setTemplate('customer/edit');
     }
 
     public function create()
     {
         $this->new();
         $this->update();
-        $this->view->setTemplate('customer-add');
     }
 
     public function delete()
     {
         if ($this->customer->remove()) {
             System::success('Kunde wurde gelöscht.');
+            $this->redirectToRoute('/customers');
         } else {
             System::error('Es ist ein Fehler beim Löschen aufgetreten!');
+            $this->redirectToRoute("customer/{$this->customer->getId()}");
         }
-
-        $this->index();
     }
 
     public function new()
     {
         $this->customer = Customer::new();
-        $this->customer->set('user', $this->getCurrentUser());
         $this->view->assign('customer', $this->customer);
-
-        $this->view->setTemplate('customer-add');
     }
 
     public function error($status, $message = "Dieser Kunde konnte leider nicht gefunden werden!")
