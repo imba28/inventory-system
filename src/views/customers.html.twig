@@ -13,21 +13,23 @@
             </ul>
         </nav>
         <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-            <h1>Kunden</h1>
+            <h1>Kunden ({{ totals }})</h1>
             <section class="row text-center placeholders">
                 {% for customer in customers %}
-                <div class="card" style="width: 10rem;">
-                    <img class="card-img-top" src="http://via.placeholder.com/100x100" alt="Card image cap">
-                    <div class="card-body">
-                        <h4 class="card-title">{{ customer.get('name') }}</h4>
-                        <p class="card-text">
-                            {{ customer.get('internal_id') }}
-                        </p>
-                        <a href="/customer/{{ customer.getId() }}" class="btn btn-primary">Details</a>
+                <div class="col-lg-2 col-md-3 col-sm-4 p-1">
+                    <div class="card p-3">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ customer.get('name') }}</h4>
+                            <p class="card-text">
+                                {{ customer.get('internal_id') }}
+                            </p>
+                            <a href="/customer/{{ customer.getId() }}" class="btn btn-primary">Details</a>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
             </section>
+            {{ paginator.render()|raw }}
         </main>
     </div>
 </div>

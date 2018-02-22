@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Models\Customer;
+use App\Models\Action;
 use App\System;
 
 class CustomerController extends ApplicationController
@@ -26,14 +27,42 @@ class CustomerController extends ApplicationController
 
     public function index($params = array())
     {
-        try {
-            $customers = Customer::all();
-        } catch (\App\Exceptions\NothingFoundException $e) {
-            $customers = array();
-        }
-        
-        $this->view->assign('customers', $customers);
-        $this->view->setTemplate('customers');
+        $this->respondTo(function ($wants) use ($params) {
+            $wants->html(function () use ($params) {
+                $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+                $itemsPerPage = 8;
+
+                try {
+                    $customers = Customer::findByFilter(
+                        array(),
+                        (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
+                    );
+                    $paginator = new \App\Paginator(
+                        Customer::getQuery(array())->count(),
+                        $currentPage,
+                        $itemsPerPage,
+                        '/customers'
+                    );
+
+                    $this->view->assign('customers', $customers);
+                    $this->view->assign('totals', $paginator->getTotals());
+                    $this->view->assign('paginator', $paginator);
+                } catch (\App\Exceptions\NothingFoundException $e) {
+                    $this->view->assign('totals', 0);
+                    System::error('Keine Ergebnisse gefunden!');
+                }
+
+                $this->view->setTemplate('customers');
+            });
+
+            $wants->json(function () {
+                $this->view->assign('customers', Customer::all());
+            });
+
+            $wants->xml(function () {
+                $this->view->assign('customers', Customer::all());
+            });
+        });
     }
 
     public function show(array $params)
