@@ -8,6 +8,8 @@ body, html {
 
 .card {
     justify-content: space-between;
+    display: flex;
+    height: 100%;
 }
 
 .card img, .card .img {

@@ -1,22 +1,24 @@
 {% macro render(products, paginator, buttons) %}
 <section class="row text-center placeholders pl-3 pr-3">
     {% for product in products %}
-    <div class="card col-lg-3 col-md-4 col-sm-6">
-        <img class="card-img-top" src="{{ product.getFrontImage().get('src') }}" alt="Card image cap">
-        <div class="card-body">
-            {{ product.isAvailable() ? '<span class="badge badge-success">Verfügbar</span>' : '<span class="badge badge-danger">Verliehen</span>' }}
-            <h4 class="card-title">{{ product.get('name') }}</h4>
-            <p class="card-text">
-                {{ product.get('type') }}
-            </p>
-            {% if buttons %}
-                {% for button in buttons %}
-                    {% set href = button.get('href') | replace({'__id__': product.getId()}) %}
-                    <a href="{{ href }}" class="btn btn-{{ button.get('style') }}">{{ button.get('text') }}</a>
-                {% endfor %}
-            {% else %}
-                <a href="/product/{{ product.getId() }}" class="btn btn-primary">Details</a>
-            {% endif %}
+    <div class="col-lg-3 col-md-4 col-sm-6 p-1">
+        <div class="card p-3">
+            <img class="card-img-top" src="{{ product.getFrontImage().get('src') }}" alt="Card image cap">
+            <div class="card-body">
+                {{ product.isAvailable() ? '<span class="badge badge-success">Verfügbar</span>' : '<span class="badge badge-danger">Verliehen</span>' }}
+                <h4 class="card-title">{{ product.get('name') }}</h4>
+                <p class="card-text">
+                    {{ product.get('type') }}
+                </p>
+                {% if buttons %}
+                    {% for button in buttons %}
+                        {% set href = button.get('href') | replace({'__id__': product.getId()}) %}
+                        <a href="{{ href }}" class="btn btn-{{ button.get('style') }}">{{ button.get('text') }}</a>
+                    {% endfor %}
+                {% else %}
+                    <a href="/product/{{ product.getId() }}" class="btn btn-primary">Details</a>
+                {% endif %}
+            </div>
         </div>
     </div>
     {% endfor %}
