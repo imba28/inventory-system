@@ -1,7 +1,7 @@
 {% macro render(products, paginator, buttons) %}
 <section class="row text-center placeholders pl-3 pr-3">
     {% for product in products %}
-    <div class="col-lg-3 col-md-4 col-sm-6 p-1">
+    <div class="col-lg-3 col-md-4 col-sm-6 p-1 list">
         <div class="card p-3">
             <img class="card-img-top" src="{{ product.getFrontImage().get('src') }}" alt="Card image cap">
             <div class="card-body">
