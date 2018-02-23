@@ -331,6 +331,8 @@ class ProductController extends ApplicationController
             $this->view->assign('action', $action);
             $this->view->setTemplate('product-rented');
         } else {
+            $this->view->setTemplate('product-rent');
+            
             if ($this->request->issetParam('submit')) {
                 try {
                     $customer = Customer::find($this->request->getParam('internal_id'), 'internal_id');
@@ -339,15 +341,20 @@ class ProductController extends ApplicationController
                     $customer->set('user', $this->getCurrentUser());
                     $customer->set('internal_id', $this->request->getParam('internal_id'));
 
-                    $customer->save();
-
-                    System::info(
-                        "Ein neuer Kunde
-                        <a href='/customer/{$customer->getId()}/edit'>
-                            {$customer->get('internal_id')}
-                        </a>
-                        wurde angelegt."
-                    );
+                    try {
+                        if ($customer->save()) {
+                            System::info(
+                                "Ein neuer Kunde
+                                <a href='/customer/{$customer->getId()}/edit'>
+                                    {$customer->get('internal_id')}
+                                </a>
+                                wurde angelegt."
+                            );
+                        }
+                    } catch (\App\Exceptions\InvalidModelDataException $e) {
+                        System::error(join(', ', $customer->getErrors()));
+                        return;
+                    }
                 }
 
                 $expectedReturnDate = !empty($this->request->getParam('expectedReturnDate')) ?
@@ -361,14 +368,16 @@ class ProductController extends ApplicationController
                 $action->set('expectedReturnDate', $expectedReturnDate);
                 $action->set('user', $this->getCurrentUser());
 
-                if ($action->save()) {
-                    System::success('Produkt verliehen!');
-                } else {
-                    System::error('Produkt konnte nicht verliehen werden!');
+                try {
+                    if ($action->save()) {
+                        System::success('Produkt verliehen!');
+                    } else {
+                        System::error('Produkt konnte nicht verliehen werden!');
+                    }
+                } catch (\App\Exceptions\InvalidModelDataException $e) {
+                    System::error(join(', ', $action->getErrors()));
                 }
             }
-
-            $this->view->setTemplate('product-rent');
         }
     }
 
