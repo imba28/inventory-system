@@ -137,9 +137,6 @@ abstract class BasicController
 
     protected function redirectToRoute($route, $requestMethod = 'GET')
     {
-        if ($route[0] !== "route") {
-            $route = "/{$route}";
-        }
         \App\Router::getInstance()->route($route, $requestMethod);
     }
 

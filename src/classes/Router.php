@@ -93,6 +93,9 @@ class Router
             $requestMethod = $_SERVER['REQUEST_METHOD'];
         }
 
+        if ($requestURI[0] !== '/') {
+            $requestURI = "/{$requestURI}";
+        }
         $uri = ltrim(parse_url($requestURI, PHP_URL_PATH), '/');
         //$params = parse_url($requestURI, PHP_URL_QUERY);
 
