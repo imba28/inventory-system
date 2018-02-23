@@ -16,18 +16,25 @@ class ProductController extends ApplicationController
     {
         parent::init();
         $this->beforeAction(
-            'product',
+            ['update', 'delete', 'show', 'edit', 'rent', 'return'],
             function ($params) {
                 try {
                     $this->product = Product::find($params['id']);
                 } catch (\App\Exceptions\NothingFoundException $e) {
-                    $this->product = null;
+                    $this->error(404);
                 }
+                $this->view->assign('product', $this->product);
+            }
+        );
+        $this->beforeAction(
+            ['new', 'update', 'delete', 'create'],
+            function ($params) {
+                $this->authenticateUser();
             }
         );
     }
 
-    public function product($params)
+    /*public function product($params)
     {
         if (is_null($this->product)) {
             $this->error(404, 'Produkt wurde nicht gefunden!');
@@ -50,20 +57,63 @@ class ProductController extends ApplicationController
                 $this->show($this->product);
             }
         }
+    }*/
+
+    public function show()
+    {
+        $this->respondTo(
+            function ($wants) {
+                $wants->html(
+                    function () {
+                        $this->view->setTemplate('product');
+
+                        try {
+                            $this->view->assign(
+                                'rentHistory',
+                                Action::findByFilter(
+                                    array(
+                                    'product',
+                                    '=',
+                                    $this->product
+                                    ),
+                                    10
+                                )
+                            );
+                        } catch (\App\Exceptions\NothingFoundException $e) {
+                            $this->view->assign('rentHistory', array());
+                        }
+                    }
+                );
+            }
+        );
+    }
+
+    public function new()
+    {
+        $this->product = Product::new();
+        $this->product->set('user', $this->getCurrentUser());
+
+        $this->view->assign('product', $this->request);
+
+        $this->view->setTemplate('product-add');
+    }
+
+    public function create()
+    {
+        $this->new();
+        $this->update();
+
+        $this->view->setTemplate('product-add');
     }
 
     public function delete(array $params)
     {
-        $this->authenticateUser();
-
-        if (isset($params['id'])) {
-            if (Product::delete(intval($params['id'])) === false) {
-                System::error('Es ist ein Fehler beim Löschen aufgetreten!');
-            } else {
-                System::success('Produkt wurde gelöscht.');
-            }
-
-            $this->products();
+        if ($this->product->remove() === false) {
+            System::error('Es ist ein Fehler beim Löschen aufgetreten!');
+            $this->redirectToRoute('/product/' . $this->product->getId());
+        } else {
+            System::success('Produkt wurde gelöscht.');
+            $this->redirectToRoute('/products');
         }
     }
 
@@ -71,6 +121,8 @@ class ProductController extends ApplicationController
     {
         if ($this->request->issetParam('search_string')) {
             $_SESSION['search_string'] = $this->request->getParam('search_string');
+        } else {
+            $_SESSION['search_string'] = '';
         }
 
         $searchString = $_SESSION['search_string'];
@@ -114,7 +166,7 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('products-search');
     }
 
-    public function products($params = array())
+    /*public function products($params = array())
     {
         if (isset($params['action'])) {
             if (intval($params['action']) > 0) { // TODO: naja, echt grausig....
@@ -133,8 +185,9 @@ class ProductController extends ApplicationController
             $this->index($params);
             /*$this->view->assign('products', Product::all());
             $this->view->setTemplate('products');*/
+            /*
         }
-    }
+    }*/
 
     public function home()
     {
@@ -223,55 +276,56 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('products');
     }
 
-    public function error($status, $message = '')
+    public function error($status, $message = 'Produkt wurde nicht gefunden!')
     {
         $this->response->setStatus($status);
         $this->view->setTemplate('error');
         $this->view->assign('errorCode', $status);
         $this->view->assign('errorMessage', $message);
+
+        $this->renderContent();
+        exit();
     }
 
     // INTERNAL METHODS
 
-    private function edit()
+    public function edit()
     {
-        $this->authenticateUser();
-
         $this->view->setTemplate('product-update');
+    }
 
-        if ($this->request->issetParam('submit')) {
-            if ($this->saveUploadedImages()) {
-                $this->product->setAll($this->request->getParams());
+    public function update()
+    {
+        if ($this->saveUploadedImages()) {
+            $this->product->setAll($this->request->getParams());
 
-                try {
-                    $this->product->save();
-                    System::success($this->product->get('name'). ' wurde aktualisiert!');
-                } catch (\App\QueryBuilder\QueryBuilderException $e) {
-                    list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
-                    System::error($errorMessage);
-                } catch (\InvalidOperationException $e) {
-                    System::error('Fehler beim Speichern! ' . $e->getMessage());
-                } catch (\App\Exceptions\InvalidModelDataException $e) {
-                    System::error(join(', ', $this->product->getErrors()));
-                } catch (\Exception $e) {
-                    System::error('Fehler beim Speichern!');
-                }
+            try {
+                $this->product->save();
+                System::success($this->product->get('name'). ' wurde aktualisiert!');
+            } catch (\App\QueryBuilder\QueryBuilderException $e) {
+                list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
+                System::error($errorMessage);
+            } catch (\InvalidOperationException $e) {
+                System::error('Fehler beim Speichern! ' . $e->getMessage());
+            } catch (\App\Exceptions\InvalidModelDataException $e) {
+                System::error(join(', ', $this->product->getErrors()));
+            } catch (\Exception $e) {
+                System::error('Fehler beim Speichern!');
             }
+
+            $this->edit();
         }
     }
 
-    private function rent()
+    public function rent()
     {
-        $this->authenticateUser();
-
         if (!$this->product->isAvailable()) {
-            $action = current(
-                Action::findByFilter(
-                    array(
-                    array('product_id', '=', $this->product->getId()),
-                    array('returnDate', 'IS', 'NULL')
-                    )
-                )
+            $action = Action::findByFilter(
+                array(
+                array('product_id', '=', $this->product->getId()),
+                array('returnDate', 'IS', 'NULL')
+                ),
+                1
             );
 
             $this->view->assign('action', $action);
@@ -318,7 +372,7 @@ class ProductController extends ApplicationController
         }
     }
 
-    private function return()
+    public function return()
     {
         $this->authenticateUser();
         $this->view->setTemplate('product-return');
@@ -344,76 +398,7 @@ class ProductController extends ApplicationController
         }
     }
 
-    private function show()
-    {
-        $this->respondTo(
-            function ($wants) {
-                $wants->html(
-                    function () {
-                        $this->view->setTemplate('product');
-
-                        try {
-                            $this->view->assign(
-                                'rentHistory',
-                                Action::findByFilter(
-                                    array(
-                                    'product',
-                                    '=',
-                                    $this->product
-                                    ),
-                                    10
-                                )
-                            );
-                        } catch (\App\Exceptions\NothingFoundException $e) {
-                            $this->view->assign('rentHistory', array());
-                        }
-                    }
-                );
-            }
-        );
-    }
-
-    private function create()
-    {
-        $this->authenticateUser();
-
-        if ($this->request->issetParam('submit')) {
-            $this->product = Product::new();
-            $this->product->set('user', $this->getCurrentUser());
-
-            $this->product->setAll($this->request->getParams());
-
-            try {
-                if ($this->saveUploadedImages()) {
-                    if ($this->product->save()) {
-                        System::success(
-                            $this->product->get('name'). ' wurde erstellt!
-                            <a href="/product/'. $this->product->getId() .'">
-                                zum Produkt
-                            </a>'
-                        );
-                    } else {
-                        System::success(
-                            $this->product->get('name').
-                            ' wurde erstellt! <a href="/product/'. $this->product->getId() .'">zum Produkt</a>'
-                        );
-                    }
-                }
-            } catch (\App\QueryBuilder\QueryBuilderException $e) {
-                list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
-                vd($e);
-                System::error($errorMessage);
-            } catch (\App\Exceptions\InvalidModelDataException $e) {
-                System::error(join(', ', $this->product->getErrors()));
-            } catch (\Exception $e) {
-                System::error('Fehler beim Speichern!');
-            }
-        }
-
-        $this->view->setTemplate('product-add');
-    }
-
-    private function rentMask()
+    public function rentMask()
     {
         $this->authenticateUser();
 
@@ -467,7 +452,7 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('products-search-mask');
     }
 
-    private function index($params)
+    public function index($params)
     {
         $this->view->setTemplate('products');
 
