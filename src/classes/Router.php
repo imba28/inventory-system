@@ -84,7 +84,7 @@ class Router
         }
     }
 
-    public function route($requestURI = null, $requestMethod = null)
+    public function route(string $requestURI = null, $requestMethod = null)
     {
         if (is_null($requestURI)) {
             $requestURI = urldecode($_SERVER['REQUEST_URI']);
@@ -96,14 +96,20 @@ class Router
         if ($requestURI[0] !== '/') {
             $requestURI = "/{$requestURI}";
         }
+
         $uri = ltrim(parse_url($requestURI, PHP_URL_PATH), '/');
         //$params = parse_url($requestURI, PHP_URL_QUERY);
+
+        if (isset($_REQUEST['_method']) && in_array(strtoupper($_REQUEST['_method']), array_keys($this->routes))) {
+            $requestMethod = strtoupper($_REQUEST['_method']);
+            unset($_REQUEST['_method']);
+        }
 
         $routes = $this->routes[$requestMethod] + $this->routes['ALL'];
         ksort($routes);
 
         if ($this->findHandler($routes, $requestURI) === false) {
-            throw new \ErrorException("Route `{$uri}`not defined!");
+            throw new \ErrorException("Route `{$requestMethod}->{$uri}`not defined!");
         }
     }
 

@@ -12,7 +12,7 @@
         </nav>
         <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
             {% import 'partials/customer-form.html.twig' as customer_form %}
-            {{ customer_form.render(customer, (customer.get('name') ~ ' &#187; Bearbeiten')|raw, 'Speichern', '/customer/' ~ customer.getId()) }}
+            {{ customer_form.render(customer, (customer.get('name') ~ ' &#187; Bearbeiten')|raw, 'Speichern', '/customer/' ~ customer.getId(), 'put') }}
         </main>
     </div>
 </div>

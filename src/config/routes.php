@@ -1,12 +1,12 @@
 <?php
 $router->addRoute('all', array('/', '/home', '/products/return'), 'ProductController#home');
 
-$router->addRoute('post', '/product/:id/delete', 'ProductController#delete');
+$router->addRoute('delete', '/product/:id', 'ProductController#delete');
 $router->addRoute('all', array('/product/:id', '/product/:id/:action'), 'ProductController#product');
 
-$router->addRoute('all', array('/products/category/:category', '/products/category/:category/:page'), 'ProductController#displayCategory');
+$router->addRoute('get', array('/products/category/:category', '/products/category/:category/:page'), 'ProductController#displayCategory');
 $router->addRoute('get', '/products/category', 'ProductController#displayCategories');
-$router->addRoute('all', array('/products/search', '/products/:action/:page'), 'ProductController#search');
+$router->addRoute('get', array('/products/search', '/products/:action/:page'), 'ProductController#search');
 $router->addRoute('all', array('/products/:action', '/products'), 'ProductController#products');
 
 $router->addRoute('get', '/customers/new', 'CustomerController#new');
@@ -15,8 +15,8 @@ $router->addRoute('post', '/customers', 'CustomerController#create');
 
 $router->addRoute('get', '/customer/:_id', 'CustomerController#show');
 $router->addRoute('get', '/customer/:_id/edit', 'CustomerController#edit');
-$router->addRoute('post', '/customer/:id', 'CustomerController#update');
-$router->addRoute('post', '/customer/:id/delete', 'CustomerController#delete');
+$router->addRoute('put', '/customer/:id', 'CustomerController#update');
+$router->addRoute('delete', '/customer/:id', 'CustomerController#delete');
 //$router->addRoute('all', '/customer/:id/:action', 'CustomerController#action');
 
 $router->addRoute('post', '/inventur', 'InventurController#actionInventur');

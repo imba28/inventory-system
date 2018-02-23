@@ -1,4 +1,4 @@
-{% macro render(product, title, button_text, back_link) %}
+{% macro render(product, title, button_text, back_link, method) %}
     <h1>Produkte
         {{ title ? ('&#187; ' ~ title)|raw : '' }}
     </h1>
@@ -7,6 +7,7 @@
     <!-- /.col-lg-3 -->
     <div class="row">
         <form method="post" id="product-form" enctype="multipart/form-data" class="ml-4 col-md-6">
+            <input type="hidden" name="_method" value="{{ method }}">
             <div class="form-group">
                 <label for="name">Name</label>
                 <input id="name" type="text" class="form-control" placeholder="Produktname eingeben" name="name" value="{{ product.get('name') }}">
