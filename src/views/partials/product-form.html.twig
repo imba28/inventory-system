@@ -1,4 +1,5 @@
 {% macro render(product, title, button_text, back_link, method) %}
+{% set action = product.getId() is not null ? '/product/' ~ product.getId() : '/products' %}
     <h1>Produkte
         {{ title ? ('&#187; ' ~ title)|raw : '' }}
     </h1>
@@ -6,7 +7,7 @@
     <hr>
     <!-- /.col-lg-3 -->
     <div class="row">
-        <form method="post" id="product-form" enctype="multipart/form-data" class="ml-4 col-md-6">
+        <form method="post" id="product-form" action="{{ action }}" enctype="multipart/form-data" class="ml-4 col-md-6">
             <input type="hidden" name="_method" value="{{ method }}">
             <div class="form-group">
                 <label for="name">Name</label>
