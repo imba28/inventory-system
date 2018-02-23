@@ -8,6 +8,7 @@ $router->addRoute('delete', '/product/:id', 'ProductController#delete');
 
 $router->addRoute(['get','post'], '/product/:id/rent', 'ProductController#rent');
 $router->addRoute(['get','post'], '/product/:id/return', 'ProductController#return');
+$router->addRoute(['get','post'], '/product/:id/request', 'ProductController#request');
 
 
 $router->addRoute('get', '/products/new', 'ProductController#new');

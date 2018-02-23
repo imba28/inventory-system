@@ -17,6 +17,7 @@ class ProductController extends ApplicationController
         parent::init();
         $this->beforeAction(
             ['update', 'delete', 'show', 'edit', 'rent', 'return'],
+            ['update', 'delete', 'show', 'edit', 'rent', 'return', 'request'],
             function ($params) {
                 try {
                     $this->product = Product::find($params['id']);
@@ -513,7 +514,7 @@ class ProductController extends ApplicationController
         return $query->get();
     }
 
-    private function request()
+    public function request()
     {
         if ($this->product->isAvailable()) {
             $adminEmail = \App\Configuration::get('admin_email');
