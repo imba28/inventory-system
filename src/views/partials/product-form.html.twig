@@ -46,8 +46,9 @@
             <button type="submit" name="submit" class="btn btn-primary">{{ button_text ? button_text : 'Speichern' }}</button>
         </form>
         {% if product.isCreated() %}
-            <form method="post" action="/product/{{ product.getId() }}/delete" class="pl-4">
+            <form method="post" action="/product/{{ product.getId() }}" class="pl-4">
                 <h5>Produkt löschen</h5>
+                <input type="hidden" name="_method" value="delete">
                 <button type="submit" class="btn btn-danger">Löschen</button>
             </form>
         </div>
