@@ -17,6 +17,13 @@ class Router
 
     public function addRoute($requestMethod, $path, $handler)
     {
+        if (is_array($requestMethod)) {
+            foreach ($requestMethod as $method) {
+                $this->addRoute($method, $path, $handler);
+            }
+            return;
+        }
+
         if (is_array($path)) {
             foreach ($path as $p) {
                 $this->addRoute($requestMethod, $p, $handler);
