@@ -29,11 +29,9 @@ class Validator
         $this->errors = array();
        
         foreach ($this->rules as $attribute => $rules) {
-            foreach ($rules as $rule) {
+            foreach ($rules as $validate) {
                 $value = $this->data[$attribute] ?? null;
-                if (!$rule($value)) {
-                    $this->errors[] = $attribute;
-                }
+                $validate($value, $attribute);
             }
         }
 
@@ -72,6 +70,22 @@ class Validator
         return $this->errors;
     }
 
+    /**
+     * Returns an array of fields that failed their tests.
+     *
+     * @return array
+     */
+    public function getFailedFields(): array
+    {
+        $fields = [];
+        foreach ($this->errors as $errors) {
+            foreach ($errors as $attribute) {
+                $fields[] = $attribute['field'];
+            }
+        }
+
+        return $fields;
+    }
     /**
      * converts array of rulesets into array of closures, that validate data.
      *
@@ -126,18 +140,29 @@ class Validator
     protected function getRule($string)
     {
         $string = explode(':', $string, 2);
+        $rule = $string[0];
 
-        $validatorMethod = "validate{$string[0]}";
+        $validatorMethod = "validate{$rule}";
 
         if (!(is_callable([$this, $validatorMethod], false))) {
-            throw new \Exception("{$string[0]} is not a valid validator!");
+            throw new \Exception("{$rule} is not a valid validator!");
         }
 
         array_shift($string);
         $param = current($string);
 
-        return function ($value) use ($validatorMethod, $param) {
-            return call_user_func_array(array($this, $validatorMethod), [$value, $param]);
+        return function ($value, $field) use ($validatorMethod, $param, $rule) {
+            $valid = call_user_func_array(array($this, $validatorMethod), [$value, $param]);
+
+            if ($valid === false) {
+                $this->errors[$rule][] = array(
+                    'field' => $field,
+                    'value' => $value,
+                    'param' => $param
+                );
+            }
+
+            return $valid;
         };
     }
 

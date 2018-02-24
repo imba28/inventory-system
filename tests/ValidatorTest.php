@@ -88,10 +88,10 @@ class ValidatorTest extends TestCase
         );
 
         $this->assertTrue($validator->fails());
-        $this->assertContains('test', $validator->getErrors());
-        $this->assertContains('password', $validator->getErrors());
+        $this->assertContains('test', $validator->getFailedFields());
+        $this->assertContains('password', $validator->getFailedFields());
 
-        $this->assertNotContains('name', $validator->getErrors());
-        $this->assertNotContains('email', $validator->getErrors());
+        $this->assertNotContains('name', $validator->getFailedFields());
+        $this->assertNotContains('email', $validator->getFailedFields());
     }
 }
