@@ -50,16 +50,34 @@ class Validator
         return !$this->passes();
     }
 
+    /**
+     * sets data, allows applying the validator on multiple datasets.
+     *
+     * @param array $data
+     * @return void
+     */
     public function setData(array $data)
     {
         $this->data = $this->parseData($data);
     }
 
+    /**
+     * returns list of errors
+     *
+     * @todo   add messages
+     * @return array
+     */
     public function getErrors(): array
     {
         return $this->errors;
     }
 
+    /**
+     * converts array of rulesets into array of closures, that validate data.
+     *
+     * @param array $rulesArray
+     * @return array
+     */
     protected function parseRules(array $rulesArray): array
     {
         $rulesArray = $this->explodeRules($rulesArray);
@@ -83,6 +101,12 @@ class Validator
         return $data;
     }
 
+    /**
+     * splits array of rulessets by separating the strings into substrings, using the pipe symbol "|" as a seperator
+     *
+     * @param array $rulesArray
+     * @return array
+     */
     protected function explodeRules(array $rulesArray): array
     {
         foreach ($rulesArray as $name => $rules) {
@@ -93,8 +117,6 @@ class Validator
     }
 
     /**
-     * getRule
-     *
      * returns a closure, which determines whether or not an attribute value is valid.
      *
      * @param  mixed $string

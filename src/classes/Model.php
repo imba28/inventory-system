@@ -4,6 +4,9 @@ namespace App;
 use App\Validator;
 use App\QueryBuilder\Builder;
 
+/**
+ * Object relational mapper
+ */
 abstract class Model implements \JsonSerializable
 {
     use Traits\Events;
@@ -115,7 +118,7 @@ abstract class Model implements \JsonSerializable
      *
      * @return bool
      */
-    public function isCreated()
+    public function isCreated(): bool
     {
         return !empty($this->getId());
     }
@@ -345,7 +348,7 @@ abstract class Model implements \JsonSerializable
      * @param  mixed $column
      * @return \App\Model
      */
-    public static function find($value, $column = 'id'): \App\Model
+    public static function find($value, $column = 'id'): Model
     {
         $selfClass = get_called_class();
         if ($column == 'id' && isset(self::$instances[$selfClass][$value])) {

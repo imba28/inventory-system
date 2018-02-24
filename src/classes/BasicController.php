@@ -30,10 +30,20 @@ abstract class BasicController
         );
     }
 
+    /**
+     * Helper method that is called inside constructor. May be overridden/extended from sub classes.
+     *
+     * @return void
+     */
     public function init()
     {
     }
 
+    /**
+     * Renders view, adds it to the response object and flushes it afterwards.
+     *
+     * @return void
+     */
     protected function renderContent()
     {
         $this->response->append($this->view->render());
@@ -41,6 +51,13 @@ abstract class BasicController
         $this->response->flush();
     }
 
+    /**
+     * specifies a function, that should be called before a specific controller method is executed.
+     *
+     * @param mixed $method
+     * @param mixed $methodToCall
+     * @return void
+     */
     protected function beforeAction($method, $methodToCall)
     {
         if (is_array($method)) {
@@ -56,6 +73,15 @@ abstract class BasicController
         $this->beforeActions[$method][] = $methodToCall;
     }
 
+    /**
+     * Executes a controller method, that was passed to the method.
+     *
+     * Tries to find the correct template based on controller and method name.
+     *
+     * @param mixed $method
+     * @param mixed $args
+     * @return void
+     */
     public function handle($method, $args)
     {
         $this->setViewTemplate($method);
@@ -67,6 +93,12 @@ abstract class BasicController
         $this->renderContent();
     }
 
+    /**
+     * Sets the view's template file.
+     *
+     * @param mixed $templateName
+     * @return void
+     */
     private function setViewTemplate($templateName)
     {
         $selfClass = get_called_class();
@@ -79,6 +111,14 @@ abstract class BasicController
         }
     }
 
+    /**
+     * Executes all closures whose response type matches $responseType.
+     *
+     * @see $responseType
+     * @see ifFormat()    For setting closures
+     *
+     * @return void
+     */
     private function callFormats()
     {
         if (isset($this->formats[$this->responseType])) {
@@ -88,7 +128,14 @@ abstract class BasicController
         }
     }
 
-    protected function ifFormat($responseType, \Closure $f)
+    /**
+     * Sets a closure that should only be executed in case of a specific response type.
+     *
+     * @param string $responseType
+     * @param \Closure $f
+     * @return void
+     */
+    protected function ifFormat(string $responseType, \Closure $f)
     {
         if (!isset($this->formats[$responseType])) {
             $this->formats[$responseType] = array();
@@ -96,6 +143,13 @@ abstract class BasicController
         $this->formats[$responseType] = $f;
     }
 
+    /**
+     * Executes all closures that were specified by beforeAction().
+     *
+     * @param mixed $method
+     * @param mixed $args
+     * @return void
+     */
     private function callBeforeActions($method, $args)
     {
         if (isset($this->beforeActions[$method])) {
@@ -113,9 +167,16 @@ abstract class BasicController
         }
     }
 
+    /**
+     * Executes code blocks depending on on what response type the client expects.
+     *
+     * @see \App\Format For all possible response types.
+     *
+     * @param \Closure $formats
+     * @return void
+     */
     protected function respondTo(\Closure $formats)
     {
-        $responseFormats = new \App\Format();
         /*
         kapselt verschiedene Closures, die je nach response Type Werte in der View setzen.
         example usage:
@@ -131,10 +192,19 @@ abstract class BasicController
             });
         });
         */
+        $responseFormats = new \App\Format();
+   
         $formats($responseFormats);
         $responseFormats->execute($this->responseType);
     }
 
+    /**
+     * Calls the router with a passed route and request method.
+     *
+     * @param mixed $route
+     * @param mixed $requestMethod
+     * @return void
+     */
     protected function redirectToRoute($route, $requestMethod = 'GET')
     {
         \App\Router::getInstance()->route($route, $requestMethod);
