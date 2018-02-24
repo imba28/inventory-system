@@ -105,7 +105,8 @@ class CustomerController extends ApplicationController
  
         try {
             $this->customer->save();
-            self::$status->add('success', 
+            self::$status->add(
+                'success',
                 "<a href='/customer/{$this->customer->getId()}'>
                     {$this->customer->get('name')}
                 </a>

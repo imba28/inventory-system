@@ -128,7 +128,8 @@ class InventurController extends ApplicationController
                 self::$status->add('info', "Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
         } catch (\App\Exceptions\NothingFoundException $e) {
-            self::$status->add('errors', 
+            self::$status->add(
+                'errors',
                 "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden.
                 Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?"
             );
@@ -155,7 +156,8 @@ class InventurController extends ApplicationController
                 self::$status->add('info', "Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
         } catch (\App\Exceptions\NothingFoundException $e) {
-            self::$status->add('errors', 
+            self::$status->add(
+                'errors',
                 "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden.
                 Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?"
             );
