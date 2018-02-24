@@ -122,7 +122,7 @@ abstract class BasicController
     private function callFormats()
     {
         if (isset($this->formats[$this->responseType])) {
-            foreach ($this->formats as $f) {
+            foreach ($this->formats[$this->responseType] as $f) {
                 $f();
             }
         }
@@ -137,10 +137,7 @@ abstract class BasicController
      */
     protected function ifFormat(string $responseType, \Closure $f)
     {
-        if (!isset($this->formats[$responseType])) {
-            $this->formats[$responseType] = array();
-        }
-        $this->formats[$responseType] = $f;
+        $this->formats[$responseType][] = $f;
     }
 
     /**
