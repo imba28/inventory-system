@@ -120,7 +120,9 @@ class CustomerController extends ApplicationController
         } catch (\InvalidOperationException $e) {
             System::error('Fehler beim Speichern! ' . $e->getMessage());
         } catch (\App\Exceptions\InvalidModelDataException $e) {
-            System::error(join(', ', $this->customer->getErrors()));
+            foreach ($this->customer->messages()->get('errors') as $error) {
+                System::error($error);                
+            }
         } catch (\Exception $e) {
             System::error('Fehler beim Speichern!');
         }

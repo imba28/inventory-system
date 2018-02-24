@@ -1,22 +1,36 @@
 <?php
 namespace App;
 
+use App\Helper\Messages\MessageInterface;
+use App\Helper\Messages\MessageCollection;
+
 /**
  * Takes rules and validates data.
  */
-class Validator
+class Validator implements MessageInterface
 {
     protected $rules;
     protected $data;
 
+    protected $messages = [
+        'required' => 'Das Feld :field muss befüllt werden!',
+        'max' => 'Das Feld :field darf maximal eine Länge von :param Zeichen besitzen!',
+        'min' => 'Das Feld :field muss mindestens eine Länge von :param Zeichen haben!',
+        'email' => 'Das Feld :field muss eine gültige E-Mail Adresse sein!'
+    ];
+
     protected $errors;
 
-    public function __construct(array $rules, array $data)
+    public function __construct(array $rules, array $data, $messages = null)
     {
         $this->rules = $this->parseRules($rules);
         $this->data = $this->parseData($data);
 
         $this->errors = array();
+
+        if (!is_null($messages) && is_array($messages)) {
+            $this->messages = $messages;
+        }
     }
 
     /**
@@ -86,6 +100,30 @@ class Validator
 
         return $fields;
     }
+
+    public function messages(): MessageCollection
+    {
+        $collection = new MessageCollection();
+    
+        foreach ($this->errors as $validationName => $errors) {
+            foreach ($errors as $error) {
+                if (isset($this->messages[$validationName])) {
+                    $message = str_replace(
+                        array(':field', ':value', ':param'),
+                        $error,
+                        $this->messages[$validationName]
+                    );
+                } else {
+                    $message = $error['field'];
+                }
+
+                $collection->add('errors', $message);
+            }
+        }
+
+        return $collection;
+    }
+
     /**
      * converts array of rulesets into array of closures, that validate data.
      *

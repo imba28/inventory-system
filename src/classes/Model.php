@@ -3,11 +3,13 @@ namespace App;
 
 use App\Validator;
 use App\QueryBuilder\Builder;
+use App\Helper\Messages\MessageInterface;
+use App\Helper\Messages\MessageCollection;
 
 /**
  * Object relational mapper
  */
-abstract class Model implements \JsonSerializable
+abstract class Model implements \JsonSerializable, MessageInterface
 {
     use Traits\Events;
 
@@ -39,7 +41,20 @@ abstract class Model implements \JsonSerializable
      */
     protected $validators = [];
 
-    private $validationErrors = [];
+    /**
+     * Lists of attributes that failed validations.
+     *
+     * @var array
+     */
+    private $invalidFields = [];
+    
+    /**
+     * Collection of messages, set when validating
+     *
+     * @see isValid()
+     * @var \App\Helper\Messages\MessageCollection
+     */
+    private $messages = null;
 
     private $foreignKey;
 
@@ -133,9 +148,9 @@ abstract class Model implements \JsonSerializable
         return $this->get('id');
     }
 
-    public function getErrors(): array
+    public function getErrors()
     {
-        return $this->validationErrors;
+        return $this->invalidFields;
     }
 
     /**
@@ -216,10 +231,17 @@ abstract class Model implements \JsonSerializable
         $passes = $validator->passes();
 
         if (!$passes) {
-            $this->validationErrors = $validator->getErrors();
+            $validator->messages();
+            $this->invalidFields = $validator->getErrors();
+            $this->messages = $validator->messages();
         }
 
         return $passes;
+    }
+
+    public function messages(): MessageCollection
+    {
+        return $this->messages;
     }
 
     /**
