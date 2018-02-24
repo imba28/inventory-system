@@ -65,5 +65,38 @@
       </nav>
       <div style="height:55px"></div>
       <div class="system-status">
-        <?php echo \App\System::getStatus() ?>
+        {% if status.any() %}
+          {% for error in status.get('errors') %}
+            <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
+                    <span aria-hidden='true'>&times;</span>
+                </button>
+                <strong>Fehler</strong> {{ error|raw }}
+            </div>
+          {% endfor %}
+          {% for message in status.get('success') %}
+            <div class='alert alert-success alert-dismissible fade show' role='alert'>
+                <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
+                    <span aria-hidden='true'>&times;</span>
+                </button>
+                <strong>Erfolg</strong> {{ message|raw }}
+            </div>
+          {% endfor %}
+           {% for message in status.get('warning') %}
+            <div class='alert alert-warning alert-dismissible fade show' role='alert'>
+                <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
+                    <span aria-hidden='true'>&times;</span>
+                </button>
+                <strong>Warnung</strong> {{ message|raw }}
+            </div>
+          {% endfor %}
+           {% for message in status.get('info') %}
+            <div class='alert alert-info alert-dismissible fade show' role='alert'>
+                <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
+                    <span aria-hidden='true'>&times;</span>
+                </button>
+                <strong>Info</strong> {{ message|raw }}
+            </div>
+          {% endfor %}
+        {% endif %}
       </div>

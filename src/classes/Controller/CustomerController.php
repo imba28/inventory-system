@@ -54,7 +54,7 @@ class CustomerController extends ApplicationController
                             $this->view->assign('paginator', $paginator);
                         } catch (\App\Exceptions\NothingFoundException $e) {
                             $this->view->assign('totals', 0);
-                            System::error('Keine Ergebnisse gefunden!');
+                            self::$status->add('errors', 'Keine Ergebnisse gefunden!');
                         }
                     }
                 );
@@ -105,7 +105,7 @@ class CustomerController extends ApplicationController
  
         try {
             $this->customer->save();
-            System::success(
+            self::$status->add('success', 
                 "<a href='/customer/{$this->customer->getId()}'>
                     {$this->customer->get('name')}
                 </a>
@@ -114,17 +114,17 @@ class CustomerController extends ApplicationController
         } catch (\App\QueryBuilder\QueryBuilderException $e) {
             list($error_code, $error_message, $error_value, $error_column) = $e->getData();
 
-            System::error($error_message);
+            self::$status->add('errors', $error_message);
         } catch (\App\QueryBuilder\NothingChangedException $e) {
             //System::info('Es wurde nichts geändert.');
         } catch (\InvalidOperationException $e) {
-            System::error('Fehler beim Speichern! ' . $e->getMessage());
+            self::$status->add('errors', 'Fehler beim Speichern! ' . $e->getMessage());
         } catch (\App\Exceptions\InvalidModelDataException $e) {
             foreach ($this->customer->messages()->get('errors') as $error) {
-                System::error($error);                
+                self::$status->add('errors', $error);
             }
         } catch (\Exception $e) {
-            System::error('Fehler beim Speichern!');
+            self::$status->add('errors', 'Fehler beim Speichern!');
         }
 
         $this->edit(); // show edit form
@@ -139,15 +139,17 @@ class CustomerController extends ApplicationController
     {
         $this->new();
         $this->update();
+
+        $this->view->setTemplate('customer/new');
     }
 
     public function delete()
     {
         if ($this->customer->remove()) {
-            System::success('Kunde wurde gelöscht.');
+            self::$status->add('success', 'Kunde wurde gelöscht.');
             $this->redirectToRoute('/customers');
         } else {
-            System::error('Es ist ein Fehler beim Löschen aufgetreten!');
+            self::$status->add('errors', 'Es ist ein Fehler beim Löschen aufgetreten!');
             $this->redirectToRoute("customer/{$this->customer->getId()}");
         }
     }

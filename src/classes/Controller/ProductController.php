@@ -109,10 +109,10 @@ class ProductController extends ApplicationController
     public function delete(array $params)
     {
         if ($this->product->remove() === false) {
-            System::error('Es ist ein Fehler beim Löschen aufgetreten!');
+            self::$status->add('errors', 'Es ist ein Fehler beim Löschen aufgetreten!');
             $this->redirectToRoute('/product/' . $this->product->getId());
         } else {
-            System::success('Produkt wurde gelöscht.');
+            self::$status->add('success', 'Produkt wurde gelöscht.');
             $this->redirectToRoute('/products');
         }
     }
@@ -157,7 +157,7 @@ class ProductController extends ApplicationController
         } catch (\App\Exceptions\NothingFoundException $e) {
             $products = array();
             $this->view->assign('totals', 0);
-            System::info('Deine Suche lieferte keine Ergebnisse!');
+            self::$status->add('info', 'Deine Suche lieferte keine Ergebnisse!');
         }
 
         $this->view->assign('products', $products);
@@ -264,7 +264,7 @@ class ProductController extends ApplicationController
         } catch (\App\Exceptions\NothingFoundException $e) {
             $products = array();
             $this->view->assign('totals', 0);
-            System::info('Deine Suche lieferte keine Ergebnisse!');
+            self::$status->add('info', 'Deine Suche lieferte keine Ergebnisse!');
         }
 
         $query = new Builder('products');
@@ -301,16 +301,18 @@ class ProductController extends ApplicationController
 
             try {
                 $this->product->save();
-                System::success($this->product->get('name'). ' wurde aktualisiert!');
+                self::$status->add('success', $this->product->get('name'). ' wurde aktualisiert!');
             } catch (\App\QueryBuilder\QueryBuilderException $e) {
                 list($errorCode, $errorMessage, $errorValue, $errorColumn) = $e->getData();
-                System::error($errorMessage);
+                self::$status->add('errors', $errorMessage);
             } catch (\InvalidOperationException $e) {
-                System::error('Fehler beim Speichern! ' . $e->getMessage());
+                self::$status->add('errors', 'Fehler beim Speichern! ' . $e->getMessage());
             } catch (\App\Exceptions\InvalidModelDataException $e) {
-                System::error(join(', ', $this->product->getErrors()));
+                foreach ($this->product->messages()->get('errors') as $error) {
+                    self::$status->add('errors', $error);
+                }
             } catch (\Exception $e) {
-                System::error('Fehler beim Speichern!');
+                self::$status->add('errors', 'Fehler beim Speichern!');
             }
 
             $this->edit();
@@ -338,7 +340,8 @@ class ProductController extends ApplicationController
                 if (!$customer->isCreated()) {
                     try {
                         if ($customer->save()) {
-                            System::info(
+                            self::$status->add(
+                                'info',
                                 "Ein neuer Kunde
                                 <a href='/customer/{$customer->getId()}/edit'>
                                     {$customer->get('internal_id')}
@@ -347,7 +350,9 @@ class ProductController extends ApplicationController
                             );
                         }
                     } catch (\App\Exceptions\InvalidModelDataException $e) {
-                        System::error(join(', ', $customer->getErrors()));
+                        foreach ($customer->messages()->get('errors') as $error) {
+                            self::$status->add('errors', $error);
+                        }
                         return;
                     }
                 }
@@ -365,12 +370,12 @@ class ProductController extends ApplicationController
 
                 try {
                     if ($action->save()) {
-                        System::success('Produkt verliehen!');
+                        self::$status->add('success', 'Produkt verliehen!');
                     } else {
-                        System::error('Produkt konnte nicht verliehen werden!');
+                        self::$status->add('errors', 'Produkt konnte nicht verliehen werden!');
                     }
                 } catch (\App\Exceptions\InvalidModelDataException $e) {
-                    System::error(join(', ', $action->getErrors()));
+                    self::$status->add('errors', join(', ', $action->getErrors()));
                 }
             }
         }
@@ -382,7 +387,7 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-return');
 
         if ($this->product->isAvailable()) {
-            System::error('Produkt wurde bereits zurückgegeben!');
+            self::$status->add('errors', 'Produkt wurde bereits zurückgegeben!');
             return;
         }
 
@@ -398,7 +403,7 @@ class ProductController extends ApplicationController
 
             $this->product->getRentalAction()->returnProduct($returnDate);
 
-            System::success("{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
+            self::$status->add('success', "{$this->product->get('name')} wurde erfolgreich zurückgegeben!");
         }
     }
 
@@ -432,11 +437,11 @@ class ProductController extends ApplicationController
                 );
 
                 if (count($products) == 0) {
-                    System::error('Es wurde kein passendes Produkt gefunden!');
+                    self::$status->add('errors', 'Es wurde kein passendes Produkt gefunden!');
                 } elseif (count($products) == 1) {
                     $this->response->redirect('/product/'. current($products)->getId() . '/rent');
                 } else {
-                    System::info('Die Suche lieferte mehrere Ergebnisse.');
+                    self::$status->add('info', 'Die Suche lieferte mehrere Ergebnisse.');
                     $this->view->assign('products', $products);
                     $this->view->assign('totals', count($products));
 
@@ -447,9 +452,9 @@ class ProductController extends ApplicationController
 
                     $this->view->assign('buttons', array($rentButton));
                 }
-                //System::success($product->get('name'). ' wurde verliehen!');
+                //self::$status->add('success', $product->get('name'). ' wurde verliehen!');
             } catch (\App\Exceptions\NothingFoundException $e) {
-                System::error('Es wurde kein passendes Produkt gefunden!');
+                self::$status->add('errors', 'Es wurde kein passendes Produkt gefunden!');
             }
         }
 
@@ -485,7 +490,7 @@ class ProductController extends ApplicationController
                             $this->view->assign('paginator', $paginator);
                         } catch (\App\Exceptions\NothingFoundException $e) {
                             $this->view->assign('totals', 0);
-                            System::error('Keine Ergebnisse gefunden!');
+                            self::$status->add('errors', 'Keine Ergebnisse gefunden!');
                         }
                     }
                 );
@@ -523,7 +528,7 @@ class ProductController extends ApplicationController
                 if (empty($this->request->get('email'))) {
                     // honeypot für bots o.Ä. echte email adresse ist in 'aklnslknat'
                     if (empty($this->request->get('aklnslknat'))) {
-                        System::error('Bitte gib deine E-Mail Adresse an!');
+                        self::$status->add('errors', 'Bitte gib deine E-Mail Adresse an!');
                     } else {
                         $to = implode($adminEmail, ';');
                         $subject = "MMT Verleih: Anfrage für Produkt {$this->product->get('name')}";
@@ -533,15 +538,15 @@ class ProductController extends ApplicationController
                             'X-Mailer: PHP/' . phpversion();
 
                         if (mail($to, $subject, $message, $header)) {
-                            System::success('Deine Anfrage wurde erfolgreich gesendet!');
+                            self::$status->add('success', 'Deine Anfrage wurde erfolgreich gesendet!');
                         } else {
-                            System::error('Deine Anfrage konnte leider nicht gesendet werden!');
+                            self::$status->add('errors', 'Deine Anfrage konnte leider nicht gesendet werden!');
                         }
                     }
                 }
             }
         } else {
-            System::error('Produkt ist bereits verliehen!');
+            self::$status->add('errors', 'Produkt ist bereits verliehen!');
             $this->redirectToRoute("/product/{$this->product->getId()}");
         }
     }
@@ -566,20 +571,20 @@ class ProductController extends ApplicationController
                         $this->product->images()->append($productImage);
                     } else {
                         $success = false;
-                        System::error("Fehler beim Speichern von {$image->getInfo('name')}");
+                        self::$status->add('errors', "Fehler beim Speichern von {$image->getInfo('name')}");
                     }
                 } else {
                     $success = false;
                     if (get_class($image->getError()) !== 'App\File\NoFileSentException') {
                         vd($image->getError());
-                        System::error($image->getError()->getMessage());
+                        self::$status->add('errors', $image->getError()->getMessage());
                     } else {
                         return true;
                     }
                 }
             }
             if ($success) {
-                System::success('Bilder wurden gespeichert!');
+                self::$status->add('success', 'Bilder wurden gespeichert!');
             }
 
             return $success;

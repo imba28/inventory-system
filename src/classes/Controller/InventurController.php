@@ -120,15 +120,15 @@ class InventurController extends ApplicationController
             $product = \App\Models\Product::find($invNr, 'invNr');
             try {
                 if ($this->inventur->registerProduct($product)) {
-                    \App\System::success("Inventarnummer <em>{$invNr}</em> wurde erfasst!");
+                    self::$status->add('success', "Inventarnummer <em>{$invNr}</em> wurde erfasst!");
                 } else {
-                    \App\System::error("Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
+                    self::$status->add('errors', "Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
                 }
             } catch (\App\QueryBuilder\NothingChangedException $e) {
-                \App\System::info("Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
+                self::$status->add('info', "Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
         } catch (\App\Exceptions\NothingFoundException $e) {
-            \App\System::error(
+            self::$status->add('errors', 
                 "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden.
                 Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?"
             );
@@ -147,15 +147,15 @@ class InventurController extends ApplicationController
 
             try {
                 if ($this->inventur->missingProduct($product)) {
-                    \App\System::success("Inventarnummer <em>{$invNr}</em> wurde als fehlend markiert!");
+                    self::$status->add('success', "Inventarnummer <em>{$invNr}</em> wurde als fehlend markiert!");
                 } else {
-                    \App\System::error("Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
+                    self::$status->add('errors', "Inventarnummer <em>{$invNr}</em> konnte nicht erfasst werden.");
                 }
             } catch (\App\QueryBuilder\NothingChangedException $e) {
-                \App\System::info("Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
+                self::$status->add('info', "Inventarnummer <em>{$invNr}</em> wurde bereits erfasst.");
             }
         } catch (\App\Exceptions\NothingFoundException $e) {
-            \App\System::error(
+            self::$status->add('errors', 
                 "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden.
                 Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?"
             );
@@ -170,10 +170,10 @@ class InventurController extends ApplicationController
     private function startInventur()
     {
         if ($this->inventur->isStarted()) {
-            \App\System::error('Inventur wurde bereits gestartet!');
+            self::$status->add('errors', 'Inventur wurde bereits gestartet!');
         } else {
             $this->inventur->start($this->getCurrentUser());
-            \App\System::success('Inventur wurde erfolgreich gestartet!');
+            self::$status->add('success', 'Inventur wurde erfolgreich gestartet!');
             $this->redirectToRoute('/inventur', 'GET');
         }
 
@@ -187,11 +187,11 @@ class InventurController extends ApplicationController
     {
         try {
             $this->inventur->end();
-            \App\System::success('Inventur wurde erfolgreich beendet!');
+            self::$status->add('success', 'Inventur wurde erfolgreich beendet!');
         } catch (\App\Exceptions\InventurNotFinishedException $e) {
-            \App\System::error($e->getMessage());
+            self::$status->add('errors', $e->getMessage());
         } catch (\App\Exceptions\InvalidOperationException $e) {
-            \App\System::error($e->getMessage());
+            self::$status->add('errors', $e->getMessage());
         }
 
         $this->view->assign('inventur', $this->inventur);

@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use \App\Helper\Messages\MessageCollection;
+
 abstract class BasicController
 {
     protected $layout;
@@ -9,10 +11,12 @@ abstract class BasicController
 
     protected $responseType;
     protected $beforeActions;
+    
+    protected static $status;
 
     private $formats = array();
 
-    public function __construct($responseType = 'html', $layout = 'default')
+    final public function __construct($responseType = 'html', $layout = 'default')
     {
         $this->layout = $layout;
         $this->responseType = $responseType;
@@ -20,12 +24,17 @@ abstract class BasicController
         $this->request = new \App\HttpRequest();
         $this->view = \App\ViewFactory::build($responseType, $layout);
 
+        if (!isset(self::$status)) {
+            self::$status = new MessageCollection();
+        }
+
         $this->beforeActions = array();
 
         $this->ifFormat(
             'html',
             function () {
                 $this->view->assign('request', $this->request);
+                $this->view->assign('status', self::$status);
             }
         );
     }

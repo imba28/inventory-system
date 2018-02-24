@@ -13,26 +13,26 @@ abstract class ApplicationController extends \App\BasicController
                 $this->view->assign('currentUser', $this->getCurrentUser());
                 $this->view->assign('isUserSignedIn', $this->isUserSignedIn());
                 $this->view->assign('siteName', \App\Configuration::get('site_name'));
+
+                if ($this->isUserSignedIn()) {
+                    $this->view->assign(
+                        'menuItems',
+                        array(
+                            'Produkte' => 'products',
+                            'Kunden' => 'customers',
+                            'Inventur' => 'inventur'
+                        )
+                    );
+                } else {
+                    $this->view->assign(
+                        'menuItems',
+                        array(
+                            'Produkte' => 'products'
+                        )
+                    );
+                }
             }
         );
-
-        if ($this->isUserSignedIn()) {
-            $this->view->assign(
-                'menuItems',
-                array(
-                    'Produkte' => 'products',
-                    'Kunden' => 'customers',
-                    'Inventur' => 'inventur'
-                )
-            );
-        } else {
-            $this->view->assign(
-                'menuItems',
-                array(
-                    'Produkte' => 'products'
-                )
-            );
-        }
     }
 
     protected function getCurrentUser()

@@ -1,6 +1,8 @@
 <?php
 namespace App\Controller;
 
+use App\Models\User;
+
 class SessionController extends ApplicationController
 {
     public function loginForm()
@@ -14,25 +16,25 @@ class SessionController extends ApplicationController
     public function login()
     {
         if ($this->isUserSignedIn()) {
-            \App\System::error('Du bist bereits eingeloggt!');
+            self::$status ->add('errors', 'Du bist bereits eingeloggt!');
             $this->redirectToRoute('/');
-        }
+        } else {
+            $this->loginForm();
 
-        $this->loginForm();
+            try {
+                $user = User::find($this->request->get('username'), 'username');
 
-        try {
-            $user = \App\Models\User::find($this->request->get('username'), 'username');
+                if (password_verify($this->request->get('password'), $user->get('password'))) {
+                    $_SESSION['user_id'] = $user->getId();
 
-            if (password_verify($this->request->get('password'), $user->get('password'))) {
-                $_SESSION['user_id'] = $user->getId();
-
-                \App\System::success("Willkommen zurück {$user->get('name')}!");
-                $this->redirectToRoute('/');
-            } else {
-                \App\System::error('Benutzer/Passwort ist falsch!');
+                    self::$status ->add('success', "Willkommen zurück {$user->get('name')}!");
+                    $this->redirectToRoute('/');
+                } else {
+                    self::$status ->add('errors', 'Benutzer/Passwort ist falsch!');
+                }
+            } catch (\App\Exceptions\NothingFoundException $e) {
+                self::$status ->add('errors', 'Benutzer/Passwort ist falsch!');
             }
-        } catch (\App\Exceptions\NothingFoundException $e) {
-            \App\System::error('Benutzer/Passwort ist falsch!');
         }
     }
 
@@ -52,7 +54,7 @@ class SessionController extends ApplicationController
             isset($params['httponly'])
         );
 
-        \App\System::info('Erfolgreich ausgeloggt!');
+        self::$status->add('info', 'Erfolgreich ausgeloggt!');
         $this->redirectToRoute('/');
     }
 
