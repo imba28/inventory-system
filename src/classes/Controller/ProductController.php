@@ -335,13 +335,8 @@ class ProductController extends ApplicationController
             $this->view->setTemplate('product-rent');
             
             if ($this->request->issetParam('submit')) {
-                try {
-                    $customer = Customer::find($this->request->getParam('internal_id'), 'internal_id');
-                } catch (\App\Exceptions\NothingFoundException $e) {
-                    $customer = Customer::new();
-                    $customer->set('user', $this->getCurrentUser());
-                    $customer->set('internal_id', $this->request->getParam('internal_id'));
-
+                $customer = Customer::findOrCreate($this->request->getParam('internal_id'), 'internal_id');
+                if (!$customer->isCreated()) {
                     try {
                         if ($customer->save()) {
                             System::info(

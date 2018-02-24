@@ -387,6 +387,17 @@ abstract class Model implements \JsonSerializable, MessageInterface
         return self::getModelFromOption($options);
     }
 
+    public static function findOrCreate($value, $column): Model
+    {
+        try {
+            return self::find($value, $column);
+        } catch (\App\Exceptions\NothingFoundException $e) {
+            $model = self::new();
+            $model->set($column, $value);
+            return $model;
+        }
+    }
+
     /**
      * Find all models that match specific criterias.
      *
