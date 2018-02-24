@@ -12,23 +12,24 @@ abstract class ApplicationController extends \App\BasicController
             function () {
                 $this->view->assign('currentUser', $this->getCurrentUser());
                 $this->view->assign('isUserSignedIn', $this->isUserSignedIn());
+                $this->view->assign('siteName', \App\Configuration::get('site_name'));
             }
         );
 
         if ($this->isUserSignedIn()) {
-            \App\Menu::getInstance()->set(
-                'items',
+            $this->view->assign(
+                'menuItems',
                 array(
-                'Produkte' => 'products',
-                'Kunden' => 'customers',
-                'Inventur' => 'inventur'
+                    'Produkte' => 'products',
+                    'Kunden' => 'customers',
+                    'Inventur' => 'inventur'
                 )
             );
         } else {
-            \App\Menu::getInstance()->set(
-                'items',
+            $this->view->assign(
+                'menuItems',
                 array(
-                'Produkte' => 'products'
+                    'Produkte' => 'products'
                 )
             );
         }

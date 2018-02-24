@@ -18,9 +18,10 @@ class View
 
     public function render($layout = 'default')
     {
-        $html = $this->getLayoutComponent($layout, 'head');
-
         $templateFile = "{$this->template}.html.twig";
+        $templateHead = "/base/{$layout}-head.html.twig";
+        $templateFooter = "/base/{$layout}-footer.html.twig";
+
         if (file_exists(ABS_PATH."/src/views/" . $templateFile)) {
             $loader = new \Twig_Loader_Filesystem(ABS_PATH."/src/views/");
 
@@ -45,8 +46,11 @@ class View
 
             $twig->addExtension(new \Twig_Extension_Debug());
 
+            $html = '';
+
+            $html .= $twig->render($templateHead, $this->data);
             $html .= $twig->render($templateFile, $this->data);
-            $html .= $this->getLayoutComponent($layout, 'footer');
+            $html .= $twig->render($templateFooter, $this->data);
 
             return $html;
         }
@@ -56,14 +60,6 @@ class View
     public function getContentType()
     {
         return 'text/html';
-    }
-
-    private function getLayoutComponent($layout, $type = 'head')
-    {
-        if (file_exists(ABS_PATH."/src/layouts/{$layout}-{$type}.php")) {
-            return $this->bufferContent(ABS_PATH."/src/layouts/{$layout}-{$type}.php");
-        }
-        throw new \InvalidArgumentException("Layout {$layout}-{$type}` does not exists!`");
     }
 
     private function bufferContent($path)
