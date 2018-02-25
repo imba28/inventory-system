@@ -1,7 +1,7 @@
 <?php
-namespace App\Controller;
+namespace App\Controllers;
 
-abstract class ApplicationController extends \App\BasicController
+abstract class ApplicationController extends BasicController
 {
     private $currentUser;
 

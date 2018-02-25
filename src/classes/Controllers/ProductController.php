@@ -1,5 +1,5 @@
 <?php
-namespace App\Controller;
+namespace App\Controllers;
 
 use App\File\NoFileSentException;
 use App\Model;
@@ -7,7 +7,6 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Customer;
 use App\Models\Action;
-use App\System;
 use App\QueryBuilder\Builder;
 
 class ProductController extends ApplicationController

@@ -100,7 +100,7 @@ class Router
         } elseif (is_string($handle)) {
             $split = explode('#', $handle);
 
-            $controllerClass = "\App\Controller\\{$split[0]}";
+            $controllerClass = "\App\Controllers\\{$split[0]}";
             $controllerAction = $split[1];
 
             $controller = new $controllerClass($responseType);
