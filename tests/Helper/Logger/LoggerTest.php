@@ -18,7 +18,7 @@ class LoggerTest extends TestCase
         
         $this->assertEquals(Logger::info('log!'), 'info: log!');
         $this->assertEquals(Logger::debug('log!'), 'debug: log!');
-        $this->assertEquals(Logger::warn('log!'), 'warn: log!');
+        $this->assertEquals(Logger::warn('log!'), 'warning: log!');
         $this->assertEquals(Logger::error('log!'), 'error: log!');
         $this->assertEquals(Logger::fatal('log!'), 'fatal: log!');
     }
