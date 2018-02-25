@@ -2,6 +2,7 @@
 namespace App\QueryBuilder;
 
 use \PDO;
+use App\Helper\Loggers\Logger;
 
 class Query
 {
@@ -66,6 +67,6 @@ class Query
             $errorMessage .= "\nValues: ". join(", ", $values);
         }
 
-        \App\Debugger::log($errorMessage, 'error');
+        Logger::error($errorMessage);
     }
 }

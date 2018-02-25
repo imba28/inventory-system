@@ -1,6 +1,8 @@
 <?php
 namespace App\File;
 
+use App\Helpers\Loggers\Logger;
+
 class File
 {
     protected static $maxFileSize = 15360; // 15kb
@@ -118,7 +120,7 @@ class File
         if (file_exists(ABS_PATH . $source)) {
             return unlink(ABS_PATH . $source);
         } else {
-            Debugger::log("Fehler beim Löschen des Bildes `$source`. Meldung: Bild nicht gefunden.", 'Fehler');
+            Logger::warn("Fehler beim Löschen des Bildes `$source`. Meldung: Bild nicht gefunden.");
         }
         return false;
     }

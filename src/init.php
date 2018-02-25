@@ -25,6 +25,11 @@ if (App\Configuration::get('env') === 'dev') {
     error_reporting(0);
 }
 
+\App\Helper\Loggers\Logger::setLogger(
+    //new App\Helper\Loggers\FileLogger(ABS_PATH . '/logs/log.txt')
+    new App\Helper\Loggers\DBLogger()
+);
+
 try {
     $drivers = [
         'mysql' => '\\App\\Database\\MySQL',

@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use \App\Helper\Messages\MessageCollection;
+use App\Helper\Loggers\Logger;
 
 abstract class BasicController
 {
@@ -167,7 +168,7 @@ abstract class BasicController
                 } elseif (function_exists($function)) {
                     $function($args);
                 } else {
-                    \App\Debugger::log('warning', "Cannot find method to call `{$function}`!");
+                    Logger::warn("Cannot find method to call `{$function}`!");
                 }
             }
         }

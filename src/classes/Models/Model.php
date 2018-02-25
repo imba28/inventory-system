@@ -3,6 +3,7 @@ namespace App\Models;
 
 use App\Validator;
 use App\Collection;
+use App\Helper\Loggers\Logger;
 use App\QueryBuilder\Builder;
 use App\Helper\Messages\MessageInterface;
 use App\Helper\Messages\MessageCollection;
@@ -98,7 +99,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
                     try {
                         $value = $className::find($value);
                     } catch (\App\Exceptions\NothingFoundException $e) {
-                        \App\Debugger::log("{$className} with id {$value} not found!", 'warning');
+                        Logger::warn("{$className} with id {$value} not found!");
                         $value = null;
                     }
                 }
@@ -157,11 +158,24 @@ abstract class Model implements \JsonSerializable, MessageInterface
     /**
      * deletes the model
      *
-     * @return void
+     * @return bool
      */
     public function remove(): bool
     {
         return self::delete($this->getId());
+    }
+
+    /**
+     * Deletes all models.
+     *
+     * @return bool
+     */
+    public function removeAll(): bool
+    {
+        self::$builder->setTable(self::getTableName());
+        return self::$builder->update([
+            'deleted' => '1'
+        ]);
     }
 
     /**
