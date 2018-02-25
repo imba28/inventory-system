@@ -22,7 +22,7 @@ abstract class BasicController
         $this->responseType = $responseType;
         $this->response = new \App\HttpResponse();
         $this->request = new \App\HttpRequest();
-        $this->view = \App\ViewFactory::build($responseType, $layout);
+        $this->view = \App\Views\Factory::build($responseType, $layout);
 
         if (!isset(self::$status)) {
             self::$status = new MessageCollection();

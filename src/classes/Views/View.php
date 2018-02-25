@@ -1,5 +1,7 @@
 <?php
-namespace App;
+namespace App\Views;
+
+use App\Configuration;
 
 class View
 {

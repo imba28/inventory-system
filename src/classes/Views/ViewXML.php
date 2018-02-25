@@ -1,5 +1,5 @@
 <?php
-namespace App;
+namespace App\Views;
 
 class ViewXML extends View
 {
@@ -13,7 +13,6 @@ class ViewXML extends View
         return 'application/xml';
     }
 
-
     private function generateValidXml($arg)
     {
         $arg = json_decode(json_encode($arg)); // naja :D
@@ -23,6 +22,7 @@ class ViewXML extends View
             return self::generateValidXmlFromObj($arg);
         }
     }
+    
     // functions adopted from http://www.sean-barton.co.uk/2009/03/turning-an-array-or-object-into-xml-using-php/
     private function generateValidXmlFromObj(\stdClass $obj, $nodeBlock = 'nodes', $nodeName = 'node')
     {

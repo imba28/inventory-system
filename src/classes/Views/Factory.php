@@ -1,7 +1,7 @@
 <?php
-namespace App;
+namespace App\Views;
 
-class ViewFactory
+class Factory
 {
     public static function build($responseType)
     {
