@@ -213,7 +213,7 @@ abstract class BasicController
      */
     protected function redirectToRoute($route, $requestMethod = 'GET')
     {
-        \App\Router::getInstance()->route($route, $requestMethod);
+        \App\Routing\Router::getInstance()->route($route, $requestMethod);
     }
 
     abstract public function error($status);

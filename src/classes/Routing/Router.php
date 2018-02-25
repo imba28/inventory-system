@@ -1,5 +1,5 @@
 <?php
-namespace App;
+namespace App\Routing;
 
 class Router
 {
@@ -14,6 +14,31 @@ class Router
         'PUT' => array(),
         'DELETE' => array()
     );
+
+    public function get($uri, $handler)
+    {
+        $this->addRoute('GET', $uri, $handler);
+    }
+
+    public function post($uri, $handler)
+    {
+        $this->addRoute('POST', $uri, $handler);
+    }
+
+    public function put($uri, $handler)
+    {
+        $this->addRoute('PUT', $uri, $handler);
+    }
+
+    public function delete($uri, $handler)
+    {
+        $this->addRoute('DELETE', $uri, $handler);
+    }
+
+    public function all($uri, $handler)
+    {
+        $this->addRoute('ALL', $uri, $handler);
+    }
 
     public function addRoute($requestMethod, $path, $handler)
     {
@@ -64,7 +89,7 @@ class Router
 
             $this->routes[$requestMethod][self::$routeCount++] = $routeOptions;
         } else {
-            throw new \InvalidArgumentException("{$requestMethod} is not a valid http request type!");
+            throw new InvalidRequestMethodException("{$requestMethod} is not a valid http request method!");
         }
     }
 
@@ -116,7 +141,7 @@ class Router
         ksort($routes);
 
         if ($this->findHandler($routes, $requestURI) === false) {
-            throw new \ErrorException("Route `{$requestMethod}->{$uri}`not defined!");
+            throw new RouteNotFoundException("Route `{$requestMethod}->{$uri}`not defined!");
         }
     }
 
@@ -143,5 +168,21 @@ class Router
         }
 
         return false;
+    }
+
+    public function resource(string $resource, string $controller)
+    {
+        if ($resource[0] !== '/') {
+            $resource = "/{$resource}";
+        }
+
+        $this->get("{$resource}s", "{$controller}#index");
+        $this->get("{$resource}s/new", "{$controller}#new");
+        $this->post("{$resource}s", "{$controller}#create");
+
+        $this->get("{$resource}/:_id", "{$controller}#show");
+        $this->get("{$resource}/:_id/edit", "{$controller}#edit");
+        $this->put("{$resource}/:_id", "{$controller}#update");
+        $this->delete("{$resource}/:_id", "{$controller}#delete");
     }
 }

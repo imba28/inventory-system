@@ -37,5 +37,5 @@ try {
     die("Keine Verbindung zur Datenbank möglich:". $e->getMessage());
 }
 
-$router = App\Router::getInstance();
+$router = App\Routing\Router::getInstance();
 require ABS_PATH . '/src/config/routes.php';
