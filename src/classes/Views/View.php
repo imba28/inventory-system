@@ -64,6 +64,7 @@ class View
         return 'text/html';
     }
 
+    /*
     private function bufferContent($path)
     {
         extract($this->data);
@@ -74,5 +75,5 @@ class View
         ob_end_clean();
 
         return $content;
-    }
+    }*/
 }
