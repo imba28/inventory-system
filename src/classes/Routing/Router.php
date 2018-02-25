@@ -118,20 +118,15 @@ class Router
 
     public function route(string $requestURI = null, $requestMethod = null)
     {
-        if (is_null($requestURI)) {
-            $requestURI = urldecode($_SERVER['REQUEST_URI']);
-        }
-        if (is_null($requestMethod)) {
-            $requestMethod = $_SERVER['REQUEST_METHOD'];
-        }
+        $requestURI = $requestURI ?? urldecode($_SERVER['REQUEST_URI']);
+        $requestMethod = $requestMethod ?? $_SERVER['REQUEST_METHOD'];
 
         if ($requestURI[0] !== '/') {
             $requestURI = "/{$requestURI}";
         }
 
         $uri = ltrim(parse_url($requestURI, PHP_URL_PATH), '/');
-        //$params = parse_url($requestURI, PHP_URL_QUERY);
-
+        
         if (isset($_REQUEST['_method']) && in_array(strtoupper($_REQUEST['_method']), array_keys($this->routes))) {
             $requestMethod = strtoupper($_REQUEST['_method']);
             unset($_REQUEST['_method']);
