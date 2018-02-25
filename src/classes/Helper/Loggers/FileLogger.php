@@ -4,7 +4,7 @@ namespace App\Helper\Loggers;
 class FileLogger implements LoggerInterface
 {
     private $logFile;
-    private static $format = '$DATE [$LOGLEVEL]: $MESSAGE'."\n";
+    private static $format = "DATE [LOGLEVEL]: MESSAGE\n";
     private static $dateFormat = 'Y-m-d, H:i:s A';
 
     public function __construct(string $logFile)
@@ -29,7 +29,7 @@ class FileLogger implements LoggerInterface
 
     public function log($logLevel, $msg)
     {
-        $logMessage = str_replace(array('$DATE', '$LOGLEVEL', '$MESSAGE'), array(date(self::$dateFormat), $logLevel, $msg), self::$format);
+        $logMessage = str_replace(array('DATE', 'LOGLEVEL', 'MESSAGE'), array(date(self::$dateFormat), $logLevel, $msg), self::$format);
 
         $handle = fopen($this->logFile, 'a');
 
