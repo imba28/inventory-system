@@ -1,7 +1,8 @@
 <?php
-namespace App;
+namespace App\Models;
 
 use App\Validator;
+use App\Collection;
 use App\QueryBuilder\Builder;
 use App\Helper\Messages\MessageInterface;
 use App\Helper\Messages\MessageCollection;
@@ -11,7 +12,7 @@ use App\Helper\Messages\MessageCollection;
  */
 abstract class Model implements \JsonSerializable, MessageInterface
 {
-    use Traits\Events;
+    use \App\Traits\Events;
 
     /**
      * The model's attributes.
@@ -169,13 +170,13 @@ abstract class Model implements \JsonSerializable, MessageInterface
      * If no changes to the state were made and the argument is set to true, an exception will be thrown.
      *
      * @param  bool $exception
-     * @throws \App\Exceptions\InvalidModelDataException
+     * @throws \App\Models\InvalidModelDataException
      * @return bool
      */
     public function save($exception = false): bool
     {
         if (!$this->isValid()) {
-            throw new \App\Exceptions\InvalidModelDataException("no valid!");
+            throw new \App\Models\InvalidModelDataException("no valid!");
         }
         
         $this->trigger('save');
@@ -303,7 +304,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
                 continue;
             }
 
-            if ($this->state[$key] instanceof \App\Model) {
+            if ($this->state[$key] instanceof \App\Models\Model) {
                 $value = $value->jsonSerialize();
             }
 
@@ -340,7 +341,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
 
         foreach ($this->state as $name => $value) {
             if ($this->originalState[$name] != $value) { // has changed
-                if ($value instanceof \App\Model) {
+                if ($value instanceof \App\Models\Model) {
                     if (!$value->isCreated()) {
                         $value->save();
                     }
@@ -368,7 +369,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
      *
      * @param  mixed $value
      * @param  mixed $column
-     * @return \App\Model
+     * @return \App\Models\Model
      */
     public static function find($value, $column = 'id'): Model
     {
@@ -444,7 +445,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
     /**
      * Factory method creates a new instance.
      *
-     * @return \App\Model
+     * @return \App\Models\Model
      */
     public static function new(): Model
     {
@@ -463,7 +464,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
      * Creates a new model instance, sets attributes and saves it afterwards.
      *
      * @param  array $data
-     * @return \App\Model
+     * @return \App\Models\Model
      */
     public static function create(array $data): Model
     {

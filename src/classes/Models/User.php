@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 
-class User extends \App\Model
+class User extends Model
 {
     protected $attributes = ['name', 'username', 'password'];
     protected $name;
@@ -36,7 +36,7 @@ class User extends \App\Model
             'name' => $this->get('name'),
             'username' => $this->get('username')
         ) as $key => $value) {
-            if ($this->get($key) instanceof \App\Model) {
+            if ($this->get($key) instanceof \App\Models\Model) {
                 $value = $value->jsonSerialize();
             }
 

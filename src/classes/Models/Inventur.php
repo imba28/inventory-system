@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 
-class Inventur extends \App\Model
+class Inventur extends Model
 {
     protected $attributes = ['startDate', 'finishDate'];
 

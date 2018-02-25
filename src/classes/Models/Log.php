@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 
-class Log extends \App\Model
+class Log extends Model
 {
     protected $attributes = ['message', 'type'];
 

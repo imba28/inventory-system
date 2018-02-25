@@ -1,5 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use App\Collection;
+use App\Models\Model;
 
 class CollectionTest extends TestCase
 {
@@ -7,14 +9,14 @@ class CollectionTest extends TestCase
 
     protected function setUp()
     {
-        $this->collection = new \App\Collection();
+        $this->collection = new Collection();
     }
 
     public function testCount()
     {
         $this->assertEquals($this->collection->count(), 0);
 
-        $this->collection = new \App\Collection(array('a', 'b', 'c'));
+        $this->collection = new Collection(array('a', 'b', 'c'));
 
         $this->assertEquals($this->collection->count(), 3);
         $this->assertCount(3, $this->collection);
@@ -37,7 +39,7 @@ class CollectionTest extends TestCase
         $this->collection->append($model_2);
         $this->collection->append($model_3);
 
-        $this->assertInstanceOf(\App\Model::class, $this->collection->find(1));
+        $this->assertInstanceOf(Model::class, $this->collection->find(1));
         $this->assertEquals($this->collection->find(1), $model_1);
         $this->assertEquals($this->collection->find(2), $model_2);
         $this->assertEquals($this->collection->find(3), $model_3);
@@ -53,7 +55,7 @@ class CollectionTest extends TestCase
         $this->collection->append($model_2);
         $this->collection->append($model_3);
 
-        $this->assertInstanceOf(\App\Model::class, $this->collection->first());
+        $this->assertInstanceOf(Model::class, $this->collection->first());
         $this->assertEquals($this->collection->first(), $model_1);
 
         $this->assertEquals($this->collection->first(1), $model_1);
@@ -93,7 +95,7 @@ class CollectionTest extends TestCase
     }
 }
 
-class TestModel extends \App\Model
+class TestModel extends Model
 {
 
 }

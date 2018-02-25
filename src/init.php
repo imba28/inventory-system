@@ -10,9 +10,9 @@ App\QueryBuilder\Builder::setTablePrefix(\App\Configuration::get('DB_PREFIX'));
 
 // TODO: this is bäh:
 if (App\Configuration::get('DB_DRIVER') === 'sqlite') {
-    App\Model::setQueryBuilder(new \App\QueryBuilder\SQLiteBuilder());
+    App\Models\Model::setQueryBuilder(new \App\QueryBuilder\SQLiteBuilder());
 } else {
-    App\Model::setQueryBuilder(new \App\QueryBuilder\Builder());
+    App\Models\Model::setQueryBuilder(new \App\QueryBuilder\Builder());
 }
 
 if (App\Configuration::get('env') === 'dev') {

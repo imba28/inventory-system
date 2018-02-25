@@ -2,6 +2,7 @@
 namespace App\QueryBuilder;
 
 use App\Exceptions\InvalidArgumentException;
+use App\Models\Model;
 
 class QueryWhere
 {
@@ -28,7 +29,7 @@ class QueryWhere
             $this->value = $value;
             $this->table = $table;
 
-            if ($this->value instanceof \App\Model) {
+            if ($this->value instanceof Model) {
                 $this->value = $this->value->getId();
                 if (substr($this->key, -3) != '_id') {
                     $this->key .= '_id';

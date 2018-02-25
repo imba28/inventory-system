@@ -2,9 +2,8 @@
 namespace App\Models;
 
 use App\Collection;
-use App\Model;
 
-class Product extends \App\Model
+class Product extends Model
 {
     protected $attributes = ['name', 'invNr', 'type', 'description', 'condition', 'note'];
     protected $validators = ['name' => 'required', 'invNr' => 'required'];
@@ -78,7 +77,7 @@ class Product extends \App\Model
         foreach ($this->images() as $image) {
             $object = new \stdClass();
             foreach ($image->get() as $key => $value) {
-                if ($value instanceof \App\Model) {
+                if ($value instanceof \App\Models\Model) {
                     continue;
                 }
                 $object->$key = $value;

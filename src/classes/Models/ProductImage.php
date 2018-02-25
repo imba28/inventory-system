@@ -3,7 +3,7 @@ namespace App\Models;
 
 use App\File\Image;
 
-class ProductImage extends \App\Model
+class ProductImage extends Model
 {
     protected $attributes = ['product', 'title', 'src'];
 

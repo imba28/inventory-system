@@ -1,6 +1,7 @@
 <?php
-namespace App\Exceptions;
+namespace App\Models;
 
 class InvalidModelDataException extends \Exception
 {
+
 }

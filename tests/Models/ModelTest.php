@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use App\QueryBuilder\Builder;
-use App\Model;
+use App\Models\Model;
 
 class ModelTest extends TestCase
 {

@@ -304,7 +304,7 @@ class ProductController extends ApplicationController
                 self::$status->add('errors', $errorMessage);
             } catch (\InvalidOperationException $e) {
                 self::$status->add('errors', 'Fehler beim Speichern! ' . $e->getMessage());
-            } catch (\App\Exceptions\InvalidModelDataException $e) {
+            } catch (\App\Models\InvalidModelDataException $e) {
                 foreach ($this->product->messages()->get('errors') as $error) {
                     self::$status->add('errors', $error);
                 }
@@ -346,7 +346,7 @@ class ProductController extends ApplicationController
                                 wurde angelegt."
                             );
                         }
-                    } catch (\App\Exceptions\InvalidModelDataException $e) {
+                    } catch (\App\Models\InvalidModelDataException $e) {
                         foreach ($customer->messages()->get('errors') as $error) {
                             self::$status->add('errors', $error);
                         }
@@ -371,7 +371,7 @@ class ProductController extends ApplicationController
                     } else {
                         self::$status->add('errors', 'Produkt konnte nicht verliehen werden!');
                     }
-                } catch (\App\Exceptions\InvalidModelDataException $e) {
+                } catch (\App\Models\InvalidModelDataException $e) {
                     self::$status->add('errors', join(', ', $action->getErrors()));
                 }
             }

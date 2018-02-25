@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use App\Models\Model;
+
 class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countable
 {
     protected $items;
@@ -47,7 +49,7 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         return isset($this->items[$n - 1]) ? $this->items[$n - 1] : null;
     }
 
-    public function append(\App\Model $model)
+    public function append(Model $model)
     {
         $this->items[] = $model;
     }

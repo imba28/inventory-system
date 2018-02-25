@@ -119,7 +119,7 @@ class CustomerController extends ApplicationController
             //System::info('Es wurde nichts geändert.');
         } catch (\InvalidOperationException $e) {
             self::$status->add('errors', 'Fehler beim Speichern! ' . $e->getMessage());
-        } catch (\App\Exceptions\InvalidModelDataException $e) {
+        } catch (\App\Models\InvalidModelDataException $e) {
             foreach ($this->customer->messages()->get('errors') as $error) {
                 self::$status->add('errors', $error);
             }

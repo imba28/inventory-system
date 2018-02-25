@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 
-class InventurProduct extends \App\Model
+class InventurProduct extends Model
 {
     protected $attributes = ['product', 'inventur', 'in_stock', 'missing'];
     

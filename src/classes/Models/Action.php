@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 
-class Action extends \App\Model
+class Action extends Model
 {
     protected $attributes = ['product', 'customer', 'rentDate', 'returnDate', 'expectedReturnDate'];
 
