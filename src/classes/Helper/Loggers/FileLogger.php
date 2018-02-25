@@ -4,6 +4,7 @@ namespace App\Helper\Loggers;
 class FileLogger implements LoggerInterface
 {
     private $logFile;
+    
     private static $format = "DATE [LOGLEVEL]: MESSAGE\n";
     private static $dateFormat = 'Y-m-d, H:i:s A';
 
