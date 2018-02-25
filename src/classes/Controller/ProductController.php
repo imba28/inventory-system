@@ -121,8 +121,6 @@ class ProductController extends ApplicationController
     {
         if ($this->request->issetParam('search_string')) {
             $_SESSION['search_string'] = $this->request->getParam('search_string');
-        } else {
-            $_SESSION['search_string'] = '';
         }
 
         $searchString = $_SESSION['search_string'];
