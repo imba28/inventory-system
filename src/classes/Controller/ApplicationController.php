@@ -7,7 +7,7 @@ abstract class ApplicationController extends \App\BasicController
 
     public function init()
     {
-        $this->ifFormat(
+        $this->ifResponseType(
             'html',
             function () {
                 $this->view->assign('currentUser', $this->getCurrentUser());

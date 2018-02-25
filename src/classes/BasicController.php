@@ -30,7 +30,7 @@ abstract class BasicController
 
         $this->beforeActions = array();
 
-        $this->ifFormat(
+        $this->ifResponseType(
             'html',
             function () {
                 $this->view->assign('request', $this->request);
@@ -124,7 +124,7 @@ abstract class BasicController
      * Executes all closures whose response type matches $responseType.
      *
      * @see $responseType
-     * @see ifFormat()    For setting closures
+     * @see ifResponseType()    For setting closures
      *
      * @return void
      */
@@ -144,7 +144,7 @@ abstract class BasicController
      * @param \Closure $f
      * @return void
      */
-    protected function ifFormat(string $responseType, \Closure $f)
+    protected function ifResponseType(string $responseType, \Closure $f)
     {
         $this->formats[$responseType][] = $f;
     }
