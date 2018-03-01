@@ -69,6 +69,24 @@ class Product extends Model
         );
     }
 
+    public function rent(Customer $customer, string $returnDate, User $user)
+    {
+        if (!$this->isAvailable()) {
+            return false;
+        }
+
+        $returnDate = empty($returnDate) ? null : $returnDate;
+
+        $action = Action::new();
+        $action->set('product', $this);
+        $action->set('customer', $customer);
+        $action->set('rentDate', 'NOW()');
+        $action->set('expectedReturnDate', $returnDate);
+        $action->set('user', $user);
+
+        return $action->save();
+    }
+
     public function jsonSerialize(): array
     {
         $json = $this->get();

@@ -354,19 +354,12 @@ class ProductController extends ApplicationController
                     }
                 }
 
-                $expectedReturnDate = !empty($this->request->getParam('expectedReturnDate')) ?
-                    $this->request->getParam('expectedReturnDate') :
-                    null;
-
-                $action = Action::new();
-                $action->set('product', $this->product);
-                $action->set('customer', $customer);
-                $action->set('rentDate', 'NOW()');
-                $action->set('expectedReturnDate', $expectedReturnDate);
-                $action->set('user', $this->getCurrentUser());
-
                 try {
-                    if ($action->save()) {
+                    if ($this->product->rent(
+                        $customer,
+                        $this->request->getParam('expectedReturnDate'),
+                        $this->getCurrentUser()
+                    )) {
                         self::$status->add('success', 'Produkt verliehen!');
                     } else {
                         self::$status->add('errors', 'Produkt konnte nicht verliehen werden!');
