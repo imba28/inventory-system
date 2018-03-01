@@ -521,7 +521,8 @@ abstract class Model implements \JsonSerializable, MessageInterface
         $foreignKey = is_null($foreignKey) ? $this->getForeignKey() : $foreignKey;
         $fullModelName = "\\App\\Models\\{$modelName}";
         
-        $relationName = "{$modelName}_{$foreignKey}_hasmany";
+        $trace = debug_backtrace();
+        $relationName = $trace[1]['function'];
 
         if (!isset($this->relations[$relationName])) {
             if (class_exists($fullModelName)) {
