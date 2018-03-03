@@ -25,7 +25,7 @@ class InventurController extends ApplicationController
                     $this->view->assign('inventurActions', $this->inventur->getInventurActions());
                     $this->view->setTemplate('inventur-registered');
                 } elseif ($params['action'] == 'missing') {
-                    $this->view->assign('products', $this->inventur->getMissingItems());
+                    $this->view->assign('products', $this->inventur->getNotRegisteredItems());
                     $this->view->setTemplate('inventur-missing');
                 } else {
                     $this->error(404, 'Seite nicht gefunden!');

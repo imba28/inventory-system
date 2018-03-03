@@ -3,15 +3,7 @@ namespace App;
 
 class Inventur
 {
-    private $itemsRented = array();
-    private $itemsAvailable = array();
-
-    private $itemsMissing = array();
-    private $itemsRegistered = array();
-
-    private $totalItems = 0;
     private $inventurObject;
-
     private $inventurActions = array();
 
     public function __construct()
@@ -66,17 +58,22 @@ class Inventur
 
     public function isReady()
     {
-        return count($this->itemsMissing) === 0;
+        return count($this->inventurObject->itemsNotScanned()) === 0;
     }
 
     public function getMissingItems()
     {
-        return $this->itemsMissing;
+        return $this->inventurObject->itemsMissing();
     }
 
     public function getRegisteredItems()
     {
-        return $this->itemsRegistered;
+        return $this->inventurObject->itemsScanned();
+    }
+
+    public function getNotRegisteredItems()
+    {
+        return $this->inventurObject->itemsNotScanned();
     }
 
     public function getModel()
@@ -91,7 +88,7 @@ class Inventur
 
     public function getTotalCount()
     {
-        return $this->totalItems;
+        return count($this->inventurObject->items());
     }
 
     public function get($key)
@@ -116,125 +113,42 @@ class Inventur
 
     public function registerProduct(\App\Models\Product $product)
     {
-        $inventurProduct;
-
-        try {
-            $inventurProduct = \App\Models\inventurProduct::findByFilter(
-                array(
-                array('product', '=', $product),
-                'AND',
-                array('inventur', '=', $this->inventurObject)
-                ),
-                1
-            );
-
-            if ($inventurProduct->isInStock()) {
-                throw new \App\QueryBuilder\NothingChangedException("already scanned!");
-            }
-        } catch (\App\Exceptions\NothingFoundException $e) {
-            $inventurProduct = \App\Models\inventurProduct::new();
-            $inventurProduct->set('product', $product);
-            $inventurProduct->set('user', $this->inventurObject->get('user'));
-        }
-
-        $inventurProduct->set('in_stock', '1');
-        $inventurProduct->set('inventur', $this->inventurObject);
-
-        function indexOf($array, $product)
-        {
-            foreach ($array as $key => $value) {
-                if ($value->getId() === $product->getId()) {
-                    return $key;
-                }
-            }
-            return false;
-        }
-
-        if ($inventurProduct->save()) {
-            if (($key = indexOf($this->itemsMissing, $product)) !== false) {
-                unset($this->itemsMissing[$key]);
-                $this->itemsMissing = array_values($this->itemsMissing);
-
-                $this->itemsRegistered[] = $product;
+        if (($key = array_search($product, $this->inventurObject->itemsScanned()->toArray())) === false) {
+            $inventurProduct = $this->getInventurAction($product);
+            $inventurProduct->set('in_stock', '1');
+            
+            if ($inventurProduct->save(true)) {
                 return true;
             }
 
             return false;
         }
-        return false;
+        throw new \App\QueryBuilder\NothingChangedException('already scanned!');
     }
 
 
     public function missingProduct(\App\Models\Product $product)
     {
-        $inventurProduct;
-
-        try {
-            $inventurProduct = \App\Models\inventurProduct::findByFilter(
-                array(
-                array('product', '=', $product),
-                'AND',
-                array('inventur', '=', $this->inventurObject)
-                ),
-                1
-            );
-
-            if ($inventurProduct->isInStock()) {
-                throw new \App\QueryBuilder\NothingChangedException("already scanned!");
-            }
-        } catch (\App\Exceptions\NothingFoundException $e) {
-            $inventurProduct = \App\Models\inventurProduct::new();
-            $inventurProduct->set('product', $product);
-        }
-
-        $inventurProduct->set('in_stock', '1');
-        $inventurProduct->set('missing', '1');
-        $inventurProduct->set('user', $this->inventurObject->get('user'));
-        $inventurProduct->set('inventur', $this->inventurObject);
-
-        function indexOf($array, $product)
-        {
-            foreach ($array as $key => $value) {
-                if ($value->getId() === $product->getId()) {
-                    return $key;
-                }
-            }
-            return false;
-        }
-
-        if ($inventurProduct->save()) {
-            if (($key = indexOf($this->itemsMissing, $product)) !== false) {
-                unset($this->itemsMissing[$key]);
-                $this->itemsMissing = array_values($this->itemsMissing);
-
-                $this->itemsRegistered[] = $product;
+        
+        if (($key = array_search($product, $this->inventurObject->itemsScanned()->toArray())) === false) {
+            $inventurProduct = $this->getInventurAction($product);
+            $inventurProduct->set('in_stock', '1');
+            $inventurProduct->set('missing', '1');
+            
+            if ($inventurProduct->save(true)) {
                 return true;
             }
 
             return false;
         }
-        return false;
+        
+        throw new \App\QueryBuilder\NothingChangedException('already scanned!');
     }
 
     private function loadInventurActions()
     {
         foreach (Models\Product::all() as $product) {
-            if ($product->isAvailable()) {
-                $this->itemsAvailable[] = $product;
-            } else {
-                $this->itemsRented[] = $product;
-            }
-
-            $this->totalItems++;
-
             $inventurAction = $this->getInventurAction($product);
-            if ($inventurAction->isInStock()) {
-                $this->itemsRegistered[] = $product;
-            } else {
-                $this->itemsMissing[] = $product;
-            }
-            $inventurAction->set('user', $this->inventurObject->get('user'));
-
             $this->inventurActions[$product->getId()] = $inventurAction;
         }
     }
@@ -244,8 +158,8 @@ class Inventur
         try {
             $action = Models\InventurProduct::findByFilter(
                 array(
-                array('product', '=', $product),
-                array('inventur', '=', $this->inventurObject)
+                    array('product', '=', $product),
+                    array('inventur', '=', $this->inventurObject)
                 ),
                 1
             );

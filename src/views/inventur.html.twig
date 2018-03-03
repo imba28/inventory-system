@@ -1,6 +1,6 @@
 {% if inventur.isStarted() %}
 {% set total = inventur.getTotalCount() %}
-{% set missing = inventur.getMissingItems()|length %}
+{% set missing = inventur.getNotRegisteredItems()|length %}
 {% set percent_done = (((total - missing) / total)* 100)|round %}
 {% endif %}
 <div class="container-fluid">
