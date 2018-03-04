@@ -208,6 +208,7 @@ class ProductController extends ApplicationController
             $query->groupBy('product_id');
             $query->orderBy(Builder::raw('count'));
             $query->orderBy('product_id');
+            $query->limit(10);
 
             $products = array();
             foreach ($query->get() as $productData) {
