@@ -41,7 +41,7 @@ class View
                 new \Twig_Filter(
                     'ago',
                     function ($string) {
-                        return ago(strtotime($string));
+                        return ago($string);
                     }
                 )
             );
