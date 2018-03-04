@@ -38,7 +38,7 @@ class Inventur
     public function end()
     {
         if ($this->isStarted()) {
-            if (count($this->itemsMissing) == 0) {
+            if (count($this->inventurObject->itemsNotScanned()) == 0) {
                 $this->inventurObject->set('finishDate', 'NOW()');
                 return $this->inventurObject->save();
             } else {
