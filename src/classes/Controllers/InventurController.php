@@ -131,7 +131,7 @@ class InventurController extends ApplicationController
             self::$status->add(
                 'errors',
                 "Inventarnummer <em>{$invNr}</em> wurde nicht gefunden.
-                Möchtest du sie <a href='/products/add' target='_blank'>anlegen</a>?"
+                Möchtest du sie <a href='/products/new' target='_blank'>anlegen</a>?"
             );
         }
 
