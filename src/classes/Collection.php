@@ -2,6 +2,7 @@
 namespace App;
 
 use App\Models\Model;
+use \Closure;
 
 class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countable
 {
@@ -29,6 +30,57 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
     public function isEmpty()
     {
         return count($this->items) == 0;
+    }
+
+    /**
+     *  Filters items using a model property, an operator and a value
+     *
+     * @param string $column
+     * @param string $operator
+     * @param string $value
+     * @return \App\Collection
+     */
+    public function where(string $column, string $operator, string $value): Collection
+    {
+        return $this->filter(function ($item) use ($column, $operator, $value) {
+            $prop = $item->get($column);
+            switch ($operator) {
+                case '=':
+                    return  $prop == $value;
+                break;
+                case '>':
+                    return $prop > $value;
+                break;
+                case '<':
+                    return $prop < $value;
+                break;
+                case '!=':
+                    return $prop != $value;
+                break;
+            }
+        });
+    }
+
+    /**
+     * Filters items using a callback function
+     *
+     * @param Closure $filter
+     * @return \App\Collection
+     */
+    public function filter(Closure $filter): Collection
+    {
+        return new Collection(array_values(array_filter($this->items, $filter)));
+    }
+
+    /**
+     * Applies the callback to the items of this collection
+     *
+     * @param Closure $callback
+     * @return \App\Collection
+     */
+    public function map(Closure $callback)
+    {
+        return new Collection(array_map($callback, $this->items));
     }
 
     public function find($id)

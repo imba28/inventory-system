@@ -93,9 +93,72 @@ class CollectionTest extends TestCase
         $this->collection->append($model_3);
         $this->assertEquals($this->collection->toArray(), [$model_1, $model_2, $model_3]);
     }
+
+    public function testFilter()
+    {
+        $model_1 = new TestModel(array('id' => 1, 'department' => 'A'));
+        $model_2 = new TestModel(array('id' => 2, 'department' => 'A'));
+        $model_3 = new TestModel(array('id' => 3, 'department' => 'a'));
+        $model_4 = new TestModel(array('id' => 4, 'department' => 'B'));
+        $model_5 = new TestModel(array('id' => 5, 'department' => 'B'));
+        $model_6 = new TestModel(array('id' => 6, 'department' => 'C'));
+
+        $this->collection->append($model_1);
+        $this->collection->append($model_2);
+        $this->collection->append($model_3);
+        $this->collection->append($model_4);
+        $this->collection->append($model_5);
+        $this->collection->append($model_6);
+
+        $filtered = $this->collection->filter(function ($model) {
+            return $model->getId() > 3;
+        });
+
+        $this->assertCount(3, $filtered);
+        $this->assertContains($model_4, $filtered);
+        $this->assertContains($model_5, $filtered);
+        $this->assertContains($model_6, $filtered);
+    }
+
+    public function testWhere()
+    {
+        $model_1 = new TestModel(array('id' => 1, 'department' => 'A'));
+        $model_2 = new TestModel(array('id' => 2, 'department' => 'B'));
+        $model_3 = new TestModel(array('id' => 3, 'department' => 'B'));
+
+        $this->collection->append($model_1);
+        $this->collection->append($model_2);
+        $this->collection->append($model_3);
+
+        $filtered = $this->collection->where('department', '=', 'B');
+
+        $this->assertCount(2, $filtered);
+        $this->assertContains($model_2, $filtered);
+        $this->assertContains($model_3, $filtered);
+    }
+
+    public function testMap()
+    {
+        $model_1 = new TestModel(array('id' => 1, 'department' => 'A'));
+        $model_2 = new TestModel(array('id' => 2, 'department' => 'B'));
+        $model_3 = new TestModel(array('id' => 3, 'department' => 'C'));
+        $model_4 = new TestModel(array('id' => 4, 'department' => 'C'));
+
+        $this->collection->append($model_1);
+        $this->collection->append($model_2);
+        $this->collection->append($model_3);
+        $this->collection->append($model_4);
+
+        $collection = $this->collection->map(function ($model) {
+            return $model->get('department');
+        });
+
+        $this->assertCount(4, $collection);
+        $this->assertEquals(['A', 'B', 'C', 'C'], $collection->toArray());
+    }
 }
 
 class TestModel extends Model
 {
-
+    protected $attributes = ['department'];
 }
