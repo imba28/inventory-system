@@ -123,6 +123,21 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         }
     }
 
+    public function sort($by, $order = 'ASC'): Collection
+    {
+        $order = $order === 'ASC' ? -1 : 1;
+
+        usort($this->items, function ($a, $b) use ($by, $order){
+            if ($a->get($by) === $b->get($by)) {
+                return 0;
+            }
+
+            return $a->get($by) < $b->get($by) ? $order : -$order;
+        });
+
+        return $this;
+    }
+
     /* SETTER */
     public function setParent(Model $parent)
     {

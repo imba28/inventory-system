@@ -80,13 +80,14 @@ class CustomerController extends ApplicationController
                 $wants->html(
                     function () {
                         try {
-                            $rentalHistory = Action::findByFilter(
+                            /*$rentalHistory = Action::findByFilter(
                                 array(
-                                array('customer', '=', $this->customer)
+                                    array('customer', '=', $this->customer)
                                 ),
                                 10,
                                 array('returnDate' => 'ASC')
-                            );
+                            );*/
+                            $rentalHistory = Action::where('customer', $this->customer)->sort('rentDate', 'DESC')->first(10);
                         } catch (\App\Exceptions\NothingFoundException $e) {
                             $rentalHistory = array();
                         }
