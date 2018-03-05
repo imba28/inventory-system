@@ -9,11 +9,12 @@ class ModelTest extends TestCase
     {
         $stub = $this->getMockBuilder(Builder::class)
         ->setConstructorArgs(['customers'])
-        ->setMethods(['update', 'insert'])
+        ->setMethods(['update', 'insert', 'describe'])
         ->getMock();
 
         $stub->method('insert')->willReturn(true);
         $stub->method('update')->willReturn(true);
+        $stub->method('describe')->willReturn([]);
 
         Model::setQueryBuilder($stub);
     }
@@ -25,7 +26,7 @@ class ModelTest extends TestCase
             \App\Models\Product::new()
         );
 
-        $customer = new \App\Models\Customer($this->existingModelProvider());
+        $customer = App\Models\Customer::create($this->existingModelProvider());
         $this->assertEquals(1, $customer->getId());
         $this->assertEquals('Test Customer', $customer->get('name'));
         $this->assertEquals('test@test.de', $customer->get('email'));
@@ -34,7 +35,7 @@ class ModelTest extends TestCase
 
     public function testIfModelCanSetProperties()
     {
-        $customer = new \App\Models\Customer($this->existingModelProvider());
+        $customer = App\Models\Customer::create($this->existingModelProvider());
 
         $this->assertFalse($customer->set('notExistingProperty', 'test'));
         $this->assertNull($customer->get('notExistingProperty'));
@@ -45,7 +46,7 @@ class ModelTest extends TestCase
 
     public function testExceptionIfNothingChanged()
     {
-        $customer = new \App\Models\Customer($this->existingModelProvider());
+        $customer = \App\Models\Customer::create($this->existingModelProvider());
 
         $this->expectException(\App\QueryBuilder\NothingChangedException::class);
         $customer->save(true);
@@ -53,7 +54,7 @@ class ModelTest extends TestCase
 
     public function testGetChangedProperties()
     {
-        $customer = new \App\Models\Customer($this->existingModelProvider());
+        $customer = \App\Models\Customer::create($this->existingModelProvider());
 
         $this->assertEmpty($customer->getChangedProperties());
         $this->assertTrue($customer->set('name', 'Changed'));
