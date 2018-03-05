@@ -48,7 +48,7 @@ class Product extends Model
         try {
             $action = \App\Models\Action::findByFilter(
                 array(
-                array('product_id', '=', $this->getId()),
+                array('product', '=', $this),
                 array('returnDate', 'IS', 'NULL')
                 )
             );
