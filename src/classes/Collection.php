@@ -40,7 +40,7 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
      *
      * @return void
      */
-    public function isEmpty(): boolean
+    public function isEmpty(): bool
     {
         return count($this->items) == 0;
     }
