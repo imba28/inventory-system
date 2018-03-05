@@ -373,7 +373,6 @@ class ProductController extends ApplicationController
 
     public function return()
     {
-        $this->authenticateUser();
         $this->view->setTemplate('product-return');
 
         if ($this->product->isAvailable()) {
