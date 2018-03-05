@@ -4,6 +4,9 @@ namespace App;
 use App\Models\Model;
 use \Closure;
 
+/**
+ * Collection of models. Provides various useful helper methods.
+ */
 class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countable
 {
     protected $items;
@@ -17,7 +20,12 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         $this->items = $items;
     }
 
-    public function count()
+    /**
+     * Counts models in collection.
+     *
+     * @return int
+     */
+    public function count(): int
     {
         return count($this->items);
     }
@@ -27,7 +35,12 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         throw new \BadMethodCallException('not implemented yet');
     }
 
-    public function isEmpty()
+    /**
+     * Check if collection is empty.
+     *
+     * @return void
+     */
+    public function isEmpty(): boolean
     {
         return count($this->items) == 0;
     }
@@ -78,11 +91,17 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
      * @param Closure $callback
      * @return \App\Collection
      */
-    public function map(Closure $callback)
+    public function map(Closure $callback): Collection
     {
         return new Collection(array_map($callback, $this->items));
     }
 
+    /**
+     * Find a model with a specific id or return null
+     *
+     * @param mixed $id
+     * @return mixed
+     */
     public function find($id)
     {
         foreach ($this->items as $item) {
@@ -93,6 +112,12 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         return null;
     }
 
+    /**
+     * Return the first model in collection or the first n models
+     *
+     * @param mixed $n
+     * @return mixed
+     */
     public function first($n = 1)
     {
         if ($n > 1) {
@@ -101,16 +126,33 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         return isset($this->items[$n - 1]) ? $this->items[$n - 1] : null;
     }
 
+    /**
+     * Add model to collection
+     *
+     * @param Model $model
+     * @return void
+     */
     public function append(Model $model)
     {
         $this->items[] = $model;
     }
 
-    public function toArray()
+    /**
+     * Returns items in collection
+     *
+     * @return array
+     */
+    public function toArray(): array
     {
         return $this->items;
     }
 
+    /**
+     * Save models in collection
+     *
+     * @todo   should work without parent too
+     * @return void
+     */
     public function save()
     {
         if ($this->parent == null) {
@@ -123,6 +165,13 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         }
     }
 
+    /**
+     * Sort collection by a model property
+     *
+     * @param mixed $by
+     * @param mixed $order
+     * @return void
+     */
     public function sort($by, $order = 'ASC'): Collection
     {
         $order = $order === 'ASC' ? -1 : 1;
@@ -138,7 +187,12 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
         return $this;
     }
 
-    /* SETTER */
+    /**
+     * Set parent model of collection.
+     *
+     * @param Model $parent
+     * @return void
+     */
     public function setParent(Model $parent)
     {
         $this->parent = $parent;
