@@ -65,7 +65,6 @@ class ProductController extends ApplicationController
                 $wants->html(
                     function () {
                         $this->view->setTemplate('product');
-
                         try {
                             $this->view->assign(
                                 'rentHistory',

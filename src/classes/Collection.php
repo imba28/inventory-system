@@ -176,7 +176,7 @@ class Collection implements \Iterator, \ArrayAccess, \JsonSerializable, \Countab
     {
         $order = $order === 'ASC' ? -1 : 1;
 
-        usort($this->items, function ($a, $b) use ($by, $order){
+        usort($this->items, function ($a, $b) use ($by, $order) {
             if ($a->get($by) === $b->get($by)) {
                 return 0;
             }

@@ -644,7 +644,6 @@ abstract class Model implements \JsonSerializable, MessageInterface
     {
         //$query = new \App\QueryBuilder\Builder(self::getTableName());
         self::$builder->setTable(self::getTableName());
-        
         self::$builder->where('deleted', '=', '0');
 
         if ($limit !== false) {
@@ -666,6 +665,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
         }
 
         $res = self::$builder->get();
+        
         if (!empty($res)) {
             return $limit == 1 ? current($res) : $res;
         } else {
