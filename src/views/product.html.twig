@@ -64,6 +64,17 @@
                                     {{ product.get('note')|raw }}
                                 </div>
                             {% endif %}
+                            {% if isUserSignedIn %}
+                                <p class="mt-3">
+                                    <small>
+                                        Erstellt am {{ product.get('createDate').format('d.m.Y') }}
+                                        von 
+                                        <a href="/user/{{ product.get('user').getId() }}">
+                                            {{ product.get('user').get('name') }}
+                                        </a>
+                                    </small>
+                                </p>
+                            {% endif %}
                         </div>
                         <div class="btn-group p-3" role="group" aria-label="Basic example">
                             {% if isUserSignedIn %}
@@ -97,7 +108,7 @@
                                         <small class="text-muted font-weight-bold">
                                             Ausgeliehen von
                                             {% if rentAction.get('customer') %}
-                                                {{ rentAction.get('customer').get('name') ? rentAction.get('customer').get('name') : rentAction.get('customer').get('invNr') }}
+                                                {{ rentAction.get('customer').get('name') ? rentAction.get('customer').get('name') : rentAction.get('customer').get('internal_id') }}
                                             {% else %}
                                                 <i>gelöscht</i>
                                             {% endif %}
@@ -113,7 +124,7 @@
                                         <small class="text-muted">
                                             Ausgeliehen von
                                             {% if rentAction.get('customer') %}
-                                                {{ rentAction.get('customer').get('name') ? rentAction.get('customer').get('name') : rentAction.get('customer').get('invNr') }}
+                                                {{ rentAction.get('customer').get('name') ? rentAction.get('customer').get('name') : rentAction.get('customer').get('internal_id') }}
                                             {% else %}
                                                 <i>gelöscht</i>
                                             {% endif %}
