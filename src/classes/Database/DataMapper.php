@@ -178,28 +178,40 @@ class DataMapper
      */
     private function toDatetime($column, $value)
     {
-        try {
-            $date = new DateTime($value);
-        } catch (\Exception $e) {
-            return $value;
+        if (is_null($value)) {
+            return null;
         }
 
-        if ($date !== false) {
-            return $date;
-        } else {
-            return $value;
+        if (is_string($value)) {
+            try {
+                $date = new DateTime($value);
+            } catch (\Exception $e) {
+                return $value;
+            }
+            
+            if ($date !== false) {
+                return $date;
+            }
         }
+        
+        return $value;
     }
 
     private function toDate($column, $value)
     {
-        $date = DateTime::createFromFormat('d.m.Y', $value);
-
-        if ($date !== false) {
-            return $date;
-        } else {
-            return $value;
+        if (is_null($value)) {
+            return null;
         }
+
+        if (is_string($value)) {
+            $date = DateTime::createFromFormat('d.m.Y', $value);
+
+            if ($date !== false) {
+                return $date;
+            }
+        }
+        
+        return $value;
     }
 
     /**
@@ -210,13 +222,18 @@ class DataMapper
      */
     private function toTimestamp($column, $value)
     {
-        $date = DateTime::createFromFormat('U', $value);
-
-        if ($date !== false) {
-            return $date;
-        } else {
-            return $value;
+        if (is_null($value)) {
+            return null;
         }
+        
+        if (is_string($value)) {
+            $date = DateTime::createFromFormat('U', $value);
+
+            if ($date !== false) {
+                return $date;
+            }
+        }
+        return $value;
     }
 
     /**
