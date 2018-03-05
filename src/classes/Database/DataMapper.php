@@ -2,6 +2,7 @@
 namespace App\Database;
 
 use \App\Helper\Loggers\Logger;
+use \App\Models\Model;
 use \DateTime;
 
 /**
@@ -22,36 +23,75 @@ class DataMapper
     }
 
     /**
-     * Converts a column value based on its type.
+     * Converts a database column value to an application value based on its data type.
      *
      * @param mixed $column
      * @param mixed $value
      * @return mixed
      */
-    public function map(&$column, $value)
+    public function mapTo(&$column, $value)
     {
         if (isset($this->schema[$column])) {
             $columnInfo = $this->schema[$column];
-            if (is_callable([$this, "get{$columnInfo['type']}"])) {
-                return $this->{"get{$columnInfo['type']}"}($column, $value);
+            if (is_callable([$this, "to{$columnInfo['type']}"])) {
+                return $this->{"to{$columnInfo['type']}"}($column, $value);
             }
         }
         return $value;
     }
 
     /**
-     * Converts an array of column values.
+     * Converts array of application values to database values.
      *
      * @param array $data
      * @return array
      */
-    public function mapAll(array $data): array
+    public function mapToAll(array $data): array
     {
         $mapped = [];
 
         foreach ($data as $key => $value) {
             $column = $key;
-            $mappedValue = $this->map($column, $value);
+            $mappedValue = $this->mapTo($column, $value);
+            $mapped[$column] = $mappedValue;
+        }
+
+        return $mapped;
+    }
+
+    public function mapFrom(&$column, $value)
+    {
+        if ($value instanceof Model) {
+            $column .= '_id';
+        }
+
+        if (isset($this->schema[$column])) {
+            $columnInfo = $this->schema[$column];
+            if (is_callable([$this, "from{$columnInfo['type']}"])) {
+                return $this->{"from{$columnInfo['type']}"}($column, $value);
+            }
+        }
+
+        if (is_null($value) || strlen(trim($value)) === 0) {
+            return null;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Converts array of application values to database values.
+     *
+     * @param array $data
+     * @return void
+     */
+    public function mapFromAll(array $data): array
+    {
+        $mapped = [];
+
+        foreach ($data as $key => $value) {
+            $column = $key;
+            $mappedValue = $this->mapFrom($column, $value);
             $mapped[$column] = $mappedValue;
         }
 
@@ -91,7 +131,7 @@ class DataMapper
      * @param mixed $value
      * @return string
      */
-    private function getVarchar($column, $value): string
+    private function toVarchar($column, $value): string
     {
         return (string) $value;
     }
@@ -102,9 +142,9 @@ class DataMapper
      * @param mixed $value
      * @return string
      */
-    private function getText($column, $value): string
+    private function toText($column, $value): string
     {
-        return $this->getVarchar($column, $value);
+        return $this->toVarchar($column, $value);
     }
 
     /**
@@ -113,7 +153,7 @@ class DataMapper
      * @param mixed $value
      * @return int
      */
-    private function getInt($column, $value): int
+    private function toInt($column, $value): int
     {
         return intval($value);
     }
@@ -125,9 +165,9 @@ class DataMapper
      * @param mixed $value
      * @return string
      */
-    private function getEnum($column, $value): string
+    private function toEnum($column, $value): string
     {
-        return $this->getVarchar($column, $value);
+        return $this->toVarchar($column, $value);
     }
 
     /**
@@ -136,9 +176,24 @@ class DataMapper
      * @param mixed $value
      * @return mixed
      */
-    private function getDatetime($column, $value)
+    private function toDatetime($column, $value)
     {
-        $date = DateTime::createFromFormat('Y-m-d H:i:s', $value);
+        try {
+            $date = new DateTime($value);
+        } catch (\Exception $e) {
+            return $value;
+        }
+
+        if ($date !== false) {
+            return $date;
+        } else {
+            return $value;
+        }
+    }
+
+    private function toDate($column, $value)
+    {
+        $date = DateTime::createFromFormat('d.m.Y', $value);
 
         if ($date !== false) {
             return $date;
@@ -153,7 +208,7 @@ class DataMapper
      * @param mixed $value
      * @return mixed
      */
-    private function getTimestamp($column, $value)
+    private function toTimestamp($column, $value)
     {
         $date = DateTime::createFromFormat('U', $value);
 
@@ -164,7 +219,15 @@ class DataMapper
         }
     }
 
-    private function getModel(&$column, $value)
+    /**
+     * Converts a column value to a Models\Model object. Changes column name, which is passed by reference.
+     *
+     * @see \App\Models\Model
+     * @param mixed &$column
+     * @param mixed $value
+     * @return mixed
+     */
+    private function toModel(&$column, $value)
     {
         try {
             $className = "\\App\\Models\\" . ucfirst(rtrim($column, '_id'));
@@ -176,5 +239,30 @@ class DataMapper
         
         $column = rtrim($column, '_id');
         return $value;
+    }
+
+    private function fromDate($column, DateTime $value): string
+    {
+        return $value->format('Y-m-d');
+    }
+
+    private function fromDatetime($column, DateTime $value): string
+    {
+        return $value->format('Y-m-d H:i:s');
+    }
+
+    private function fromTimestamp($column, DateTime $value): int
+    {
+        return $value->format('U');
+    }
+
+    private function fromModel(&$column, Model $value): string
+    {
+        // TODO add a method that indicates whether or not a model is saved.
+        if (!$value->isCreated()) {
+            $value->save();
+        }
+        
+        return $value->getId();
     }
 }

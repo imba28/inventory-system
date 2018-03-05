@@ -322,8 +322,8 @@ class ProductController extends ApplicationController
         if (!$this->product->isAvailable()) {
             $action = Action::findByFilter(
                 array(
-                array('product_id', '=', $this->product->getId()),
-                array('returnDate', 'IS', 'NULL')
+                    array('product_id', '=', $this->product->getId()),
+                    array('returnDate', 'IS', 'NULL')
                 ),
                 1
             );
@@ -383,7 +383,7 @@ class ProductController extends ApplicationController
         }
 
         if ($this->request->issetParam('submit')) {
-            $returnDate = 'NOW()';
+            $returnDate = 'NOW';
 
             if ($this->request->issetParam('returnDate')) {
                 $date = \DateTime::createFromFormat('d.m.Y', $this->request->getParam('returnDate'));

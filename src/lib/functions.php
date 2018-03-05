@@ -189,7 +189,7 @@ function fileext_to_mime($filename)
 
 function tryParseDate($string)
 {
-    if (strtoupper($string) === 'NOW' || strtolower($string)  === 'NOW()') {
+    if (strtoupper($string) === 'NOW' || strtoupper($string)  === 'NOW()') {
         $date = new DateTime('now');
     } elseif (preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/", $string)) { // YYYY-MM-DD
         $date = DateTime::createFromFormat("Y-m-d", $string);

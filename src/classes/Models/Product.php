@@ -80,7 +80,7 @@ class Product extends Model
         $action = Action::new();
         $action->set('product', $this);
         $action->set('customer', $customer);
-        $action->set('rentDate', 'NOW()');
+        $action->set('rentDate', 'now');
         $action->set('expectedReturnDate', $returnDate);
         $action->set('user', $user);
 

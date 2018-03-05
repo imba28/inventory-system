@@ -28,7 +28,7 @@ class Action extends Model
         return !is_null($this->get('returnDate'));
     }
 
-    public function returnProduct($date = 'NOW()')
+    public function returnProduct($date = 'NOW')
     {
         $this->set('returnDate', $date);
         $this->save();

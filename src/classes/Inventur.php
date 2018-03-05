@@ -28,7 +28,7 @@ class Inventur
     {
         if (!$this->isStarted()) {
             $this->inventurObject->set('user', $startedBy);
-            $this->inventurObject->set('startDate', 'NOW()');
+            $this->inventurObject->set('startDate', 'NOW');
             return $this->inventurObject->save();
         }
 
@@ -39,7 +39,7 @@ class Inventur
     {
         if ($this->isStarted()) {
             if (count($this->inventurObject->itemsNotScanned()) == 0) {
-                $this->inventurObject->set('finishDate', 'NOW()');
+                $this->inventurObject->set('finishDate', 'NOW');
                 return $this->inventurObject->save();
             } else {
                 throw new \App\Exceptions\InventurNotFinishedException(

@@ -26,37 +26,41 @@ class DataMapperTest extends TestCase
         ]);
     }
 
-    public function testMap()
+    public function testMapTo()
     {
         $column = 'name';
-        $this->assertInternalType('string', $this->mapper->map($column, 'John Doe'));
+        $this->assertInternalType('string', $this->mapper->mapTo($column, 'John Doe'));
 
         $column = 'active';
-        $this->assertInternalType('int', $this->mapper->map($column, '0'));
+        $this->assertInternalType('int', $this->mapper->mapTo($column, '0'));
 
         $column = 'created_at';
-        $this->assertInstanceOf(\DateTime::class, $this->mapper->map($column, '2018-03-04 22:52:00'));
+        $this->assertInstanceOf(\DateTime::class, $this->mapper->mapTo($column, '2018-03-04 22:52:00'));
+
+        $column = 'created_at';
+        $this->assertInstanceOf(\DateTime::class, $this->mapper->mapTo($column, 'now'));
 
         $column = 'updated_at';
-        $this->assertInstanceOf(\DateTime::class, $this->mapper->map($column, '12345678901'));
+        $this->assertInstanceOf(\DateTime::class, $this->mapper->mapTo($column, '1520214233'));
+        
         
         $column = 'created_at';
-        $this->assertInternalType('string', $this->mapper->map($column, 'invalid timestamp'));
+        $this->assertInternalType('string', $this->mapper->mapTo($column, 'invalid timestamp'));
         
         $column = 'updated_at';
-        $this->assertInternalType('string', $this->mapper->map($column, 'invalid datetime'));
+        $this->assertInternalType('string', $this->mapper->mapTo($column, 'invalid datetime'));
     }
 
-    public function testMapAll()
+    public function testMapToAll()
     {
         $data = [
             'name' => 'John Doe',
             'active' => '1',
             'created_at' => '2018-03-04 22:52:00',
-            'updated_at' => '12345678901'
+            'updated_at' => '1520214233'
         ];
 
-        $mappedData = $this->mapper->mapAll($data);
+        $mappedData = $this->mapper->mapToAll($data);
 
         $this->assertInternalType('string', $mappedData['name']);
         $this->assertInternalType('int', $mappedData['active']);

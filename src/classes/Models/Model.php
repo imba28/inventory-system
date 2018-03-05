@@ -3,6 +3,7 @@ namespace App\Models;
 
 use App\Validator;
 use App\Collection;
+use App\Database\DataMapper;
 use App\Helper\Loggers\Logger;
 use App\QueryBuilder\Builder;
 use App\Helper\Messages\MessageInterface;
@@ -68,6 +69,13 @@ abstract class Model implements \JsonSerializable, MessageInterface
     private $relations = [];
 
     /**
+     * Data mapper. Converts model data based on its database field type.
+     *
+     * @var App\Database\DataMapper
+     */
+    private $mapper;
+
+    /**
      * QueryBuilder which is used to retrieve data from the database.
      *
      * @var \App\QueryBuilder\Builder
@@ -81,7 +89,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
      */
     static private $instances = [];
 
-    public function __construct($options = array())
+    public function __construct($options = array(), DataMapper $mapper = null)
     {
         $this->originalState = array_merge($this->attributes, ['id', 'user', 'createDate', 'stamp', 'deleted']);
         $this->originalState = array_map(
@@ -91,20 +99,9 @@ abstract class Model implements \JsonSerializable, MessageInterface
             array_flip($this->originalState)
         );
 
-        foreach ($options as $key => $value) {
-            if (preg_match('/([\w]+)_id$/', $key, $m)) {
-                $className = '\App\Models\\'.ucfirst($m[1]);
-                if (class_exists($className)) {
-                    $key = $m[1];
-                    try {
-                        $value = $className::find($value);
-                    } catch (\App\Exceptions\NothingFoundException $e) {
-                        Logger::warn("{$className} with id {$value} not found!");
-                        $value = null;
-                    }
-                }
-            }
+        $this->mapper = $mapper;
 
+        foreach ($options as $key => $value) {
             if (array_key_exists($key, $this->originalState)) {
                 $this->originalState[$key] = $value;
                 $this->state[$key] = $value;
@@ -200,7 +197,8 @@ abstract class Model implements \JsonSerializable, MessageInterface
 
         if ($this->isCreated()) {
             if (count($propertiesUpdate) > 0) {
-                $res = self::$builder->where('id', '=', $this->getId())->update($propertiesUpdate);
+                $update = $this->mapper->mapFromAll($propertiesUpdate);
+                $res = self::$builder->where('id', '=', $this->getId())->update($update);
     
                 if ($res === false) {
                     throw new \App\QueryBuilder\QueryBuilderException("could not update data", self::$builder->getError());
@@ -213,10 +211,11 @@ abstract class Model implements \JsonSerializable, MessageInterface
         } else {
             $this->trigger('create');
 
-            $propertiesUpdate['createDate'] = 'NOW()';
+            $propertiesUpdate['createDate'] = new \DateTime('now');
             $propertiesUpdate['deleted'] = '0';
 
-            $res = self::$builder->insert($propertiesUpdate);
+            $insert = $this->mapper->mapFromAll($propertiesUpdate);
+            $res = self::$builder->insert($insert);
 
             if ($res === false) {
                 throw new \App\QueryBuilder\QueryBuilderException("could not insert data", self::$builder->getError());
@@ -284,7 +283,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
     public function set($property, $value)
     {
         if (array_key_exists($property, $this->originalState)) {
-            $this->state[$property] = $value;
+            $this->state[$property] = $this->mapper->mapTo($property, $value);
             $this->trigger('set', $this, array('property' => $property, 'value' => $value));
             return true;
         }
@@ -355,19 +354,11 @@ abstract class Model implements \JsonSerializable, MessageInterface
 
         foreach ($this->state as $name => $value) {
             if ($this->originalState[$name] != $value) { // has changed
-                if ($value instanceof \App\Models\Model) {
-                    if (!$value->isCreated()) {
-                        $value->save();
-                    }
-                    $name = "{$name}_id";
-                    $value = $value->getId();
-                } elseif (is_null($value) || (empty($value) && $value != 0)) {
-                    $value = null;
-                } elseif ($value === "NOW()") {
+                /*if ($value === "now") {
                     $date = new \DateTime();
                     $value = $date->format('Y-m-d H:i:s');
                     $this->state[$name] = $value;
-                }
+                }*/
 
                 $propertiesUpdate[$name] = $value;
             }
@@ -467,8 +458,11 @@ abstract class Model implements \JsonSerializable, MessageInterface
         if ($selfClass == false) {
             throw new \RuntimeException('Oh shit.');
         }
-
-        $model = new $selfClass();
+        
+        self::$builder->setTable(self::getTableName());
+        $mapper = new DataMapper(self::$builder->describe());
+            
+        $model = new $selfClass([], $mapper);
         //$model->setQueryBuilder(new QueryBuilder\Builder(self::getTableName()));
 
         return $model;
@@ -554,7 +548,11 @@ abstract class Model implements \JsonSerializable, MessageInterface
         $selfClass = get_called_class();
 
         if (!isset(self::$instances[$selfClass][$data['id']])) {
-            $model = new $selfClass($data);
+            self::$builder->setTable(self::getTableName());
+            $mapper = new DataMapper(self::$builder->describe());
+            $data = $mapper->mapToAll($data);
+            
+            $model = new $selfClass($data, $mapper);
             //$model->setQueryBuilder(new QueryBuilder\Builder(self::getTableName()));
 
             self::$instances[$selfClass][$data['id']] = $model;
@@ -564,7 +562,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
     }
 
     /**
-     * Returns a model's tabe name. It's assumed the table name follows the rule 'classNameOfModel' + s
+     * Returns a model's table name. Table is assumed to be the plural of the class name.
      *
      * @return string
      */
