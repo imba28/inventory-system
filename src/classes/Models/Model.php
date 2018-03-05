@@ -539,6 +539,22 @@ abstract class Model implements \JsonSerializable, MessageInterface
         return $this->relations[$relationName];
     }
 
+    public static function where($key, $operator = null, $value = null): Collection
+    {
+        if (count(func_get_args()) == 2) {
+            $value = $operator;
+            $operator = '=';
+        }
+        
+        if (count(func_get_args()) > 1) {
+            $filter = [$key, $operator, $value];
+        } else {
+            $filter = $key;
+        }
+
+        return static::findByFilter($filter, false);
+    }
+
     private static function getModelFromOption(array $data)
     {
         if (!isset(self::$instances[get_called_class()])) {
