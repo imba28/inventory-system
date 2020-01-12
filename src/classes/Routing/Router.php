@@ -1,9 +1,23 @@
 <?php
 namespace App\Routing;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 class Router
 {
-    use \App\Traits\Singleton;
+    // use \App\Traits\Singleton;
+
+    /** @var ContainerInterface  */
+    private $container;
+
+    /**
+     * Router constructor.
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
 
     private static $routeCount = 0;
 
@@ -100,10 +114,10 @@ class Router
         } elseif (is_string($handle)) {
             $split = explode('#', $handle);
 
-            $controllerClass = "\App\Controllers\\{$split[0]}";
+            $controllerClass = "App\Controllers\\{$split[0]}";
             $controllerAction = $split[1];
 
-            $controller = new $controllerClass($responseType);
+            $controller = $this->container->get($controllerClass);
             $controller->init();
 
             if (is_callable(array($controller, $controllerAction), true)) {

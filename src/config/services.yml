@@ -1,0 +1,18 @@
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\:
+        resource: '../classes/*'
+        exclude: '../classes/Controllers'
+
+    App\Routing\Router:
+        class: '\App\Routing\Router'
+        public: true
+
+    App\Controllers\:
+        resource: '../classes/Controllers'
+        public: true

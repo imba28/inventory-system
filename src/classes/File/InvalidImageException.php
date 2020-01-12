@@ -1,7 +1,7 @@
 <?php
 namespace App\File;
 
-class InvalidImageExecption extends \Exception
+class InvalidImageException extends \Exception
 {
     
 }

@@ -29,3 +29,4 @@ $router->get('/logs', 'LogController#index');
 $router->delete('/images/:id', 'ProductImageController#delete');
 
 $router->get('*', 'FileController#main');
+
