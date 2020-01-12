@@ -3,18 +3,18 @@ namespace App\Models;
 
 class User extends Model
 {
-    protected $attributes = ['name', 'username', 'password'];
+    protected $attributes = ['name', 'username', 'password', 'email'];
     protected $name;
     protected $username;
+    protected $email;
     protected $password;
 
-    protected function int()
+    protected function init()
     {
         $this->on(
             'save',
             function ($e) {
                 $user = $e->getContext();
-
                 $password = self::getHashedString($user->get('password'));
 
                 $user->set('password', $password);
