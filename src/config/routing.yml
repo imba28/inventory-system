@@ -1,0 +1,3 @@
+app_legacy:
+    resource: .
+    type: legacy

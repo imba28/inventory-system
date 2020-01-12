@@ -1,6 +1,7 @@
 <?php
 namespace App\Controllers;
 
+use App\Bootstrap\Bootstrap;
 use \App\Helper\Messages\MessageCollection;
 use App\Helper\Loggers\Logger;
 
@@ -109,9 +110,10 @@ abstract class BasicController
      * @param mixed $templateName
      * @return void
      */
-    private function setViewTemplate($templateName)
+    public function setViewTemplate($templateName)
     {
         $selfClass = get_called_class();
+
 
         if (preg_match('/([^\\\]+)Controller$/', $selfClass, $m)) {
             $dir = strtolower($m[1]);
@@ -129,7 +131,7 @@ abstract class BasicController
      *
      * @return void
      */
-    private function callFormats()
+    public function callFormats()
     {
         if (isset($this->formats[$this->responseType])) {
             foreach ($this->formats[$this->responseType] as $f) {
@@ -157,7 +159,7 @@ abstract class BasicController
      * @param mixed $args
      * @return void
      */
-    private function callBeforeActions($method, $args)
+    public function callBeforeActions($method, $args)
     {
         if (isset($this->beforeActions[$method])) {
             foreach ($this->beforeActions[$method] as $function) {
@@ -214,8 +216,13 @@ abstract class BasicController
      */
     protected function redirectToRoute($route, $requestMethod = 'GET')
     {
-        \App\Routing\Router::getInstance()->route($route, $requestMethod);
+        Bootstrap::getContainer()->get('App\Routing\Router')->route($route, $requestMethod);
     }
 
     abstract public function error($status);
+
+    public function getView()
+    {
+        return $this->view;
+    }
 }

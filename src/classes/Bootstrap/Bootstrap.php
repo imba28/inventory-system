@@ -2,18 +2,22 @@
 
 namespace App\Bootstrap;
 
+use App\Configuration;
+use App\Kernel;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 
 class Bootstrap
 {
-    private $container = null;
+    private static $container = null;
 
-    private function startUp()
+    public function startUp()
     {
-        $this->buildContainer();
         $this->setConfigParams();
+        $this->buildContainer();
 
         \App\Helper\Loggers\Logger::setLogger(
         //new App\Helper\Loggers\FileLogger(ABS_PATH . '/logs/log.txt')
@@ -36,9 +40,9 @@ class Bootstrap
     public function run() {
         $this->startUp();
 
-        $router = $this->container->get("App\Routing\Router");
+        $router = self::$container->get("App\Routing\Router");
 
-        require ABS_PATH . '/src/config/routes.php';
+        require ABS_PATH . '/src/config/legacy_routes.php';
         $router->route();
     }
 
@@ -48,9 +52,16 @@ class Bootstrap
         $loader = new YamlFileLoader($containerBuilder, new FileLocator(__DIR__));
         $loader->load('../../config/services.yml');
 
+        $containerBuilder->addCompilerPass(new RegisterListenersPass());
+
         $containerBuilder->compile();
 
-        $this->container = $containerBuilder;
+        self::$container = $containerBuilder;
+    }
+
+    public static function getContainer(): ContainerInterface
+    {
+        return self::$container;
     }
 
     private function setConfigParams()
@@ -59,6 +70,7 @@ class Bootstrap
         if (\App\Configuration::get('DB_DRIVER') === 'sqlite') {
             \App\Models\Model::setQueryBuilder(new \App\QueryBuilder\SQLiteBuilder());
         } else {
+            \App\Configuration::set('DB_DRIVER', 'mysql');
             \App\Models\Model::setQueryBuilder(new \App\QueryBuilder\Builder());
         }
 
@@ -73,5 +85,10 @@ class Bootstrap
             ini_set('display_startup_errors', 0);
             error_reporting(0);
         }
+    }
+
+    public function getKernel()
+    {
+        return new Kernel(Configuration::get('env'), Configuration::get('env') === 'dev');
     }
 }

@@ -99,6 +99,7 @@ class Router
                 }
             }
 
+            $routeOptions['path'] = $path;
             $routeOptions['regex'] = '/^' . implode('\/', $routeOptions['regex']) . '$/ui';
 
             $this->routes[$requestMethod][self::$routeCount++] = $routeOptions;
@@ -193,5 +194,10 @@ class Router
         $this->get("{$resource}/:_id/edit", "{$controller}#edit");
         $this->put("{$resource}/:_id", "{$controller}#update");
         $this->delete("{$resource}/:_id", "{$controller}#delete");
+    }
+
+    public function getRoutes(): array
+    {
+        return $this->routes;
     }
 }

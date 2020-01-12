@@ -7,12 +7,14 @@ services:
 
     App\:
         resource: '../classes/*'
-        exclude: '../classes/Controllers'
 
-    App\Routing\Router:
-        class: '\App\Routing\Router'
+    App\Routing\:
+        resource: '../classes/Routing/*'
         public: true
 
+    App\Routing\RouteLoader:
+        tags: [routing.loader]
+
     App\Controllers\:
-        resource: '../classes/Controllers'
+        resource: '../classes/Controllers/'
         public: true

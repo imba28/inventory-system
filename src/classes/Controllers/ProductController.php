@@ -8,6 +8,7 @@ use App\Models\ProductImage;
 use App\Models\Customer;
 use App\Models\Action;
 use App\QueryBuilder\Builder;
+use Symfony\Component\HttpFoundation\Request;
 
 class ProductController extends ApplicationController
 {
@@ -450,8 +451,11 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('products-search-mask');
     }
 
-    public function index($params)
+    public function index(Request $request)
     {
+        $params = $request->request->all();
+        vd($params);
+
         $this->view->setTemplate('products');
 
         $this->respondTo(
