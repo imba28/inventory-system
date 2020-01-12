@@ -374,7 +374,7 @@ class Builder
             foreach ($this->where as $clause) {
                 $clauses[] = $clause->getClause(self::getTableName($this->table));
             }
-            return ' WHERE ' . implode($clauses, ' AND ');
+            return ' WHERE ' . implode(' AND ', $clauses);
         }
 
         return '';
@@ -407,10 +407,10 @@ class Builder
                 $join_statement[] = $join->getStatement();
             }
 
-            $selection .= ', ' . implode($join_selection, ', ');
+            $selection .= ', ' . implode(', ', $join_selection);
         }
 
-        $join_statement = implode($join_statement, ' ');
+        $join_statement = implode(' ', $join_statement);
 
         $sql = "SELECT $selection FROM " . $this->sanitize(self::getTableName($this->table));
         $sql .= $join_statement;
@@ -420,15 +420,15 @@ class Builder
         }
 
         if (count($this->group) > 0) {
-            $sql .= " GROUP BY ". join($this->group, ", ");
+            $sql .= " GROUP BY ". join(", ", $this->group);
         }
 
         if (count($this->order) > 0) {
-            $sql .= " ORDER BY ". join($this->order, ", ");
+            $sql .= " ORDER BY ". join(", ", $this->order);
         }
 
         if (count($this->limit) > 0) {
-            $sql .= " LIMIT ". join($this->limit, ", ");
+            $sql .= " LIMIT ". join(", ", $this->limit);
         }
 
         return $sql;
