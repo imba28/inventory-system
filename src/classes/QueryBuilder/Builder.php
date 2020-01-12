@@ -42,10 +42,10 @@ class Builder
     {
         if (is_array($arg1) && $arg2 == null) {
             foreach ($arg1 as $arg) {
-                if (!is_array($arg) || count($arg) != 3) {
+                if (!is_array($arg) || (is_array($arg) && count($arg) != 3)) {
                     throw new \InvalidArgumentException(
                         'Invalid nested where arguments!
-                        Expected argument to be array of length 3, got '. gettype($arg) .' of length '.count($arg).'!'
+                        Expected argument to be array of length 3, got '. gettype($arg) .' of length '. (is_array($arg) ? count($arg) : $arg) .'!'
                     );
                 }
 

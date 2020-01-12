@@ -13,7 +13,7 @@ class Format
     public function __call($formatType, array $arguments)
     {
         if (isset($this->formatClosures[$formatType])) {
-            if (count($arguments[0]) > 0 && $arguments[0] instanceof \Closure) {
+            if (count($arguments) > 0 && $arguments[0] instanceof \Closure) {
                 $this->formatClosures[$formatType] = $arguments[0];
             } else {
                 throw new \InvalidArgumentException(
