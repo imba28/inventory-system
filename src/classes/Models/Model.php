@@ -190,7 +190,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
             throw new \App\Models\InvalidModelDataException("no valid!");
         }
         
-        $this->trigger('save');
+        $this->trigger('save', $this);
 
         self::$builder->setTable(self::getTableName());
         $propertiesUpdate = $this->getChangedProperties();
