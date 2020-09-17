@@ -5,6 +5,7 @@ use App\Bootstrap\Bootstrap;
 use \App\Helper\Messages\MessageCollection;
 use App\Helper\Loggers\Logger;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 abstract class BasicController
@@ -178,12 +179,12 @@ abstract class BasicController
      * Calls the router with a passed route and request method.
      *
      * @param mixed $route
+     * @todo: while the original method forwarded the request to another controller we are using a hard redirect. this might break stuff?
      * @param mixed $requestMethod
-     * @return void
      */
-    protected function redirectToRoute($route, $requestMethod = 'GET')
+    protected function redirectToRoute($route)
     {
-        Bootstrap::getContainer()->get('App\Routing\Router')->route($route, $requestMethod);
+        return new RedirectResponse($route);
     }
 
     public function getView()

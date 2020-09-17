@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Models\User;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class SessionController extends ApplicationController
 {
@@ -18,7 +19,7 @@ class SessionController extends ApplicationController
     {
         if ($this->isUserSignedIn()) {
             self::$status ->add('errors', 'Du bist bereits eingeloggt!');
-            $this->redirectToRoute('/');
+            return $this->redirectToRoute('/');
         } else {
             $this->loginForm();
 
@@ -29,7 +30,7 @@ class SessionController extends ApplicationController
                     $_SESSION['user_id'] = $user->getId();
 
                     self::$status ->add('success', "Willkommen zurück {$user->get('name')}!");
-                    $this->redirectToRoute('/');
+                    return $this->redirectToRoute('/');
                 } else {
                     self::$status ->add('errors', 'Benutzer/Passwort ist falsch!');
                 }
@@ -56,7 +57,7 @@ class SessionController extends ApplicationController
         );
 
         self::$status->add('info', 'Erfolgreich ausgeloggt!');
-        $this->redirectToRoute('/');
+        return $this->redirectToRoute('/');
     }
 
     public function error($status)

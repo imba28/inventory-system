@@ -32,13 +32,13 @@ class ResponseResolver implements EventSubscriberInterface
 
     public function onKernelView(ViewEvent $event)
     {
-        if ($this->calledController === null) {
+        if ($this->calledController === null || $event->getResponse() !== null) {
             return;
         }
+
         try {
             $event->setResponse(new Response($this->calledController->getView()->render()));
-        } catch (\Exception $e) {
-        }
+        } catch (\Exception $e) {}
     }
 
     public function onKernelController(ControllerEvent $event)
