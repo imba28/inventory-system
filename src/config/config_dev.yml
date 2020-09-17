@@ -1,2 +1,13 @@
 imports:
     - { resource: config.yml }
+
+framework:
+    secret: S0ME_SECRET
+    form: true
+    session: ~
+    csrf_protection: ~
+    profiler: { only_exceptions: false }
+
+web_profiler:
+    toolbar: true
+    intercept_redirects: false
