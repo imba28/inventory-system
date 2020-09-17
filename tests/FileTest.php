@@ -2,6 +2,7 @@
 use PHPUnit\Framework\TestCase;
 
 use App\File\Image;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileTest extends TestCase
 {
@@ -20,42 +21,24 @@ class FileTest extends TestCase
     public function testGetSource()
     {
         $image = new Image($this->validFileProvider());
-        $this->assertEquals($image->getSource(), 'tests/test.png');
+        $this->assertEquals($image->getSource(), __DIR__ . '/test.png');
 
         $image = new Image($this->invalidFileProvider());
-        $this->assertEquals($image->getSource(), 'tests/test.txt');
+        $this->assertEquals($image->getSource(), __DIR__. '/test.txt');
     }
     
-    protected function validFileProvider(): array
+    protected function validFileProvider(): UploadedFile
     {
-        return array(
-            'name' => 'test.png',
-            'type' => 'image/png',
-            'tmp_name' => 'tests/test.png',
-            'error' => 0,
-            'size' => filesize('tests/test.txt')
-        );
+        return new UploadedFile('tests/test.png', 'test.png', 'image/png', 0);
     }
 
-    protected function invalidFileProvider(): array
+    protected function invalidFileProvider(): UploadedFile
     {
-        return array(
-            'name' => 'test.txt',
-            'type' => 'text/plain',
-            'tmp_name' => 'tests/test.txt',
-            'error' => 0,
-            'size' => filesize('tests/test.txt')
-        );
+        return new UploadedFile('tests/test.txt', 'test.txt', 'text/plain', 0);
     }
 
-    protected function invalidFileProvider2(): array
+    protected function invalidFileProvider2(): UploadedFile
     {
-        return array(
-            'name' => 'test.png',
-            'type' => 'text/plain',
-            'tmp_name' => 'tests/test.png',
-            'error' => 1,
-            'size' => filesize('tests/test.png')
-        );
+        return new UploadedFile('tests/test.png', 'test.png', 'image/png', 1);
     }
 }
