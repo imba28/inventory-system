@@ -178,7 +178,7 @@ class InventurController extends ApplicationController
         } else {
             $this->inventur->start($this->getCurrentUser());
             self::$status->add('success', 'Inventur wurde erfolgreich gestartet!');
-            return $this->redirectToRoute('/inventur');
+            return $this->redirectTo('/inventur');
         }
 
         $this->view->assign('inventur', $this->inventur);

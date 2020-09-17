@@ -112,10 +112,10 @@ class ProductController extends ApplicationController
 
         if ($this->product->remove() === false) {
             self::$status->add('errors', 'Es ist ein Fehler beim Löschen aufgetreten!');
-            return $this->redirectToRoute('/product/' . $this->product->getId());
+            return $this->redirectTo('/product/' . $this->product->getId());
         } else {
             self::$status->add('success', 'Produkt wurde gelöscht.');
-            return $this->redirectToRoute('/products');
+            return $this->redirectTo('/products');
         }
     }
 
@@ -229,7 +229,7 @@ class ProductController extends ApplicationController
             $this->view->assign('topProducts', $products);
             $this->view->setTemplate('products-rented');
         } else {
-            return $this->redirectToRoute('/products');
+            return $this->redirectTo('/products');
         }
     }
 
@@ -533,7 +533,7 @@ class ProductController extends ApplicationController
             }
         } else {
             self::$status->add('errors', 'Produkt ist bereits verliehen!');
-            return $this->redirectToRoute("/product/{$this->product->getId()}");
+            return $this->redirectTo("/product/{$this->product->getId()}");
         }
     }
 

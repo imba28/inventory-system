@@ -37,18 +37,7 @@ abstract class ApplicationController extends BasicController
 
     protected function getCurrentUser()
     {
-        if (isset($_SESSION['user_id'])) {
-            if (is_null($this->currentUser)) {
-                try {
-                    $this->currentUser = \App\Models\User::find($_SESSION['user_id']);
-                } catch (\App\Exceptions\NothingFoundException $e) {
-                    return null;
-                }
-            }
-            return $this->currentUser;
-        }
-
-        return null;
+        return $this->getUser();
     }
 
     protected function isUserSignedIn()

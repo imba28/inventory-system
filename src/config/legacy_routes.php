@@ -20,10 +20,6 @@ $router->get('/inventur/:_id', 'InventurController#show');
 $router->get('/inventur/list', 'InventurController#list');
 $router->get(array('/inventur/:action', '/inventur'), 'InventurController#main');
 
-$router->get('/login', 'SessionController#loginForm');
-$router->post('/login', 'SessionController#login');
-$router->post('/logout', 'SessionController#logout');
-
 $router->get('/logs', 'LogController#index');
 
 $router->delete('/images/:id', 'ProductImageController#delete');

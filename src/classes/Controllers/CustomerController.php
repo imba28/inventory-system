@@ -149,10 +149,10 @@ class CustomerController extends ApplicationController
     {
         if ($this->customer->remove()) {
             self::$status->add('success', 'Kunde wurde gelöscht.');
-            return $this->redirectToRoute('/customers');
+            return $this->redirectTo('/customers');
         } else {
             self::$status->add('errors', 'Es ist ein Fehler beim Löschen aufgetreten!');
-            return $this->redirectToRoute("customer/{$this->customer->getId()}");
+            return $this->redirectTo("customer/{$this->customer->getId()}");
         }
     }
 

@@ -2,14 +2,16 @@
 namespace App\Controllers;
 
 use App\Bootstrap\Bootstrap;
+use App\Helper\Messages\FlashBagWrapper;
 use \App\Helper\Messages\MessageCollection;
 use App\Helper\Loggers\Logger;
 use App\Views\Factory;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-abstract class BasicController
+abstract class BasicController extends AbstractController
 {
     protected $response;
     protected $view;
@@ -21,14 +23,14 @@ abstract class BasicController
 
     private $formats = array();
 
-    final public function __construct(RequestStack $requestStack, Factory $viewFactory, $responseType = 'html', $layout = 'default')
+    final public function __construct(RequestStack $requestStack, Factory $viewFactory, FlashBagWrapper $flashBagWrapper, $responseType = 'html', $layout = 'default')
     {
         $this->responseType = $responseType;
         $this->response = new \App\HttpResponse();
         $this->view = $viewFactory->build($responseType, $layout);
 
         if (!isset(self::$status)) {
-            self::$status = new MessageCollection();
+            self::$status = $flashBagWrapper;
         }
 
         $this->beforeActions = array();
@@ -183,7 +185,7 @@ abstract class BasicController
      * @todo: while the original method forwarded the request to another controller we are using a hard redirect. this might break stuff?
      * @param mixed $requestMethod
      */
-    protected function redirectToRoute($route)
+    protected function redirectTo($route)
     {
         return new RedirectResponse($route);
     }
