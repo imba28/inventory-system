@@ -19,7 +19,8 @@
         "symfony/http-kernel": "^4",
         "symfony/routing": "^4",
         "symfony/console": "^4",
-        "sensio/framework-extra-bundle": "^5.5"
+        "sensio/framework-extra-bundle": "^5.5",
+        "ext-fileinfo": "*"
     },
     "authors": [
         {

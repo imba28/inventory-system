@@ -59,7 +59,7 @@ abstract class ApplicationController extends BasicController
     protected function authenticateUser()
     {
         if (!$this->isUserSignedIn()) {
-            $this->response->redirect('/login');
+            return $this->response->redirect('/login');
         }
     }
 }

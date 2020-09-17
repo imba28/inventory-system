@@ -14,10 +14,11 @@ class Bootstrap
 {
     private static $container = null;
 
+    private static $kernel = null;
+
     public function startUp()
     {
         $this->setConfigParams();
-        $this->buildContainer();
 
         \App\Helper\Loggers\Logger::setLogger(
         //new App\Helper\Loggers\FileLogger(ABS_PATH . '/logs/log.txt')
@@ -35,33 +36,6 @@ class Bootstrap
         } catch (\Exception $e) {
             die("Keine Verbindung zur Datenbank möglich:". $e->getMessage());
         }
-    }
-
-    public function run() {
-        $this->startUp();
-
-        $router = self::$container->get("App\Routing\Router");
-
-        require ABS_PATH . '/src/config/legacy_routes.php';
-        $router->route();
-    }
-
-    private function buildContainer()
-    {
-        $containerBuilder = new ContainerBuilder();
-        $loader = new YamlFileLoader($containerBuilder, new FileLocator(__DIR__));
-        $loader->load('../../config/services.yml');
-
-        $containerBuilder->addCompilerPass(new RegisterListenersPass());
-
-        $containerBuilder->compile();
-
-        self::$container = $containerBuilder;
-    }
-
-    public static function getContainer(): ContainerInterface
-    {
-        return self::$container;
     }
 
     private function setConfigParams()
@@ -89,6 +63,9 @@ class Bootstrap
 
     public function getKernel()
     {
-        return new Kernel(Configuration::get('env'), Configuration::get('env') === 'dev');
+        if (self::$kernel === null) {
+            self::$kernel = new Kernel(Configuration::get('env'), Configuration::get('env') === 'dev');
+        }
+        return self::$kernel;
     }
 }

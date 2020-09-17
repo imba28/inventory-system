@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
 class HttpResponse implements \App\Interfaces\Response
 {
     private $status = '200 OK';
@@ -22,11 +24,7 @@ class HttpResponse implements \App\Interfaces\Response
 
     public function redirect($location)
     {
-        $this->setStatus(301);
-        $this->addHeader('Location', $location);
-        $this->flush();
-
-        exit();
+        return new RedirectResponse($location);
     }
 
     public function flush()

@@ -8,6 +8,7 @@ use App\Models\ProductImage;
 use App\Models\Customer;
 use App\Models\Action;
 use App\QueryBuilder\Builder;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
 class ProductController extends ApplicationController
@@ -49,7 +50,7 @@ class ProductController extends ApplicationController
                 } elseif ($params['action'] == 'return') {
                     $this->return();
                 } elseif ($params['action'] == 'request') {
-                    $this->request();
+                    $request();
                 } elseif ($params['action'] == 'claim') {
                     //TODO: implements claim product
                 }
@@ -87,12 +88,12 @@ class ProductController extends ApplicationController
         );
     }
 
-    public function new()
+    public function new(Request $request)
     {
         $this->product = Product::new();
         $this->product->set('user', $this->getCurrentUser());
 
-        $this->view->assign('product', $this->request);
+        $this->view->assign('product', $this->product);
 
         $this->view->setTemplate('product-add');
     }
@@ -105,8 +106,10 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-add');
     }
 
-    public function delete(array $params)
+    public function delete(Request $request)
     {
+        $params = $request->request->all();
+
         if ($this->product->remove() === false) {
             self::$status->add('errors', 'Es ist ein Fehler beim Löschen aufgetreten!');
             $this->redirectToRoute('/product/' . $this->product->getId());
@@ -116,10 +119,12 @@ class ProductController extends ApplicationController
         }
     }
 
-    public function search($params)
+    public function search(Request $request)
     {
-        if ($this->request->issetParam('search_string')) {
-            $_SESSION['search_string'] = $this->request->getParam('search_string');
+        $params = $request->request->all();
+
+        if ($request->get('search_string')) {
+            $_SESSION['search_string'] = $request->get('search_string');
         }
 
         $searchString = $_SESSION['search_string'];
@@ -274,17 +279,6 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('products');
     }
 
-    public function error($status, $message = 'Produkt wurde nicht gefunden!')
-    {
-        $this->response->setStatus($status);
-        $this->view->setTemplate('error');
-        $this->view->assign('errorCode', $status);
-        $this->view->assign('errorMessage', $message);
-
-        $this->renderContent();
-        exit();
-    }
-
     // INTERNAL METHODS
 
     public function edit()
@@ -292,10 +286,10 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-update');
     }
 
-    public function update()
+    public function update(Request $request)
     {
         if ($this->saveUploadedImages()) {
-            $this->product->setAll($this->request->getParams());
+            $this->product->setAll($request->request->all());
 
             try {
                 $this->product->save();
@@ -317,7 +311,7 @@ class ProductController extends ApplicationController
         }
     }
 
-    public function rent()
+    public function rent(Request $request)
     {
         if (!$this->product->isAvailable()) {
             $action = Action::findByFilter(
@@ -333,8 +327,8 @@ class ProductController extends ApplicationController
         } else {
             $this->view->setTemplate('product-rent');
             
-            if ($this->request->issetParam('submit')) {
-                $customer = Customer::findOrCreate($this->request->getParam('internal_id'), 'internal_id');
+            if ($request->get('submit')) {
+                $customer = Customer::findOrCreate($request->get('internal_id'), 'internal_id');
                 if (!$customer->isCreated()) {
                     try {
                         if ($customer->save()) {
@@ -358,7 +352,7 @@ class ProductController extends ApplicationController
                 try {
                     if ($this->product->rent(
                         $customer,
-                        $this->request->getParam('expectedReturnDate'),
+                        $request->get('expectedReturnDate'),
                         $this->getCurrentUser()
                     )) {
                         self::$status->add('success', 'Produkt verliehen!');
@@ -372,7 +366,7 @@ class ProductController extends ApplicationController
         }
     }
 
-    public function return()
+    public function return(Request $request)
     {
         $this->view->setTemplate('product-return');
 
@@ -381,11 +375,11 @@ class ProductController extends ApplicationController
             return;
         }
 
-        if ($this->request->issetParam('submit')) {
+        if ($request->get('submit')) {
             $returnDate = 'NOW';
 
-            if ($this->request->issetParam('returnDate')) {
-                $date = \DateTime::createFromFormat('d.m.Y', $this->request->getParam('returnDate'));
+            if ($request->get('returnDate')) {
+                $date = \DateTime::createFromFormat('d.m.Y', $request->get('returnDate'));
                 if ($date !== false) {
                     $returnDate = $date->format('Y-m-d H:i:s');
                 }
@@ -397,13 +391,13 @@ class ProductController extends ApplicationController
         }
     }
 
-    public function rentMask()
+    public function rentMask(Request $request)
     {
         $this->authenticateUser();
 
-        if ($this->request->issetParam('submit') && $this->request->issetParam('search')) {
+        if ($request->get('submit') && $request->get('search')) {
             try {
-                $searchString = $this->request->getParam('search');
+                $searchString = $request->get('search');
 
                 $this->view->assign('search_string', $searchString);
                 $this->view->assign('totals', 0);
@@ -429,7 +423,7 @@ class ProductController extends ApplicationController
                 if (count($products) == 0) {
                     self::$status->add('errors', 'Es wurde kein passendes Produkt gefunden!');
                 } elseif (count($products) == 1) {
-                    $this->response->redirect('/product/'. current($products)->getId() . '/rent');
+                    return $this->response->redirect('/product/'. current($products)->getId() . '/rent');
                 } else {
                     self::$status->add('info', 'Die Suche lieferte mehrere Ergebnisse.');
                     $this->view->assign('products', $products);
@@ -454,7 +448,6 @@ class ProductController extends ApplicationController
     public function index(Request $request)
     {
         $params = $request->request->all();
-        vd($params);
 
         $this->view->setTemplate('products');
 
@@ -506,7 +499,7 @@ class ProductController extends ApplicationController
         return $query->get();
     }
 
-    public function request()
+    public function request(Request $request)
     {
         if ($this->product->isAvailable()) {
             $adminEmail = \App\Configuration::get('admin_email');
@@ -517,17 +510,17 @@ class ProductController extends ApplicationController
             $this->view->assign('admin_email', $adminEmail);
             $this->view->setTemplate('product-request');
 
-            if ($this->request->issetParam('submit')) {
-                if (empty($this->request->get('email'))) {
+            if ($request->get('submit')) {
+                if (empty($request->get('email'))) {
                     // honeypot für bots o.Ä. echte email adresse ist in 'aklnslknat'
-                    if (empty($this->request->get('aklnslknat'))) {
+                    if (empty($request->get('aklnslknat'))) {
                         self::$status->add('errors', 'Bitte gib deine E-Mail Adresse an!');
                     } else {
                         $to = implode($adminEmail, ';');
                         $subject = "MMT Verleih: Anfrage für Produkt {$this->product->get('name')}";
-                        $message = "Anfrage für Verleih von {$this->product->get('name')} von {$this->request->get('name')}.";
+                        $message = "Anfrage für Verleih von {$this->product->get('name')} von {$request->get('name')}.";
                         $header = 'From: webmaster@example.com' . "\r\n" .
-                            'Reply-To: '. $this->request->get('aklnslknat') . "\r\n" .
+                            'Reply-To: '. $request->get('aklnslknat') . "\r\n" .
                             'X-Mailer: PHP/' . phpversion();
 
                         if (mail($to, $subject, $message, $header)) {
@@ -544,12 +537,13 @@ class ProductController extends ApplicationController
         }
     }
 
-    private function saveUploadedImages()
+    private function saveUploadedImages(Request $request)
     {
-        if ($this->request->issetFile("add-productImage")) {
-            $files = $this->request->getFiles("add-productImage");
+        if ($request->files->has('add-productImage')) {
+            $files = $request->files->get("add-productImage");
             $success = true;
 
+            /** @var UploadedFile $file */
             foreach ($files as $file) {
                 $image = new \App\File\Image($file);
 
@@ -558,13 +552,13 @@ class ProductController extends ApplicationController
                         $productImage = ProductImage::new();
                         $productImage->set('src', "/public/files/images/{$image->getDestination()}");
                         $productImage->set('product', $this->product);
-                        $productImage->set('title', $image->getInfo('name'));
+                        $productImage->set('title', $file->getClientOriginalName());
                         $productImage->set('user', $this->getCurrentUser());
 
                         $this->product->images()->append($productImage);
                     } else {
                         $success = false;
-                        self::$status->add('errors', "Fehler beim Speichern von {$image->getInfo('name')}");
+                        self::$status->add('errors', "Fehler beim Speichern von {$file->getClientOriginalName()}");
                     }
                 } else {
                     $success = false;

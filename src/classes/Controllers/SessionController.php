@@ -2,18 +2,19 @@
 namespace App\Controllers;
 
 use App\Models\User;
+use Symfony\Component\HttpFoundation\Request;
 
 class SessionController extends ApplicationController
 {
     public function loginForm()
     {
         if ($this->isUserSignedIn()) {
-            $this->response->redirect('/');
+            return $this->response->redirect('/');
         }
         $this->view->setTemplate('login-form');
     }
 
-    public function login()
+    public function login(Request $request)
     {
         if ($this->isUserSignedIn()) {
             self::$status ->add('errors', 'Du bist bereits eingeloggt!');
@@ -22,9 +23,9 @@ class SessionController extends ApplicationController
             $this->loginForm();
 
             try {
-                $user = User::find($this->request->get('username'), 'username');
+                $user = User::find($request->get('username'), 'username');
 
-                if (password_verify($this->request->get('password'), $user->get('password'))) {
+                if (password_verify($request->get('password'), $user->get('password'))) {
                     $_SESSION['user_id'] = $user->getId();
 
                     self::$status ->add('success', "Willkommen zurück {$user->get('name')}!");

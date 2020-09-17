@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Models\ProductImage;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ProductImageController extends ApplicationController
 {
@@ -48,7 +49,6 @@ class ProductImageController extends ApplicationController
 
     public function error($status, $message = null)
     {
-        $this->response->setStatus($status);
-        $this->response->flush();
+        throw new HttpException($status, $message);
     }
 }

@@ -16,10 +16,16 @@ class Kernel extends SymfonyKernel
 
     public function registerBundles()
     {
-        return [
+        $bundles = [
             new FrameworkBundle(),
             new SensioFrameworkExtraBundle()
         ];
+
+        if ($this->getEnvironment() == 'dev') {
+            // $bundles[] = new WebProfilerBundle();
+        }
+
+        return $bundles;
     }
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)

@@ -4,10 +4,11 @@ namespace App\Controllers;
 use App\Bootstrap\Bootstrap;
 use \App\Helper\Messages\MessageCollection;
 use App\Helper\Loggers\Logger;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 abstract class BasicController
 {
-    protected $layout;
     protected $response;
     protected $view;
 
@@ -18,12 +19,10 @@ abstract class BasicController
 
     private $formats = array();
 
-    final public function __construct($responseType = 'html', $layout = 'default')
+    final public function __construct(RequestStack $requestStack, $responseType = 'html', $layout = 'default')
     {
-        $this->layout = $layout;
         $this->responseType = $responseType;
         $this->response = new \App\HttpResponse();
-        $this->request = new \App\HttpRequest();
         $this->view = \App\Views\Factory::build($responseType, $layout);
 
         if (!isset(self::$status)) {
@@ -34,8 +33,8 @@ abstract class BasicController
 
         $this->ifResponseType(
             'html',
-            function () {
-                $this->view->assign('request', $this->request);
+            function () use($requestStack) {
+                $this->view->assign('request', $requestStack->getMasterRequest());
                 $this->view->assign('status', self::$status);
             }
         );
@@ -48,18 +47,6 @@ abstract class BasicController
      */
     public function init()
     {
-    }
-
-    /**
-     * Renders view, adds it to the response object and flushes it afterwards.
-     *
-     * @return void
-     */
-    protected function renderContent()
-    {
-        $this->response->append($this->view->render());
-        $this->response->addHeader('Content-Type', $this->view->getContentType());
-        $this->response->flush();
     }
 
     /**
@@ -82,26 +69,6 @@ abstract class BasicController
             $this->beforeActions[$method] = array();
         }
         $this->beforeActions[$method][] = $methodToCall;
-    }
-
-    /**
-     * Executes a controller method, that was passed to the method.
-     *
-     * Tries to find the correct template based on controller and method name.
-     *
-     * @param mixed $method
-     * @param mixed $args
-     * @return void
-     */
-    public function handle($method, $args)
-    {
-        $this->setViewTemplate($method);
-        
-        $this->callFormats();
-        $this->callBeforeActions($method, $args);
-        $this->$method($args);
-
-        $this->renderContent();
     }
 
     /**
@@ -218,8 +185,6 @@ abstract class BasicController
     {
         Bootstrap::getContainer()->get('App\Routing\Router')->route($route, $requestMethod);
     }
-
-    abstract public function error($status);
 
     public function getView()
     {

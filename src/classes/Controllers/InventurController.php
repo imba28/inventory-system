@@ -1,6 +1,8 @@
 <?php
 namespace App\Controllers;
 
+use Symfony\Component\HttpFoundation\Request;
+
 class InventurController extends ApplicationController
 {
     protected $inventur;
@@ -31,7 +33,7 @@ class InventurController extends ApplicationController
                     $this->error(404, 'Seite nicht gefunden!');
                 }
             } else {
-                $this->response->redirect('/inventur');
+                return $this->response->redirect('/inventur');
             }
         } else {
             $this->view->setTemplate('inventur');
@@ -46,25 +48,25 @@ class InventurController extends ApplicationController
         $this->view->setTemplate('inventur-list');
     }
 
-    public function actionInventur()
+    public function actionInventur(Request $request)
     {
-        if ($this->request->issetParam('action')) {
-            if ($this->request->getParam('action') == 'start') {
+        if ($request->get('action')) {
+            if ($request->get('action') == 'start') {
                 if (!$this->inventur->isStarted()) {
                     $this->startInventur();
                 } else {
-                    $this->response->redirect('/inventur');
+                    return $this->response->redirect('/inventur');
                 }
-            } elseif ($this->request->getParam('action') == 'end') {
+            } elseif ($request->get('action') == 'end') {
                 if ($this->inventur->isStarted()) {
                     $this->endInventur();
                 } else {
-                    $this->response->redirect('/inventur');
+                    return $this->response->redirect('/inventur');
                 }
-            } elseif ($this->request->getParam('action') == 'scan_product') {
-                $this->scanProduct($this->request->getParam('invNr'));
-            } elseif ($this->request->getParam('action') == 'missing_product') {
-                $this->missingProduct($this->request->getParam('invNr'));
+            } elseif ($request->get('action') == 'scan_product') {
+                $this->scanProduct($request->get('invNr'));
+            } elseif ($request->get('action') == 'missing_product') {
+                $this->missingProduct($request->get('invNr'));
             } else {
                 throw new \App\Exceptions\InvalidOperationException('not a valid action!');
             }

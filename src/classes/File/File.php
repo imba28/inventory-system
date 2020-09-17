@@ -2,12 +2,13 @@
 namespace App\File;
 
 use App\Helpers\Loggers\Logger;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class File
 {
     protected static $maxFileSize = 15360; // 15kb
 
-    protected $fileInfo;
+    protected UploadedFile $fileInfo;
 
     protected $fileName;
     protected $fileExt;
@@ -16,22 +17,18 @@ class File
 
     private $isValid = false;
 
-    public function __construct($fileInfo)
+    public function __construct(UploadedFile $fileInfo)
     {
         $this->fileInfo = $fileInfo;
 
-        $fileParts = explode(".", $this->fileInfo["name"]);
+        $fileParts = explode(".", $this->fileInfo->getClientOriginalName());
         $this->fileName = sha1($fileParts[0] . time() . rand(0, 10));
     }
 
     public function isValid()
     {
         try {
-            if (!isset($this->fileInfo['error']) || is_array($this->fileInfo['error'])) {
-                throw new \RuntimeException('Ungültige Bildparameter!');
-            }
-
-            switch ($this->fileInfo['error']) {
+            switch ($this->fileInfo->getError()) {
                 case UPLOAD_ERR_OK:
                     break;
                 case UPLOAD_ERR_NO_FILE:
@@ -43,11 +40,11 @@ class File
                     throw new \RuntimeException('Unbekannter Fehler während des Uploads!');
             }
 
-            if ($this->fileInfo['error'] > 0) {
+            if ($this->fileInfo->getError() > 0) {
                 throw new \RuntimeException("Datei ist beschädigt, da während des Upload ein Fehler aufgetreten ist!");
             }
 
-            if ($this->fileInfo['size'] > $this::$maxFileSize) {
+            if ($this->fileInfo->getSize() > $this::$maxFileSize) {
                 throw new \RuntimeException('Datei ist zu groß! Erlaubt sind maximal ' . $this::$maxFileSize / 1024 . 'kb.');
             }
 
@@ -55,13 +52,13 @@ class File
 
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
             $mimetypeIdx = array_search(
-                $finfo->file($this->fileInfo['tmp_name']),
+                $finfo->file($this->fileInfo->getRealPath()),
                 $allowedMimeTypes,
                 true
             );
             if ($mimetypeIdx === false) {
                 throw new \RuntimeException(
-                    "`{$finfo->file($this->fileInfo['tmp_name'])}` ist kein erlaubtes Dateiformat!"
+                    "`{$finfo->file($this->fileInfo->getClientOriginalName())}` ist kein erlaubtes Dateiformat!"
                 );
             }
 
@@ -79,7 +76,7 @@ class File
 
     public function getSource()
     {
-        return $this->fileInfo["tmp_name"];
+        return $this->fileInfo->getRealPath();
     }
     public function getDestination()
     {
@@ -102,17 +99,9 @@ class File
             }
 
             $dir = ABS_PATH . '/public/files/' . ltrim(trim($directory), '/') . '/';
-            return move_uploaded_file($this->fileInfo['tmp_name'], $dir . $this->getDestination());
+            return move_uploaded_file($this->fileInfo->getRealPath(), $dir . $this->getDestination());
         }
         return false;
-    }
-
-    public function getInfo($key)
-    {
-        if (isset($this->fileInfo[$key])) {
-            return $this->fileInfo[$key];
-        }
-        return "";
     }
 
     public static function delete($source)

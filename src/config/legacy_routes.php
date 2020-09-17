@@ -27,6 +27,3 @@ $router->post('/logout', 'SessionController#logout');
 $router->get('/logs', 'LogController#index');
 
 $router->delete('/images/:id', 'ProductImageController#delete');
-
-$router->get('*', 'FileController#main');
-

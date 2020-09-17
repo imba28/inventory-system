@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Models\Customer;
 use App\Models\Action;
+use Symfony\Component\HttpFoundation\Request;
 
 class CustomerController extends ApplicationController
 {
@@ -99,9 +100,9 @@ class CustomerController extends ApplicationController
         );
     }
 
-    public function update()
+    public function update(Request $request)
     {
-        $this->customer->setAll($this->request->getParams());
+        $this->customer->setAll($request->request->all());
  
         try {
             $this->customer->save();
@@ -159,16 +160,5 @@ class CustomerController extends ApplicationController
     {
         $this->customer = Customer::new();
         $this->view->assign('customer', $this->customer);
-    }
-
-    public function error($status, $message = "Dieser Kunde konnte leider nicht gefunden werden!")
-    {
-        $this->response->setStatus($status);
-        $this->view->setTemplate('error');
-        $this->view->assign('errorCode', $status);
-        $this->view->assign('errorMessage', $message);
-
-        $this->renderContent();
-        exit();
     }
 }
