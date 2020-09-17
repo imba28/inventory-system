@@ -1,6 +1,7 @@
 <?php
 namespace App\Views;
 
+
 class ViewJSON extends View
 {
     public function render($layout = null)

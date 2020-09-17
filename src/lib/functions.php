@@ -29,7 +29,7 @@
 function vd($a)
 {
     echo "<pre>";
-    print_r($a);
+    var_dump($a);
     echo "</pre>";
 }
 

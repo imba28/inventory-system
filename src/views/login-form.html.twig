@@ -2,6 +2,8 @@
     <div class="row">
         <main class="col-sm-12 ml-sm-auto col-md-12 pt-4" role="main">
             <form class="form-signin text-center" action="/login" method="post">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}"/>
+
                 <img class="mb-4" src="http://via.placeholder.com/150x150" alt="" width="72" height="72">
                 <h1 class="h3 mb-3 font-weight-normal">Login</h1>
                 <label for="username" class="sr-only">Benutzername</label>

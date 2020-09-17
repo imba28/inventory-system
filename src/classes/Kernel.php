@@ -2,9 +2,12 @@
 
 namespace App;
 
-use Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle;
+use App\DependencyInjection\Compiler\TwigFileLoaderPass;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Bundle\WebProfilerBundle\WebProfilerBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as SymfonyKernel;
@@ -18,11 +21,12 @@ class Kernel extends SymfonyKernel
     {
         $bundles = [
             new FrameworkBundle(),
-            new SensioFrameworkExtraBundle()
+            new TwigBundle(),
+            new SecurityBundle()
         ];
 
         if ($this->getEnvironment() == 'dev') {
-            // $bundles[] = new WebProfilerBundle();
+            $bundles[] = new WebProfilerBundle();
         }
 
         return $bundles;

@@ -18,3 +18,9 @@ services:
     App\Controllers\:
         resource: '../classes/Controllers/'
         public: true
+
+    app.twig.loader:
+        class: Twig\Loader\FilesystemLoader
+        arguments:
+            $paths: '%kernel.project_dir%/src/views/'
+

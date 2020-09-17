@@ -30,7 +30,7 @@
 
           <div class="collapse navbar-collapse" id="navbarsExampleDefault">
               <ul class="navbar-nav mr-auto">
-              {% set requestURI = request.getHeader('REQUEST_URI') != '/' ? request.getHeader('REQUEST_URI') : '/products' %}
+              {% set requestURI = app.request.pathInfo != '/' ? app.request.pathInfo : '/products' %}
               {% for label, link in menuItems %}
                   <li class='nav-item'>
                       <a class='nav-link{{ (requestURI matches '|^\/' ~ link|trim('s', 'right') ~ '|') ? ' active' }}' href='/{{ link }}'>{{ label }}</a>
