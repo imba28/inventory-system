@@ -1,0 +1,14 @@
+version: '3'
+services:
+    db:
+        image: mariadb:10.5
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: mmt_verleihsystem
+            MYSQL_PASSWORD: keins
+            MYSQL_DATABASE: mmt_verleihsystem
+        ports:
+            - 127.0.0.1:3306:3306
+        volumes:
+        - ./create.sql:/docker-entrypoint-initdb.d/create.sql:ro
