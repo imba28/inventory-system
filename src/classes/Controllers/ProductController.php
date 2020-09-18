@@ -120,7 +120,7 @@ class ProductController extends ApplicationController
         }
     }
 
-    public function search(Request $request, SessionInterface $session)
+    public function search(Request $request, SessionInterface $session, $page = 1)
     {
         $params = $request->request->all();
 
@@ -129,7 +129,7 @@ class ProductController extends ApplicationController
         }
 
         $searchString = $session->get('q') ?? $session->get('q');
-        $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+        $currentPage = $page;
         $itemsPerPage = 8;
 
         try {
@@ -239,27 +239,27 @@ class ProductController extends ApplicationController
         $this->view->assign('categories', $categories);
     }
 
-    public function displayCategory($params)
+    public function displayCategory($category, $page = 1)
     {
-        $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+        $currentPage = $page;
         $itemsPerPage = 8;
 
         try {
             $products = Product::findByFilter(
                 array(
-                'type', '=', $params['category']
+                'type', '=', $category
                 ),
                 (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
             );
 
             $paginator = new \App\Paginator(
                 Product::getQuery(
-                    array('type', '=', $params['category'])
+                    array('type', '=', $category)
                 )
                 ->count(),
                 $currentPage,
                 $itemsPerPage,
-                '/products/category/' . urlencode($params['category'])
+                '/products/category/' . urlencode($category)
             );
 
             $this->view->assign('paginator', $paginator);
@@ -449,15 +449,15 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('products-search-mask');
     }
 
-    public function index(Request $request)
+    public function index(Request $request, $page = 1)
     {
         $params = $request->request->all();
 
         $this->view->setTemplate('products');
 
         $this->respondTo(
-            function ($wants) use ($params) {
-                $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+            function ($wants) use ($page) {
+                $currentPage = $page;
                 $itemsPerPage = 8;
 
                 try {

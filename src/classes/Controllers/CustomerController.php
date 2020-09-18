@@ -28,15 +28,15 @@ class CustomerController extends ApplicationController
         );
     }
 
-    public function index(Request $request)
+    public function index(Request $request, $page = 1)
     {
         $params = $request->request->all();
 
         $this->respondTo(
-            function ($wants) use ($params) {
+            function ($wants) use ($page) {
                 $wants->html(
-                    function () use ($params) {
-                        $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+                    function () use ($page) {
+                        $currentPage = $page;
                         $itemsPerPage = 8;
 
                         try {

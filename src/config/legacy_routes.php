@@ -10,7 +10,7 @@ $router->get('/products/:_page', 'ProductController#index');
 $router->addRoute(['get','post'], '/products/rent', 'ProductController#rentMask');
 $router->get(array('/products/category/:category', '/products/category/:category/:page'), 'ProductController#displayCategory');
 $router->get('/products/category', 'ProductController#displayCategories');
-$router->addRoute('get', '/products/search', 'ProductController#search');
+$router->addRoute('get', ['/products/search', '/products/search/:page'], 'ProductController#search');
 
 $router->resource('customer', 'CustomerController');
 $router->get('/customers/:page', 'CustomerController#index');
