@@ -17,7 +17,7 @@
             </nav>
             <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
                 <h1>Kunde &#187;
-                    {{ customer.get('name') }}</h1>
+                    {{ customer.get('name')|default(customer.get('internal_id')) }}</h1>
                 <a href="/customers">Zurück</a>
                 <hr>
                 <!-- /.col-lg-3 -->
