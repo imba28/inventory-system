@@ -1,66 +1,70 @@
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar mt-3">
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="/products/new">Produkt einpflegen</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/products/rent">Produkt verleihen</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/products/return">Produkt zurücknehmen</a>
-                </li>
-            </ul>
-        </nav>
-        <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-            <h1>Produkt &#187;
-                {{ product.get('name') }}
-                &#187; Verleihen</h1>
-            <a href="/product/{{ product.getId() }}">Zurück</a>
-            <hr>
-            <!-- /.col-lg-3 -->
-            <div class="row">
-                <form class="ml-4" method='post'>
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input id="name" type="text" class="form-control" readonly="readonly" value="{{ product.get('name') }} ({{ product.get('invNr') }})">
-                    </div>
-                    <div class="form-group">
-                        <label for="internal_id">FHS Nummer</label>
-                        <input id="internal_id" type="text" class="form-control" placeholder="FHS Nummer eingeben" name='internal_id' value="{{ request.getParam('internal_id') }}" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label for="expectedReturnDate">Voraussichtliches Rückgabedatum</label>
-                        <input id="expectedReturnDate" type="text" class="form-control datepicker" name='expectedReturnDate' placeholder="(optional)" value="{{ request.getParam('expectedReturnDate') }}">
-                    </div>
+{% extends 'base/layout.html.twig' %}
 
-                    <button type="submit" name="submit" class="btn btn-primary">Leihen</button>
-                </form>
-            </div>
-        </main>
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar mt-3">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products/new">Produkt einpflegen</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products/rent">Produkt verleihen</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products/return">Produkt zurücknehmen</a>
+                    </li>
+                </ul>
+            </nav>
+            <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
+                <h1>Produkt &#187;
+                    {{ product.get('name') }}
+                    &#187; Verleihen</h1>
+                <a href="/product/{{ product.getId() }}">Zurück</a>
+                <hr>
+                <!-- /.col-lg-3 -->
+                <div class="row">
+                    <form class="ml-4" method='post'>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input id="name" type="text" class="form-control" readonly="readonly" value="{{ product.get('name') }} ({{ product.get('invNr') }})">
+                        </div>
+                        <div class="form-group">
+                            <label for="internal_id">FHS Nummer</label>
+                            <input id="internal_id" type="text" class="form-control" placeholder="FHS Nummer eingeben" name='internal_id' value="{{ request.getParam('internal_id') }}" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="expectedReturnDate">Voraussichtliches Rückgabedatum</label>
+                            <input id="expectedReturnDate" type="text" class="form-control datepicker" name='expectedReturnDate' placeholder="(optional)" value="{{ request.getParam('expectedReturnDate') }}">
+                        </div>
+
+                        <button type="submit" name="submit" class="btn btn-primary">Leihen</button>
+                    </form>
+                </div>
+            </main>
+        </div>
     </div>
-</div>
-<script src="/src/js/auto-complete.min.js"></script>
-<script>
-$(document).ready(function() {
-    $.getJSON('/customers.json', {}, function(data) {
-        data = data.map(function(item) {
-            return item.internal_id;
-        });
+    <script src="/src/js/auto-complete.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $.getJSON('/customers.json', {}, function(data) {
+            data = data.map(function(item) {
+                return item.internal_id;
+            });
 
-        new autoComplete({
-            selector: '#internal_id',
-            minChars: 1,
-            source: function(term, suggest){
-                term = term.toLowerCase();
-                var matches = [];
-                for (i = 0; i < data.length; i++) {
-                    if (data[i].toLowerCase().indexOf(term) > -1) matches.push(data[i]);
+            new autoComplete({
+                selector: '#internal_id',
+                minChars: 1,
+                source: function(term, suggest){
+                    term = term.toLowerCase();
+                    var matches = [];
+                    for (i = 0; i < data.length; i++) {
+                        if (data[i].toLowerCase().indexOf(term) > -1) matches.push(data[i]);
+                    }
+                    suggest(matches);
                 }
-                suggest(matches);
-            }
+            });
         });
     });
-});
-</script>
+    </script>
+{% endblock %}

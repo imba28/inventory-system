@@ -1,35 +1,39 @@
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active" href="/customers">Übersicht</a>
-                </li>
-                {% if isUserSignedIn %}
-                <li class="nav-item">
-                    <a class="nav-link" href="/customers/new">Kunde anlegen</a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-            <h1>Kunden ({{ totals }})</h1>
-            <section class="row text-center placeholders list">
-                {% for customer in customers %}
-                <div class="col-lg-2 col-md-3 col-sm-4 p-1">
-                    <div class="card p-3">
-                        <div class="card-body">
-                            <h4 class="card-title">{{ customer.get('name') }}</h4>
-                            <p class="card-text">
-                                {{ customer.get('internal_id') }}
-                            </p>
-                            <a href="/customer/{{ customer.getId() }}" class="btn btn-primary">Details</a>
+{% extends 'base/layout.html.twig' %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/customers">Übersicht</a>
+                    </li>
+                    {% if isUserSignedIn %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers/new">Kunde anlegen</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
+                <h1>Kunden ({{ totals }})</h1>
+                <section class="row text-center placeholders list">
+                    {% for customer in customers %}
+                    <div class="col-lg-2 col-md-3 col-sm-4 p-1">
+                        <div class="card p-3">
+                            <div class="card-body">
+                                <h4 class="card-title">{{ customer.get('name') }}</h4>
+                                <p class="card-text">
+                                    {{ customer.get('internal_id') }}
+                                </p>
+                                <a href="/customer/{{ customer.getId() }}" class="btn btn-primary">Details</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-                {% endfor %}
-            </section>
-            {{ paginator.render()|raw }}
-        </main>
+                    {% endfor %}
+                </section>
+                {{ paginator.render()|raw }}
+            </main>
+        </div>
     </div>
-</div>
+{% endblock %}

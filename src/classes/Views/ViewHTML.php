@@ -25,17 +25,12 @@ class ViewHTML extends View
     public function render($layout = 'default')
     {
         $templateFile = "{$this->template}.html.twig";
-        $templateHead = "/base/{$layout}-head.html.twig";
-        $templateFooter = "/base/{$layout}-footer.html.twig";
-
-        $twig = $this->twig;
-
 
         if (!file_exists(ABS_PATH."/src/views/" . $templateFile)) {
             throw new \Exception("Template `{$this->template}` not found!");
         }
 
-        $twig->addFilter(
+        $this->twig->addFilter(
             new \Twig_Filter(
                 'ago',
                 function ($string) {
@@ -44,13 +39,7 @@ class ViewHTML extends View
             )
         );
 
-        $html = '';
-
-        $html .= $twig->render($templateHead, $this->data);
-        $html .= $twig->render($templateFile, $this->data);
-        $html .= $twig->render($templateFooter, $this->data);
-
-        return $html;
+        return $this->twig->render($templateFile, $this->data);
     }
 
     public function getContentType()

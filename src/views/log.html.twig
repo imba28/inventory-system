@@ -1,32 +1,36 @@
-<div class="container-fluid">
-    <div class="row">
-        <main class="col-sm-12 ml-sm-auto col-md-12 pt-3" role="main">
-            <h1>Logs</h1>
-            <ul id="log">
-                {% for log in logs %}
-                {% set textColor = log.get("type") == "error" ? "danger" : log.get("type") %}
-                <li>
-                    <span class="date">{{ log.get("createDate")|date }}</span> 
-                    <span class="type text-{{ textColor }}">[{{ log.get("type") }}]</span>
-                    <div class="message">{{ log.get("message")|nl2br }} </div>
-                </li>
-                {% endfor %}
-            </ul>
-            <style>
-            #log li {
-                list-style: none;
-                margin-bottom: 1em;
-            }
+{% extends 'base/layout.html.twig' %}
 
-            #log li span.date {
-                font-weight: bold;
-            }
-            #log li div.message {
-                padding-left: 2em;
-                font-size: 0.8rem;
-                font-family: monospace;
-            }
-            </style>
-        </main>
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <main class="col-sm-12 ml-sm-auto col-md-12 pt-3" role="main">
+                <h1>Logs</h1>
+                <ul id="log">
+                    {% for log in logs %}
+                    {% set textColor = log.get("type") == "error" ? "danger" : log.get("type") %}
+                    <li>
+                        <span class="date">{{ log.get("createDate")|date }}</span>
+                        <span class="type text-{{ textColor }}">[{{ log.get("type") }}]</span>
+                        <div class="message">{{ log.get("message")|nl2br }} </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <style>
+                #log li {
+                    list-style: none;
+                    margin-bottom: 1em;
+                }
+
+                #log li span.date {
+                    font-weight: bold;
+                }
+                #log li div.message {
+                    padding-left: 2em;
+                    font-size: 0.8rem;
+                    font-family: monospace;
+                }
+                </style>
+            </main>
+        </div>
     </div>
-</div>
+{% endblock %}

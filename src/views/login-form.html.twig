@@ -1,20 +1,24 @@
-<div class="container-fluid">
-    <div class="row">
-        <main class="col-sm-12 ml-sm-auto col-md-12 pt-4" role="main">
-            <form class="form-signin text-center" action="/login" method="post">
-                {% if error %}
-                    <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-                {% endif %}
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}"/>
+{% extends 'base/layout.html.twig' %}
 
-                <img class="mb-4" src="http://via.placeholder.com/150x150" alt="" width="72" height="72">
-                <h1 class="h3 mb-3 font-weight-normal">Login</h1>
-                <label for="username" class="sr-only">Benutzername</label>
-                <input type="text" id="username" class="form-control" required="required" name="username" autofocus="autofocus" value="{{ lastUsername }}" placeholder="Benutzername">
-                <label for="pwd" class="sr-only">Password</label>
-                <input type="password" id="pwd" name="password" class="form-control" required="required" placeholder="Passwort">
-                <button class="btn btn-lg btn-primary btn-block mt-3" type="submit">Einloggen</button>
-            </form>
-        </main>
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <main class="col-sm-12 ml-sm-auto col-md-12 pt-4" role="main">
+                <form class="form-signin text-center" action="/login" method="post">
+                    {% if error %}
+                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    {% endif %}
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}"/>
+
+                    <img class="mb-4" src="http://via.placeholder.com/150x150" alt="" width="72" height="72">
+                    <h1 class="h3 mb-3 font-weight-normal">Login</h1>
+                    <label for="username" class="sr-only">Benutzername</label>
+                    <input type="text" id="username" class="form-control" required="required" name="username" autofocus="autofocus" value="{{ lastUsername }}" placeholder="Benutzername">
+                    <label for="pwd" class="sr-only">Password</label>
+                    <input type="password" id="pwd" name="password" class="form-control" required="required" placeholder="Passwort">
+                    <button class="btn btn-lg btn-primary btn-block mt-3" type="submit">Einloggen</button>
+                </form>
+            </main>
+        </div>
     </div>
-</div>
+{% endblock %}

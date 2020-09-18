@@ -1,27 +1,31 @@
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="/inventur">Übersicht</a>
-                </li>
-            </ul>
-        </nav>
-        <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-            <h1>Fehler</h1>
-            <hr />
-            <section class="placeholders">
-                <div class="error">
-                    <p class="error__code">
-                        {{ errorCode }}
-                    </p>
-                    {% if errorMessage %}
-                    <p class="error__message">
-                        {{ errorMessage }}
-                    </p>
-                    {% endif %}
-                </div>
-            </section>
-        </main>
+{% extends 'base/layout.html.twig' %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/inventur">Übersicht</a>
+                    </li>
+                </ul>
+            </nav>
+            <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
+                <h1>Fehler</h1>
+                <hr />
+                <section class="placeholders">
+                    <div class="error">
+                        <p class="error__code">
+                            {{ errorCode }}
+                        </p>
+                        {% if errorMessage %}
+                        <p class="error__message">
+                            {{ errorMessage }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
-</div>
+{% endblock %}

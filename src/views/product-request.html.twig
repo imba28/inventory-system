@@ -1,51 +1,55 @@
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
-            {% if isUserSignedIn %}
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="/products/new">Produkt einpflegen</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/products/rent">Produkt verleihen</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/products/return">Produkt zurücknehmen</a>
-                </li>
-            </ul>
-            {% endif %}
-        </nav>
-        <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
-            <h1>Produkt &#187;
-                {{ product.get('name') }}
-                &#187; Leihen</h1>
-            <a href="/product/{{ product.getId() }}">Zurück</a>
-            <hr>
-            <div class="row">
-                <form class="ml-4" method='post'>
-                    <div class="text-muted">
-                        Bitte fülle folgendes Formular aus, damit wir einen Termin zum Abholen festlegen können.
-                    </div>
-                    <div class="text-muted">
-                        Alternativ kannst du auch eine E-Mail an
-                        {% for email in admin_email %}
-                            <a href="mailto:{{ email }}?subject={{ ('MMT Verleih: Anfrage für Produkt ' ~ product.get('name'))|url_encode }}">{{ email }}</a>
-                        {% endfor %}
-                        senden.
-                    </div>
-                    <div class="form-group mt-3">
-                        <label for="name">Dein Name</label>
-                        <input type="text" class="form-control" name='name' placeholder="Max Mustermann" value="{{ request.getParam('name') }}">
-                    </div>
-                    <div class="form-group">
-                        <label for="name">Deine E-Mail Adresse</label>
-                        <input type="text" class="form-control" name='aklnslknat' placeholder="max@mustermann.com" value="{{ request.getParam('aklnslknat') }}">
-                    </div>
-                    <input type="email" name="email" class="d-none" />
+{% extends 'base/layout.html.twig' %}
 
-                    <button type="submit" name="submit" class="btn btn-primary">Leihen beantragen</button>
-                </form>
-            </div>
-        </main>
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar pt-3">
+                {% if isUserSignedIn %}
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products/new">Produkt einpflegen</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products/rent">Produkt verleihen</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products/return">Produkt zurücknehmen</a>
+                    </li>
+                </ul>
+                {% endif %}
+            </nav>
+            <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
+                <h1>Produkt &#187;
+                    {{ product.get('name') }}
+                    &#187; Leihen</h1>
+                <a href="/product/{{ product.getId() }}">Zurück</a>
+                <hr>
+                <div class="row">
+                    <form class="ml-4" method='post'>
+                        <div class="text-muted">
+                            Bitte fülle folgendes Formular aus, damit wir einen Termin zum Abholen festlegen können.
+                        </div>
+                        <div class="text-muted">
+                            Alternativ kannst du auch eine E-Mail an
+                            {% for email in admin_email %}
+                                <a href="mailto:{{ email }}?subject={{ ('MMT Verleih: Anfrage für Produkt ' ~ product.get('name'))|url_encode }}">{{ email }}</a>
+                            {% endfor %}
+                            senden.
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="name">Dein Name</label>
+                            <input type="text" class="form-control" name='name' placeholder="Max Mustermann" value="{{ request.getParam('name') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Deine E-Mail Adresse</label>
+                            <input type="text" class="form-control" name='aklnslknat' placeholder="max@mustermann.com" value="{{ request.getParam('aklnslknat') }}">
+                        </div>
+                        <input type="email" name="email" class="d-none" />
+
+                        <button type="submit" name="submit" class="btn btn-primary">Leihen beantragen</button>
+                    </form>
+                </div>
+            </main>
+        </div>
     </div>
-</div>
+{% endblock %}
