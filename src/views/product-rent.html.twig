@@ -31,14 +31,14 @@
                         </div>
                         <div class="form-group">
                             <label for="internal_id">FHS Nummer</label>
-                            <input id="internal_id" type="text" class="form-control" placeholder="FHS Nummer eingeben" name='internal_id' value="{{ request.getParam('internal_id') }}" autocomplete="off">
+                            <input id="internal_id" type="text" class="form-control" placeholder="FHS Nummer eingeben" name='internal_id' value="{{ request.get('internal_id') }}" autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label for="expectedReturnDate">Voraussichtliches Rückgabedatum</label>
-                            <input id="expectedReturnDate" type="text" class="form-control datepicker" name='expectedReturnDate' placeholder="(optional)" value="{{ request.getParam('expectedReturnDate') }}">
+                            <input id="expectedReturnDate" type="text" class="form-control datepicker" name='expectedReturnDate' placeholder="(optional)" value="{{ request.get('expectedReturnDate') }}">
                         </div>
 
-                        <button type="submit" name="submit" class="btn btn-primary">Leihen</button>
+                        <button type="submit" name="submit" value="1" class="btn btn-primary">Leihen</button>
                     </form>
                 </div>
             </main>

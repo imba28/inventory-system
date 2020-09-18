@@ -20,4 +20,14 @@ class FlashBagWrapper extends MessageCollection
     {
         $this->flashBag->add($key, $message);
     }
+
+    public function get($key): array
+    {
+        return $this->flashBag->get($key);
+    }
+
+    public function any(): bool
+    {
+        return true;
+    }
 }

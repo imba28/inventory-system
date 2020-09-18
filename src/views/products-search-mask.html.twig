@@ -7,7 +7,7 @@
             <div class="row mb-4">
                 <div class="col-sm-6 col-lg-4">
                     <input type="hidden" name="submit" value="1"/>
-                    <input type="text" class="form-control" name="search" placeholder="Nach Name, Inventarnummer oder Kategorie suchen..." value="{{ search_string ? search_string : '' }}"/>
+                    <input type="text" class="form-control" name="search" placeholder="Nach Name, Inventarnummer oder Kategorie suchen..." value="{{ search_string|default('')}}"/>
                 </div>
             </div>
         </form>

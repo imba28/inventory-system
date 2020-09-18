@@ -20,7 +20,7 @@
             </nav>
             <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
               <h1>Produkte
-                  {% if search_string is not empty and totals %}
+                  {% if search_string is defined and totals %}
                   &#187; {{ search_string }}" ({{ totals }})
                   {% else %}
                    &#187; Suche

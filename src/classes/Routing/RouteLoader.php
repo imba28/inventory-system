@@ -66,7 +66,7 @@ class RouteLoader extends Loader
                 $path .= '.{_format}';
 
                 $route = new Route($path, $defaults, $requirements, [], '', [], $methods);
-                $routeCollection->add('legacy_' . $name . '_' . $path, $route);
+                $routeCollection->add( $name . '_' . $path . '_' . $method, $route);
             }
         }
 

@@ -393,7 +393,11 @@ class ProductController extends ApplicationController
 
     public function rentMask(Request $request)
     {
-        $this->authenticateUser();
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $this->view->assign('products', []);
+        $this->view->assign('paginator', null);
+        $this->view->assign('buttons', []);
 
         if ($request->get('submit') && $request->get('search')) {
             try {
