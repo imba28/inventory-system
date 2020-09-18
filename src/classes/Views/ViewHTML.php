@@ -30,15 +30,6 @@ class ViewHTML extends View
             throw new \Exception("Template `{$this->template}` not found!");
         }
 
-        $this->twig->addFilter(
-            new \Twig_Filter(
-                'ago',
-                function ($string) {
-                    return ago($string);
-                }
-            )
-        );
-
         return $this->twig->render($templateFile, $this->data);
     }
 

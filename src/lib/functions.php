@@ -68,54 +68,6 @@ function array_find(array &$xs, callable $f)
     return null;
 }
 
-function ago($time)
-{
-    if ($time instanceof DateTime) {
-        $time = $time->getTimestamp();
-    } else {
-        if (preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/", $time)) {
-            $time = DateTime::createFromFormat("Y-m-d", $time)->getTimestamp();
-        } elseif (preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/", $time)) {
-            $time = DateTime::createFromFormat("Y-m-d H:i:s", $time)->getTimestamp();
-        } elseif (preg_match("/^[0-9]+$/", $time)) {
-            $time = DateTime::createFromFormat("U", $time)->getTimestamp();
-        } else {
-            throw new InvalidArgumentException("$time is not a valid time string!");
-        }
-    }
-
-    $periods = array("Sekunde", "Minute", "Stunde", "Tag", "Woche", "Monat", "Jahr");
-    $lengths = array("60","60","24","7","4.35","12","10");
-
-    $now = time();
-
-    $difference = $now - $time;
-
-    for ($j = 0; $difference >= $lengths[$j] && $j < count($lengths)-1; $j++) {
-        $difference /= $lengths[$j];
-    }
-
-    $difference = round($difference);
-
-    if ($difference != 1) {
-        switch ($j) {
-            case 0:
-            case 1:
-            case 2:
-            case 4:
-                $periods[$j].= "n";
-                break;
-            case 3:
-            case 5:
-            case 6:
-                $periods[$j].= "en";
-                break;
-        }
-    }
-
-    return "$difference $periods[$j]";
-}
-
 function fileext_to_mime($filename)
 {
        $mime_types = array(

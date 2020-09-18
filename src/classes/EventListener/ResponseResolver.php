@@ -36,9 +36,7 @@ class ResponseResolver implements EventSubscriberInterface
             return;
         }
 
-        try {
-            $event->setResponse(new Response($this->calledController->getView()->render()));
-        } catch (\Exception $e) {}
+        $event->setResponse(new Response($this->calledController->getView()->render()));
     }
 
     public function onKernelController(ControllerEvent $event)
