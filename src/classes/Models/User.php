@@ -1,31 +1,15 @@
 <?php
 namespace App\Models;
 
-class User extends Model
+use Symfony\Component\Security\Core\User\UserInterface;
+
+class User extends Model implements UserInterface
 {
     protected $attributes = ['name', 'username', 'password', 'email'];
     protected $name;
     protected $username;
     protected $email;
     protected $password;
-
-    protected function init()
-    {
-        $this->on(
-            'save',
-            function ($e) {
-                $user = $e->getContext();
-                $password = self::getHashedString($user->get('password'));
-
-                $user->set('password', $password);
-            }
-        );
-    }
-
-    public static function getHashedString($string): string
-    {
-        return password_hash($string, PASSWORD_BCRYPT);
-    }
 
     public function jsonSerialize(): array
     {
@@ -44,5 +28,45 @@ class User extends Model
         }
 
         return $json;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRoles()
+    {
+        return ['ROLE_USER', 'ROLE_ADMIN'];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPassword()
+    {
+        return $this->get('password');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSalt()
+    {
+        // noop
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getUsername()
+    {
+        return $this->get('username');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function eraseCredentials()
+    {
+        // noop
     }
 }

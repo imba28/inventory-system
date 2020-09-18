@@ -512,6 +512,8 @@ class Builder
         $errorColumn = null;
         $errorCode = -1;
 
+        vd($e->getMessage());
+
         if (preg_match("/: ([0-9]+) /", $e->getMessage(), $matches)) {
             $errorCode = $matches[1];
             switch ($errorCode) {

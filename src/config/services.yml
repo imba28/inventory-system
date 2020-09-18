@@ -19,6 +19,9 @@ services:
         resource: '../classes/Controllers/'
         public: true
 
+    app.security.legacy_user_provider:
+        class: App\Security\UserProvider
+
     app.twig.loader:
         class: Twig\Loader\FilesystemLoader
         arguments:

@@ -94,8 +94,8 @@ CREATE TABLE `v_products` (
 CREATE TABLE `v_users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(45) NOT NULL,
-  `password` varchar(64) NOT NULL,
-  `name` varchar(100) NOT NULL,
+  `password` varchar(256) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
   `email` varchar(150) NOT NULL,
   `createDate` datetime NOT NULL,
   `stamp` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,

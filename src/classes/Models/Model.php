@@ -71,7 +71,7 @@ abstract class Model implements \JsonSerializable, MessageInterface
     /**
      * Data mapper. Converts model data based on its database field type.
      *
-     * @var App\Database\DataMapper
+     * @var \App\Database\DataMapper
      */
     private $mapper;
 
