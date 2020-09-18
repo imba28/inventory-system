@@ -20,8 +20,8 @@
             </nav>
             <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
               <h1>Produkte
-                  {% if search_string is defined and totals %}
-                  &#187; {{ search_string }}" ({{ totals }})
+                  {% if app.request.get('q') and totals %}
+                  &#187; {{ app.request.get('q') }}" ({{ totals }})
                   {% else %}
                    &#187; Suche
                   {% endif %}
@@ -30,7 +30,7 @@
               {% endblock %}
               <hr />
               {% import 'partials/product-list.html.twig' as product_list %}
-              {{ product_list.render(products, paginator, buttons) }}
+              {{ product_list.render(products, paginator, buttons|default([])) }}
             </main>
         </div>
     </div>

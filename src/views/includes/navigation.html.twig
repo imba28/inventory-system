@@ -35,8 +35,8 @@
                 <a class="btn btn-primary my-2 mr-2 my-sm-0" href="/login">Login</a>
             {% endif %}
         </div>
-        <form class="form-inline mt-2 mt-md-0" method="post" action="/products/search">
-            <input class="form-control mr-sm-2" type="text" placeholder="Produkte suchen" aria-label="Suchen" name="search_string">
+        <form class="form-inline mt-2 mt-md-0" method="get" action="/products/search">
+            <input class="form-control mr-sm-2" type="text" placeholder="Produkte suchen" aria-label="Suchen" name="q" value="{{ app.request.get('q') }}">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Suchen</button>
         </form>
     </div>

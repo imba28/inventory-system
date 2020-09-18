@@ -10,6 +10,7 @@ use App\Models\Action;
 use App\QueryBuilder\Builder;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class ProductController extends ApplicationController
 {
@@ -119,15 +120,15 @@ class ProductController extends ApplicationController
         }
     }
 
-    public function search(Request $request)
+    public function search(Request $request, SessionInterface $session)
     {
         $params = $request->request->all();
 
-        if ($request->get('search_string')) {
-            $_SESSION['search_string'] = $request->get('search_string');
+        if ($request->get('q')) {
+            $session->set('q', $request->get('q'));
         }
 
-        $searchString = $_SESSION['search_string'];
+        $searchString = $session->get('q') ?? $session->get('q');
         $currentPage = isset($params['page']) ? intval($params['page']) : 1;
         $itemsPerPage = 8;
 
@@ -163,7 +164,6 @@ class ProductController extends ApplicationController
         }
 
         $this->view->assign('products', $products);
-        $this->view->assign('search_string', $searchString);
 
         $this->view->setTemplate('products-search');
     }
