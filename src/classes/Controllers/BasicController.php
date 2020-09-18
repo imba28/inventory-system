@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 abstract class BasicController extends AbstractController
 {
-    protected $response;
     protected $view;
 
     protected $responseType;
@@ -26,7 +25,6 @@ abstract class BasicController extends AbstractController
     final public function __construct(RequestStack $requestStack, Factory $viewFactory, FlashBagWrapper $flashBagWrapper, $responseType = 'html', $layout = 'default')
     {
         $this->responseType = $responseType;
-        $this->response = new \App\HttpResponse();
         $this->view = $viewFactory->build($responseType, $layout);
 
         if (!isset(self::$status)) {

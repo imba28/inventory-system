@@ -423,7 +423,7 @@ class ProductController extends ApplicationController
                 if (count($products) == 0) {
                     self::$status->add('errors', 'Es wurde kein passendes Produkt gefunden!');
                 } elseif (count($products) == 1) {
-                    return $this->response->redirect('/product/'. current($products)->getId() . '/rent');
+                    return $this->redirectTo('/product/'. current($products)->getId() . '/rent');
                 } else {
                     self::$status->add('info', 'Die Suche lieferte mehrere Ergebnisse.');
                     $this->view->assign('products', $products);

@@ -33,7 +33,7 @@ class InventurController extends ApplicationController
                     $this->error(404, 'Seite nicht gefunden!');
                 }
             } else {
-                return $this->response->redirect('/inventur');
+                return $this->redirectTo('/inventur');
             }
         } else {
             $this->view->setTemplate('inventur');
@@ -55,13 +55,13 @@ class InventurController extends ApplicationController
                 if (!$this->inventur->isStarted()) {
                     $this->startInventur();
                 } else {
-                    return $this->response->redirect('/inventur');
+                    return $this->redirectTo('/inventur');
                 }
             } elseif ($request->get('action') == 'end') {
                 if ($this->inventur->isStarted()) {
                     $this->endInventur();
                 } else {
-                    return $this->response->redirect('/inventur');
+                    return $this->redirectTo('/inventur');
                 }
             } elseif ($request->get('action') == 'scan_product') {
                 $this->scanProduct($request->get('invNr'));
@@ -206,7 +206,6 @@ class InventurController extends ApplicationController
 
     public function error($status, $message = null)
     {
-        $this->response->setStatus($status);
         $this->view->assign('errorCode', $status);
         if (!is_null($message)) {
             $this->view->assign('errorMessage', $message);
