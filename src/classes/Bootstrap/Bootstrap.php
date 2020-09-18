@@ -12,8 +12,6 @@ use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 
 class Bootstrap
 {
-    private static $container = null;
-
     private static $kernel = null;
 
     public function startUp()
