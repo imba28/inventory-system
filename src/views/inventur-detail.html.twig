@@ -31,7 +31,7 @@
                                 <div class="card-title">Erfasste Produkte:
                                     {{ scannedProducts|length }}
                                 </div>
-                                <div class="card-type">von {{ inventur.get('user').get('name') }}</div>
+                                <div class="card-type">von {{ inventur.get('user').get('name')|default(inventur.get('user').get('username')) }}</div>
                             </div>
                         </div>
                     </div>

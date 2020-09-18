@@ -27,9 +27,9 @@
                     <form class="ml-4" method='post'>
                         <div class="form-group">
                             <label for="exampleInputPassword1">Rückgabedatum</label>
-                            <input type="text" class="form-control datepicker" name='returnDate' placeholder="Rückgabedatum eingeben (leer = jetzt)" value="{{ request.getParam('expectedReturnDate') }}">
+                            <input type="text" class="form-control datepicker" name='returnDate' placeholder="Rückgabedatum eingeben (leer = jetzt)" value="{{ request.get('expectedReturnDate') }}">
                         </div>
-                        <button type="submit" name="submit" class="btn btn-primary">Zurückgeben</button>
+                        <button type="submit" name="submit" value="1" class="btn btn-primary">Zurückgeben</button>
                     </form>
                 </div>
             </main>

@@ -15,7 +15,7 @@
             </nav>
             <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
                 {% import 'partials/customer-form.html.twig' as customer_form %}
-                {{ customer_form.render(request, 'Neu'|raw, 'Erstellen', '/customers', 'post') }}
+                {{ customer_form.render(customer, 'Neu'|raw, 'Erstellen', '/customers', 'post') }}
             </main>
         </div>
     </div>

@@ -28,7 +28,7 @@
                                     <a href="/inventur/{{ inventur.getId() }}" class="d-block">
                                         <h5 class="mt-0 mb-0">Inventur #{{ inventur.getId() }}</h5>
                                     </a>
-                                    <h6>von {{ inventur.get('user').get('name') }}</h6>
+                                    <h6>von {{ inventur.get('user').get('name')|default(inventur.get('user').get('username')) }}</h6>
                                     <div class="text-muted">
                                         am {{ inventur.get('finishDate')|date('d.m.Y') }}
                                     </div>

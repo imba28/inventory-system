@@ -28,8 +28,10 @@ class CustomerController extends ApplicationController
         );
     }
 
-    public function index($params = array())
+    public function index(Request $request)
     {
+        $params = $request->request->all();
+
         $this->respondTo(
             function ($wants) use ($params) {
                 $wants->html(
@@ -74,8 +76,10 @@ class CustomerController extends ApplicationController
         );
     }
 
-    public function show(array $params)
+    public function show(Request $request)
     {
+        $params = $request->request->all();
+
         $this->respondTo(
             function ($wants) {
                 $wants->html(
@@ -137,10 +141,10 @@ class CustomerController extends ApplicationController
         $this->view->setTemplate('customer/edit');
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $this->new();
-        $this->update();
+        $this->update($request);
 
         $this->view->setTemplate('customer/new');
     }

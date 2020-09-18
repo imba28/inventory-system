@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class InventurController extends ApplicationController
 {
@@ -15,8 +16,11 @@ class InventurController extends ApplicationController
         $this->inventur = new \App\Inventur();
     }
 
-    public function main($params)
+    public function main(Request $request, $action = null)
     {
+        $params = $request->request->all();
+        $params['action'] = $action;
+
         $this->view->assign('lastInventur', \App\Inventur::getLastInventur());
         $this->view->assign('inventur', $this->inventur);
 
@@ -51,18 +55,22 @@ class InventurController extends ApplicationController
     public function actionInventur(Request $request)
     {
         if ($request->get('action')) {
+            $this->view->setTemplate('inventur');
+
             if ($request->get('action') == 'start') {
                 if (!$this->inventur->isStarted()) {
-                    $this->startInventur();
+                    $r = $this->startInventur();
+                    if ($r instanceof Response) {
+                        return $r;
+                    }
                 } else {
                     return $this->redirectTo('/inventur');
                 }
             } elseif ($request->get('action') == 'end') {
                 if ($this->inventur->isStarted()) {
                     $this->endInventur();
-                } else {
-                    return $this->redirectTo('/inventur');
                 }
+                return $this->redirectTo('/inventur');
             } elseif ($request->get('action') == 'scan_product') {
                 $this->scanProduct($request->get('invNr'));
             } elseif ($request->get('action') == 'missing_product') {
@@ -73,11 +81,11 @@ class InventurController extends ApplicationController
         }
     }
 
-    public function show($params)
+    public function show(Request $request, $id)
     {
-        if (isset($params['id'])) {
+        if (isset($id)) {
             try {
-                $inventur = \App\Models\Inventur::find($params['id']);
+                $inventur = \App\Models\Inventur::find($id);
                 $missingProducts = array();
                 $scannedProducts = array();
 
