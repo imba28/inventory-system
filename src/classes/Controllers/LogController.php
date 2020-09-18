@@ -3,7 +3,11 @@ namespace App\Controllers;
 
 use \DateTime;
 use App\Models\Log;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
+/**
+ * @IsGranted("ROLE_ADMIN")
+ */
 class LogController extends ApplicationController
 {
     public function index()
@@ -16,12 +20,6 @@ class LogController extends ApplicationController
                 array('createDate', '>', date('Y-m-d', time() - 86400 * 7))
             )
         );
-    }
-
-    public function init()
-    {
-        parent::init();
-        $this->beforeAction('index', 'authenticateUser');
     }
 
     public function error($status)

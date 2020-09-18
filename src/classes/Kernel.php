@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\DependencyInjection\Compiler\TwigFileLoaderPass;
+use Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -21,6 +21,7 @@ class Kernel extends SymfonyKernel
     {
         $bundles = [
             new FrameworkBundle(),
+            new SensioFrameworkExtraBundle(),
             new TwigBundle(),
             new SecurityBundle()
         ];

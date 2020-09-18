@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Models\ProductImage;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ProductImageController extends ApplicationController
@@ -12,7 +13,6 @@ class ProductImageController extends ApplicationController
     {
         parent::init();
         
-        $this->beforeAction('delete', 'authenticateUser');
         $this->beforeAction(
             'delete',
             function ($params) {
@@ -25,6 +25,9 @@ class ProductImageController extends ApplicationController
         );
     }
 
+    /**
+     * @IsGranted("ROLE_ADMIN")
+     */
     public function delete()
     {
         $this->image->remove();

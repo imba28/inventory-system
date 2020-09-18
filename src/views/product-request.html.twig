@@ -38,11 +38,11 @@
                         </div>
                         <div class="form-group mt-3">
                             <label for="name">Dein Name</label>
-                            <input type="text" class="form-control" name='name' placeholder="Max Mustermann" value="{{ request.getParam('name') }}">
+                            <input type="text" class="form-control" name='name' placeholder="Max Mustermann" value="{{ request.get('name') }}">
                         </div>
                         <div class="form-group">
                             <label for="name">Deine E-Mail Adresse</label>
-                            <input type="text" class="form-control" name='aklnslknat' placeholder="max@mustermann.com" value="{{ request.getParam('aklnslknat') }}">
+                            <input type="text" class="form-control" name='aklnslknat' placeholder="max@mustermann.com" value="{{ request.get('aklnslknat') }}">
                         </div>
                         <input type="email" name="email" class="d-none" />
 

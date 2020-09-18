@@ -1,9 +1,13 @@
 <?php
 namespace App\Controllers;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @IsGranted("ROLE_ADMIN")
+ */
 class InventurController extends ApplicationController
 {
     protected $inventur;
@@ -12,7 +16,6 @@ class InventurController extends ApplicationController
     {
         parent::init();
         
-        $this->authenticateUser();
         $this->inventur = new \App\Inventur();
     }
 

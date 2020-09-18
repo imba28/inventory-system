@@ -8,6 +8,7 @@ use App\Models\ProductImage;
 use App\Models\Customer;
 use App\Models\Action;
 use App\QueryBuilder\Builder;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -26,12 +27,6 @@ class ProductController extends ApplicationController
                     $this->error(404);
                 }
                 $this->view->assign('product', $this->product);
-            }
-        );
-        $this->beforeAction(
-            ['new', 'update', 'delete', 'create'],
-            function ($params) {
-                $this->authenticateUser();
             }
         );
     }
@@ -89,6 +84,10 @@ class ProductController extends ApplicationController
         );
     }
 
+    /**
+     * @IsGranted("ROLE_ADMIN")
+     * @param Request $request
+     */
     public function new(Request $request)
     {
         $this->product = Product::new();
@@ -99,6 +98,10 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-add');
     }
 
+    /**
+     * @IsGranted("ROLE_ADMIN")
+     * @param Request $request
+     */
     public function create(Request $request)
     {
         $this->new($request);
@@ -107,6 +110,11 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-add');
     }
 
+    /**
+     * @IsGranted("ROLE_ADMIN")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function delete(Request $request)
     {
         $params = $request->request->all();
@@ -281,11 +289,18 @@ class ProductController extends ApplicationController
 
     // INTERNAL METHODS
 
+    /**
+     * @IsGranted("ROLE_ADMIN")
+     */
     public function edit()
     {
         $this->view->setTemplate('product-update');
     }
 
+    /**
+     * @IsGranted("ROLE_ADMIN")
+     * @param Request $request
+     */
     public function update(Request $request)
     {
         if ($this->saveUploadedImages($request)) {

@@ -1,10 +1,15 @@
 <?php
 namespace App\Controllers;
 
+
 use App\Models\Customer;
 use App\Models\Action;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * @IsGranted("ROLE_ADMIN")
+ */
 class CustomerController extends ApplicationController
 {
     private $customer;
@@ -12,8 +17,6 @@ class CustomerController extends ApplicationController
     public function init()
     {
         parent::init();
-        
-        $this->authenticateUser();
 
         $this->beforeAction(
             array('show', 'update', 'delete', 'edit'),
@@ -30,8 +33,6 @@ class CustomerController extends ApplicationController
 
     public function index(Request $request, $page = 1)
     {
-        $params = $request->request->all();
-
         $this->respondTo(
             function ($wants) use ($page) {
                 $wants->html(
@@ -78,8 +79,6 @@ class CustomerController extends ApplicationController
 
     public function show(Request $request)
     {
-        $params = $request->request->all();
-
         $this->respondTo(
             function ($wants) {
                 $wants->html(

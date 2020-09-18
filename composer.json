@@ -9,7 +9,8 @@
         "twig/twig": "~2.0",
         "ext-fileinfo": "*",
         "symfony/symfony": "^5",
-        "symfony/framework-bundle": "^5.1"
+        "symfony/framework-bundle": "^5.1",
+        "sensio/framework-extra-bundle": "^5.6"
     },
     "authors": [
         {

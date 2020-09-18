@@ -3,8 +3,6 @@ namespace App\Controllers;
 
 abstract class ApplicationController extends BasicController
 {
-    private $currentUser;
-
     public function init()
     {
         $this->ifResponseType(
@@ -35,20 +33,20 @@ abstract class ApplicationController extends BasicController
         );
     }
 
+    /**
+     * @deprecated - use $this->getUser()
+     */
     protected function getCurrentUser()
     {
         return $this->getUser();
     }
 
+    /**
+     * @deprecated - use $this->getUser() !== null instead
+     */
     protected function isUserSignedIn()
     {
         return !is_null($this->getCurrentUser());
     }
 
-    protected function authenticateUser()
-    {
-        if (!$this->isUserSignedIn()) {
-            return $this->redirectTo('/login');
-        }
-    }
 }
