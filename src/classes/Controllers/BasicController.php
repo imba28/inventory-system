@@ -22,10 +22,10 @@ abstract class BasicController extends AbstractController
 
     private $formats = array();
 
-    final public function __construct(RequestStack $requestStack, Factory $viewFactory, FlashBagWrapper $flashBagWrapper, $responseType = 'html', $layout = 'default')
+    final public function __construct(RequestStack $requestStack, Factory $viewFactory, FlashBagWrapper $flashBagWrapper, $layout = 'default')
     {
-        $this->responseType = $responseType;
-        $this->view = $viewFactory->build($responseType, $layout);
+        $this->responseType = $requestStack->getMasterRequest()->getRequestFormat();
+        $this->view = $viewFactory->build($this->responseType, $layout);
 
         if (!isset(self::$status)) {
             self::$status = $flashBagWrapper;

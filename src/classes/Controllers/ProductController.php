@@ -98,10 +98,10 @@ class ProductController extends ApplicationController
         $this->view->setTemplate('product-add');
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $this->new();
-        $this->update();
+        $this->new($request);
+        $this->update($request);
 
         $this->view->setTemplate('product-add');
     }
@@ -288,7 +288,7 @@ class ProductController extends ApplicationController
 
     public function update(Request $request)
     {
-        if ($this->saveUploadedImages()) {
+        if ($this->saveUploadedImages($request)) {
             $this->product->setAll($request->request->all());
 
             try {
@@ -453,39 +453,34 @@ class ProductController extends ApplicationController
 
         $this->respondTo(
             function ($wants) use ($params) {
-                $wants->html(
-                    function () use ($params) {
-                        $currentPage = isset($params['page']) ? intval($params['page']) : 1;
-                        $itemsPerPage = 8;
+                $currentPage = isset($params['page']) ? intval($params['page']) : 1;
+                $itemsPerPage = 8;
 
-                        try {
-                            $products = Product::findByFilter(
-                                array(),
-                                (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
-                            );
-                            $paginator = new \App\Paginator(
-                                Product::getQuery(array())->count(),
-                                $currentPage,
-                                $itemsPerPage,
-                                '/products'
-                            );
+                try {
+                    $products = Product::findByFilter(
+                        array(),
+                        (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
+                    );
+                    $paginator = new \App\Paginator(
+                        Product::getQuery(array())->count(),
+                        $currentPage,
+                        $itemsPerPage,
+                        '/products'
+                    );
 
-                            $this->view->assign('products', $products);
+                    $wants->html(
+                        function () use ($paginator) {
                             $this->view->assign('categories', $this->getCategories());
                             $this->view->assign('totals', $paginator->getTotals());
                             $this->view->assign('paginator', $paginator);
-                        } catch (\App\Exceptions\NothingFoundException $e) {
-                            $this->view->assign('totals', 0);
-                            self::$status->add('errors', 'Keine Ergebnisse gefunden!');
                         }
-                    }
-                );
+                    );
+                    $this->view->assign('products', $products);
 
-                $wants->json(
-                    function () {
-                        $this->view->assign('products', Product::all());
-                    }
-                );
+                } catch (\App\Exceptions\NothingFoundException $e) {
+                    $this->view->assign('totals', 0);
+                    self::$status->add('errors', 'Keine Ergebnisse gefunden!');
+                }
             }
         );
     }
@@ -550,7 +545,7 @@ class ProductController extends ApplicationController
                 if ($image->isValid()) {
                     if ($image->save("/images")) {
                         $productImage = ProductImage::new();
-                        $productImage->set('src', "/public/files/images/{$image->getDestination()}");
+                        $productImage->set('src', "/files/images/{$image->getDestination()}");
                         $productImage->set('product', $this->product);
                         $productImage->set('title', $file->getClientOriginalName());
                         $productImage->set('user', $this->getCurrentUser());

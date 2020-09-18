@@ -21,7 +21,7 @@ class RouteLoader extends Loader
         $this->kernel = $kernel;
     }
 
-    public function load($resource, $type = null)
+    public function load($resource, string $type = null)
     {
         if (true === $this->loaded) {
             throw new \RuntimeException('Do not add the "legacy" loader twice');
@@ -42,7 +42,8 @@ class RouteLoader extends Loader
                 $methods = $method === 'ALL' ? ['GET', 'POST', 'PUT', 'DELETE'] : [$method];
                 $requirements = [];
                 $defaults = [
-                    '_controller' => 'App\Controllers\\'. str_replace('#', '::', $routeInfo['handler'])
+                    '_controller' => 'App\Controllers\\'. str_replace('#', '::', $routeInfo['handler']),
+                    '_format' => 'html'
                 ];
 
                 if (strpos($path, ':') !== false) {
@@ -62,6 +63,8 @@ class RouteLoader extends Loader
                     }
                 }
 
+                $path .= '.{_format}';
+
                 $route = new Route($path, $defaults, $requirements, [], '', [], $methods);
                 $routeCollection->add('legacy_' . $name . '_' . $path, $route);
             }
@@ -70,7 +73,7 @@ class RouteLoader extends Loader
         return $routeCollection;
     }
 
-    public function supports($resource, $type = null)
+    public function supports($resource, string $type = null)
     {
         return 'legacy' === $type;
     }

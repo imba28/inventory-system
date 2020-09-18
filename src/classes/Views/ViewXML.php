@@ -59,4 +59,9 @@ class ViewXML extends View
 
         return $xml;
     }
+
+    public function setTemplate($string)
+    {
+
+    }
 }

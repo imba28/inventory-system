@@ -4,8 +4,8 @@ services:
         build: .
         ports:
             - 127.0.0.1:8080:80
-        #volumes:
-        #- .:/var/www/html
+        volumes:
+            - .:/var/www/html
     db:
         image: mariadb:10.5
         restart: always

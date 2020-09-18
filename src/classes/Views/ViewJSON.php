@@ -17,4 +17,9 @@ class ViewJSON extends View
     {
         return 'application/json';
     }
+
+    public function setTemplate($string)
+    {
+
+    }
 }
