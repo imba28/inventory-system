@@ -3,12 +3,13 @@
     {% for product in products %}
     <div class="col-lg-3 col-md-4 col-sm-6 p-1 list">
         <div class="card p-3">
-            <img class="card-img-top" src="{{ product.getFrontImage().get('src') }}" alt="Card image cap">
+            <img class="card-img-top" src="{{ product.frontImage.src }}" alt="Card image cap">
+
             <div class="card-body">
                 {{ product.isAvailable() ? '<span class="badge badge-success">Verfügbar</span>' : '<span class="badge badge-danger">Verliehen</span>' }}
-                <h4 class="card-title">{{ product.get('name') }}</h4>
+                <h4 class="card-title">{{ product.name }}</h4>
                 <p class="card-text">
-                    {{ product.get('type') }}
+                    {{ product.type }}
                 </p>
                 {% if buttons %}
                     {% for button in buttons %}
@@ -24,8 +25,6 @@
     {% endfor %}
 </section>
 <section>
-    {% if paginator %}
-      {{ paginator.render()|raw }}
-    {% endif %}
+    {{ include('includes/paginator.html.twig') }}
 </section>
 {% endmacro %}

@@ -4,9 +4,12 @@ namespace App;
 
 use App\DependencyInjection\AppExtension;
 use App\DependencyInjection\Compiler\DatabasePass;
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle;
 use Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\MakerBundle\MakerBundle;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Bundle\WebProfilerBundle\WebProfilerBundle;
@@ -25,11 +28,14 @@ class Kernel extends SymfonyKernel
             new FrameworkBundle(),
             new SensioFrameworkExtraBundle(),
             new TwigBundle(),
+            new DoctrineBundle(),
+            new DoctrineMigrationsBundle(),
             new SecurityBundle()
         ];
 
         if ($this->getEnvironment() == 'dev') {
             $bundles[] = new WebProfilerBundle();
+            $bundles[] = new MakerBundle();
         }
 
         return $bundles;
@@ -42,7 +48,7 @@ class Kernel extends SymfonyKernel
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
-        $c->registerExtension(new AppExtension);
+        $c->registerExtension(new AppExtension());
 
         $configPath = $this->getProjectDir() . '/src/config/config.yml';
         if (file_exists($this->getProjectDir() . '/src/config/config_' . $this->getEnvironment() . '.yml')) {

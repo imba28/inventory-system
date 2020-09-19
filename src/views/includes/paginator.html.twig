@@ -1,0 +1,22 @@
+{% set page = app.request.get('page', 1) %}
+{% set max_page = (paginator|length / paginator.query.maxResults)|round(0, 'ceil') %}
+{% if max_page > 1 %}
+    <ul class="pagination pagination-sm">
+        {# `«` arrow  #}
+        <li {{ page == 1 ? 'class="disabled"' }}>
+            <a href="/products/ {{ page-1 < 1 ? 1 : page-1 }}">«</a>
+        </li>
+
+        {# Render each page number #}
+        {% for i in 1..max_page %}
+            <li {{ page == i ? 'class="active"' }}>
+                <a href="/products/{{ i }}">{{ i }}</a>
+            </li>
+        {% endfor %}
+
+        {# `»` arrow #}
+        <li {{ page == max_page ? 'class="disabled"' }}>
+            <a href="/products/{{ page+1 <= max_page ? page+1 : page }}">»</a>
+        </li>
+    </ul>
+{% endif %}

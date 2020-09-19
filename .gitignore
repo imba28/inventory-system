@@ -3,7 +3,8 @@ public/files/images/*.jpg
 public/files/images/*.gif
 public/files/images/*.jpeg
 
-src/config/packages/
+.env
+src/config/packages/app.yml
 
 results
 vendor

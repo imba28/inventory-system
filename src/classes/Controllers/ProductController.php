@@ -8,6 +8,7 @@ use App\Models\ProductImage;
 use App\Models\Customer;
 use App\Models\Action;
 use App\QueryBuilder\Builder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -475,26 +476,24 @@ class ProductController extends ApplicationController
                 $currentPage = $page;
                 $itemsPerPage = 8;
 
+                $repository = $this->getDoctrine()->getRepository(\App\Entity\Product::class);
+                $query = $repository->createQueryBuilder('u')->getQuery();
+
+                $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query);
+                $paginator->getQuery()
+                    ->setFirstResult($itemsPerPage * ($page-1))
+                    ->setMaxResults($itemsPerPage);
+
                 try {
-                    $products = Product::findByFilter(
-                        array(),
-                        (($currentPage - 1) * $itemsPerPage ) . ", $itemsPerPage"
-                    );
-                    $paginator = new \App\Paginator(
-                        Product::getQuery(array())->count(),
-                        $currentPage,
-                        $itemsPerPage,
-                        '/products'
-                    );
 
                     $wants->html(
                         function () use ($paginator) {
                             $this->view->assign('categories', $this->getCategories());
-                            $this->view->assign('totals', $paginator->getTotals());
+                            $this->view->assign('totals', count($paginator));
                             $this->view->assign('paginator', $paginator);
                         }
                     );
-                    $this->view->assign('products', $products);
+                    $this->view->assign('products', $paginator);
 
                 } catch (\App\Exceptions\NothingFoundException $e) {
                     $this->view->assign('totals', 0);

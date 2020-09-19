@@ -1,0 +1,15 @@
+doctrine:
+    dbal:
+        url: 'mysql://mmt_verleihsystem:keins@db:3306/mmt_verleihsystem'
+        mapping_types:
+            enum: string
+    orm:
+        auto_generate_proxy_classes: '%kernel.debug%'
+        entity_managers:
+            default:
+                mappings:
+                    app:
+                        is_bundle: false
+                        type: annotation
+                        dir: '%kernel.project_dir%/src/classes/Entity/'
+                        prefix: App\Entity\
