@@ -1,0 +1,5 @@
+app:
+    database:
+        user: mmt_verleihsystem
+        database: mmt_verleihsystem
+        password: keins

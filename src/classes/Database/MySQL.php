@@ -1,23 +1,25 @@
 <?php
 namespace App\Database;
 
+use App\Models\Model;
+use App\QueryBuilder\Builder;
 use \PDO;
 
 class MySQL implements DatabaseInterface
 {
     private $handler;
 
-    public function __construct()
+    public function __construct(string $host, string $database, string $user, ?string $password, int $port, Builder $builder)
     {
         $dsn =
             'mysql:host='.
-            \App\Configuration::get('DB_HOST') .
+            $host .
             ';dbname='.
-            \App\Configuration::get('DB_DB') .
-            ';port='. \App\Configuration::get('DB_PORT') .
+            $database .
+            ';port='. $port .
             ';';
 
-        $this->handler = new \PDO($dsn, \App\Configuration::get('DB_USER'), \App\Configuration::get('DB_PWD'));
+        $this->handler = new \PDO($dsn, $user, $password);
         if (is_null($this->handler)) {
             throw new \UnexpectedValueException('Database connection could not be established!');
         }
@@ -27,6 +29,8 @@ class MySQL implements DatabaseInterface
         $this->handler->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
         $this->handler->exec('SET NAMES UTF8');
+
+        Model::setQueryBuilder($builder);
     }
 
     public function getHandler(): PDO

@@ -167,7 +167,7 @@ class QueryBuilderTest extends TestCase
 
     public function testSetTablePrefix()
     {
-        $this->query::setTablePrefix('pre');
+        $this->query->setTablePrefix('pre');
         $this->assertEquals($this->query->getSql(), 'SELECT `pre_test`.* FROM `pre_test`');
 
         $this->query->select('name')->where('id', '=', 1);

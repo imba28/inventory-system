@@ -1,16 +1,21 @@
 #!/usr/bin/env php
 <?php
 
+use App\Bootstrap\Bootstrap;
+use App\Configuration;
+use App\Kernel;
+
 require_once './vars.php';
 require_once './src/lib/functions.php';
 
 require ABS_PATH . '/vendor/autoload.php';
 require_once ABS_PATH . '/src/config/config.php';
 
-$bootstrap = new \App\Bootstrap\Bootstrap();
-$bootstrap->startUp();
+$kernel = new Kernel(Configuration::get('env'), Configuration::get('env') === 'dev');
+$kernel->boot();
 
-$kernel = $bootstrap->getKernel();
+$bootstrap = $kernel->getContainer()->get(Bootstrap::class);
+$bootstrap->startUp();
 
 $application = new \App\Console\Application($kernel);
 $application->run();

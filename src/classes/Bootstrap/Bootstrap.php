@@ -3,16 +3,20 @@
 namespace App\Bootstrap;
 
 use App\Configuration;
+use App\Database\DatabaseInterface;
 use App\Kernel;
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 
 class Bootstrap
 {
     private static $kernel = null;
+
+    private $database;
+
+
+    public function __construct(DatabaseInterface $database)
+    {
+        $this->database = $database;
+    }
 
     public function startUp()
     {
@@ -24,13 +28,7 @@ class Bootstrap
         );
 
         try {
-            $drivers = [
-                'mysql' => '\\App\\Database\\MySQL',
-                'sqlite' => '\\App\\Database\\SQLite'
-            ];
-
-            $driverClass = $drivers[\App\Configuration::get('DB_DRIVER')];
-            \App\Registry::setDatabase(new $driverClass);
+            \App\Registry::setDatabase($this->database);
         } catch (\Exception $e) {
             die("Keine Verbindung zur Datenbank möglich:". $e->getMessage());
         }
@@ -38,16 +36,6 @@ class Bootstrap
 
     private function setConfigParams()
     {
-        // TODO: this is bäh:
-        if (\App\Configuration::get('DB_DRIVER') === 'sqlite') {
-            \App\Models\Model::setQueryBuilder(new \App\QueryBuilder\SQLiteBuilder());
-        } else {
-            \App\Configuration::set('DB_DRIVER', 'mysql');
-            \App\Models\Model::setQueryBuilder(new \App\QueryBuilder\Builder());
-        }
-
-        \App\QueryBuilder\Builder::setTablePrefix(\App\Configuration::get('DB_PREFIX'));
-
         if (\App\Configuration::get('env') === 'dev') {
             ini_set('display_errors', 1);
             ini_set('display_startup_errors', 1);

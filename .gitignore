@@ -3,6 +3,8 @@ public/files/images/*.jpg
 public/files/images/*.gif
 public/files/images/*.jpeg
 
+src/config/packages/
+
 results
 vendor
 *config.php

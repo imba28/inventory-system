@@ -30,6 +30,16 @@ Zum Entwickeln kann der integrierte Webserver von PHP verwendet werden (Routenfo
 
 ## Konfiguration
 
+`src/config/packages/app.yml`
+
+```yaml
+app:
+    database:
+        user: mmt_verleihsystem
+        database: mmt_verleihsystem
+        password: keins
+```
+
 `src/config/config.php`
 
 ```php
@@ -37,13 +47,6 @@ Zum Entwickeln kann der integrierte Webserver von PHP verwendet werden (Routenfo
 \App\Configuration::set('env', 'dev');
 \App\Configuration::set('site_name', 'MMT Verleihmanager');
 \App\Configuration::set('admin_email', 'max@mustermann.net');
-
-\App\Configuration::set('DB_HOST', '127.0.0.1');
-\App\Configuration::set('DB_DB', 'verleih');
-\App\Configuration::set('DB_PORT', '3306');
-\App\Configuration::set('DB_USER', 'db_user');
-\App\Configuration::set('DB_PWD', '');
-\App\Configuration::set('DB_PREFIX', 'v');
 ?>
 ```
 

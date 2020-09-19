@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\DependencyInjection\AppExtension;
+use App\DependencyInjection\Compiler\DatabasePass;
 use Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -33,8 +35,15 @@ class Kernel extends SymfonyKernel
         return $bundles;
     }
 
+    protected function build(ContainerBuilder $container)
+    {
+        $container->addCompilerPass(new DatabasePass());
+    }
+
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
+        $c->registerExtension(new AppExtension);
+
         $configPath = $this->getProjectDir() . '/src/config/config.yml';
         if (file_exists($this->getProjectDir() . '/src/config/config_' . $this->getEnvironment() . '.yml')) {
             $configPath = $this->getProjectDir() . '/src/config/config_' . $this->getEnvironment() . '.yml';
